@@ -1,0 +1,879 @@
+import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+class PaymentScreen extends StatefulWidget {
+  final String pickupAddress;
+  final String destinationAddress;
+  final double pickupLat;
+  final double pickupLng;
+  final double destinationLat;
+  final double destinationLng;
+  final DateTime? selectedDateTime;
+  final String vehicleName;
+  final double totalPrice;
+  final double distanceMiles;
+  final String duration;
+  final String? flightNumber;
+  final Map<String, bool> extraServices;
+
+  const PaymentScreen({
+    super.key,
+    required this.pickupAddress,
+    required this.destinationAddress,
+    required this.pickupLat,
+    required this.pickupLng,
+    required this.destinationLat,
+    required this.destinationLng,
+    this.selectedDateTime,
+    required this.vehicleName,
+    required this.totalPrice,
+    required this.distanceMiles,
+    required this.duration,
+    this.flightNumber,
+    required this.extraServices,
+  });
+
+  @override
+  State<PaymentScreen> createState() => _PaymentScreenState();
+}
+
+class _PaymentScreenState extends State<PaymentScreen> {
+  final _cardNumberController = TextEditingController();
+  final _expiryController = TextEditingController();
+  final _cvvController = TextEditingController();
+  final _nameController = TextEditingController();
+
+  Set<Marker> _markers = {};
+  Set<Polyline> _polylines = {};
+  bool _isLoadingRoute = true;
+  List<LatLng> _routePoints = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDetailedRoute();
+  }
+
+  Future<void> _loadDetailedRoute() async {
+    try {
+      // Por ahora usamos línea recta
+      // TODO: Implementar Directions API para ruta detallada
+      setState(() {
+        _routePoints = [
+          LatLng(widget.pickupLat, widget.pickupLng),
+          LatLng(widget.destinationLat, widget.destinationLng),
+        ];
+
+        // Crear marcadores
+        _markers = {
+          Marker(
+            markerId: const MarkerId('pickup'),
+            position: LatLng(widget.pickupLat, widget.pickupLng),
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              BitmapDescriptor.hueGreen,
+            ),
+            infoWindow: InfoWindow(
+              title: 'Pickup',
+              snippet: widget.pickupAddress,
+            ),
+          ),
+          Marker(
+            markerId: const MarkerId('destination'),
+            position: LatLng(widget.destinationLat, widget.destinationLng),
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              BitmapDescriptor.hueRed,
+            ),
+            infoWindow: InfoWindow(
+              title: 'Destination',
+              snippet: widget.destinationAddress,
+            ),
+          ),
+        };
+
+        // Crear polyline con la ruta
+        _polylines = {
+          Polyline(
+            polylineId: const PolylineId('route'),
+            points: _routePoints,
+            color: const Color(0xFF4169E1),
+            width: 5,
+          ),
+        };
+
+        _isLoadingRoute = false;
+      });
+    } catch (e) {
+      print('Error loading route: $e');
+      setState(() {
+        _isLoadingRoute = false;
+      });
+    }
+  }
+
+  void _processPayment() {
+    // TODO: Integrar con Stripe
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Payment Successful'),
+        content: const Text(
+          'Your booking has been confirmed! You will receive a confirmation email shortly.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Column(
+        children: [
+          _buildTopNavBar(),
+          _buildStepIndicator(),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 1400),
+                padding: const EdgeInsets.all(80),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'STEP 5 OF 5',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Payment',
+                      style: TextStyle(
+                        fontSize: 36,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF0B3254),
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+
+                    _buildProgressIndicator(),
+
+                    const SizedBox(height: 40),
+
+                    _buildTripInfo(),
+
+                    const SizedBox(height: 40),
+
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          flex: 3,
+                          child: Column(
+                            children: [
+                              _buildRouteMap(),
+                              const SizedBox(height: 24),
+                              _buildBookingSummary(),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 40),
+                        Expanded(flex: 2, child: _buildPaymentForm()),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTopNavBar() {
+    return Container(
+      height: 70,
+      padding: const EdgeInsets.symmetric(horizontal: 80),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          const Text(
+            'VANELUX',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF0B3254),
+            ),
+          ),
+          const Spacer(),
+          _buildNavLink('HOME'),
+          _buildNavLink('SERVICES'),
+          _buildNavLink('FLEET'),
+          _buildNavLink('ABOUT'),
+          _buildNavLink('CONTACT'),
+          const SizedBox(width: 32),
+          const Text(
+            '+1 917 599-5522',
+            style: TextStyle(fontSize: 14, color: Color(0xFF0B3254)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavLink(String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: TextButton(
+        onPressed: () {},
+        child: Text(
+          text,
+          style: const TextStyle(
+            color: Color(0xFF0B3254),
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStepIndicator() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 80),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _buildStep(1, 'Information', true),
+          _buildStepLine(true),
+          _buildStep(2, 'Vehicle', true),
+          _buildStepLine(true),
+          _buildStep(3, 'Login', true),
+          _buildStepLine(true),
+          _buildStep(4, 'Details', true),
+          _buildStepLine(true),
+          _buildStep(5, 'Payment', true),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStep(int number, String label, bool isActive) {
+    return Column(
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: isActive ? const Color(0xFF4CAF50) : Colors.grey[300],
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Text(
+              '$number',
+              style: TextStyle(
+                color: isActive ? Colors.white : Colors.grey[600],
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: isActive ? const Color(0xFF0B3254) : Colors.grey[600],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStepLine(bool isActive) {
+    return Container(
+      width: 80,
+      height: 2,
+      margin: const EdgeInsets.only(bottom: 28),
+      color: isActive ? const Color(0xFF4CAF50) : Colors.grey[300],
+    );
+  }
+
+  Widget _buildProgressIndicator() {
+    return Row(
+      children: [
+        _buildCheckItem('Ride Information', true),
+        const SizedBox(width: 32),
+        _buildCheckItem('Vehicle Class', true),
+        const SizedBox(width: 32),
+        _buildCheckItem('Login', true),
+        const SizedBox(width: 32),
+        _buildCheckItem('Booking Details', true),
+        const SizedBox(width: 32),
+        _buildCheckItem('Payment', false, isActive: true),
+      ],
+    );
+  }
+
+  Widget _buildCheckItem(
+    String label,
+    bool isCompleted, {
+    bool isActive = false,
+  }) {
+    return Row(
+      children: [
+        Container(
+          width: 24,
+          height: 24,
+          decoration: BoxDecoration(
+            color: isCompleted
+                ? const Color(0xFF4CAF50)
+                : (isActive ? const Color(0xFF4169E1) : Colors.grey[300]),
+            shape: BoxShape.circle,
+          ),
+          child: isCompleted
+              ? const Icon(Icons.check, color: Colors.white, size: 16)
+              : Center(
+                  child: Text(
+                    '5',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: isCompleted || isActive
+                ? const Color(0xFF0B3254)
+                : Colors.grey[600],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTripInfo() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Pickup',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  widget.pickupAddress,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Destination',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  widget.destinationAddress,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Date & Time',
+                style: TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                _formatDateTime(widget.selectedDateTime),
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRouteMap() {
+    return Container(
+      height: 400,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      clipBehavior: Clip.hardEdge,
+      child: Stack(
+        children: [
+          GoogleMap(
+            initialCameraPosition: CameraPosition(
+              target: LatLng(
+                (widget.pickupLat + widget.destinationLat) / 2,
+                (widget.pickupLng + widget.destinationLng) / 2,
+              ),
+              zoom: 11,
+            ),
+            markers: _markers,
+            polylines: _polylines,
+            zoomControlsEnabled: true,
+            mapToolbarEnabled: false,
+          ),
+          if (_isLoadingRoute)
+            Container(
+              color: Colors.black26,
+              child: const Center(child: CircularProgressIndicator()),
+            ),
+          Positioned(
+            top: 16,
+            left: 16,
+            right: 16,
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 8,
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Route Information',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0B3254),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          const Text(
+                            'Distance: ',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                          Text(
+                            '${widget.distanceMiles.toStringAsFixed(1)} mi',
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          const Text(
+                            'Est. Time: ',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                          Text(
+                            widget.duration,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: Colors.green,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'From: ',
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                      Expanded(
+                        child: Text(
+                          widget.pickupAddress.split(',').first,
+                          style: const TextStyle(fontSize: 12),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'To: ',
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                      Expanded(
+                        child: Text(
+                          widget.destinationAddress.split(',').first,
+                          style: const TextStyle(fontSize: 12),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBookingSummary() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Booking Summary',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF0B3254),
+            ),
+          ),
+          const SizedBox(height: 24),
+          _buildSummaryRow('Vehicle:', widget.vehicleName),
+          const Divider(height: 24),
+          _buildSummaryRow(
+            'Total fare:',
+            '\$${widget.totalPrice.toStringAsFixed(2)}',
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0B3254),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Total:',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                Text(
+                  '\$${widget.totalPrice.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFFD4AF37),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: const TextStyle(color: Colors.grey)),
+        Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
+      ],
+    );
+  }
+
+  Widget _buildPaymentForm() {
+    return Container(
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Payment Information',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF0B3254),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          const Text(
+            'Card details',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _cardNumberController,
+            decoration: InputDecoration(
+              hintText: 'Card number',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+              suffixIcon: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset(
+                    'assets/visa.png',
+                    height: 24,
+                    errorBuilder: (_, __, ___) => const SizedBox(),
+                  ),
+                  const SizedBox(width: 4),
+                  Image.asset(
+                    'assets/mastercard.png',
+                    height: 24,
+                    errorBuilder: (_, __, ___) => const SizedBox(),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _expiryController,
+                  decoration: InputDecoration(
+                    hintText: 'MM/YY',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: TextField(
+                  controller: _cvvController,
+                  decoration: InputDecoration(
+                    hintText: 'CVV',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          TextField(
+            controller: _nameController,
+            decoration: InputDecoration(
+              hintText: 'Cardholder name',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.grey[50],
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey[200]!),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.credit_card, size: 20, color: Colors.grey),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'We accept all major credit and debit cards',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 32),
+
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton(
+              onPressed: _processPayment,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF4169E1),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(
+                'Pay \$${widget.totalPrice.toStringAsFixed(2)}',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          Row(
+            children: [
+              const Icon(Icons.lock, size: 16, color: Colors.grey),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Secure Payment',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Your payment is processed securely. Your data is protected with bank-level encryption and we never store complete card details on our servers.',
+            style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDateTime(DateTime? dateTime) {
+    if (dateTime == null) return 'Not specified';
+    const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+
+    final weekday = weekdays[dateTime.weekday - 1];
+    final month = months[dateTime.month - 1];
+    final hour = dateTime.hour > 12
+        ? dateTime.hour - 12
+        : (dateTime.hour == 0 ? 12 : dateTime.hour);
+    final amPm = dateTime.hour >= 12 ? 'PM' : 'AM';
+
+    return '$weekday, $month ${dateTime.day}, ${dateTime.year}, $hour:${dateTime.minute.toString().padLeft(2, '0')} $amPm';
+  }
+}
