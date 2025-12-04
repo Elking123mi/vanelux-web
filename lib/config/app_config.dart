@@ -20,7 +20,7 @@ class AppConfig {
     static String get authRegisterUrl => '$centralApiBaseUrl/auth/register';
     
     static const int _apiTimeoutSeconds =
-            int.fromEnvironment('API_TIMEOUT', defaultValue: 30);
+            int.fromEnvironment('API_TIMEOUT', defaultValue: 60);
     static const Duration defaultRequestTimeout =
             Duration(seconds: _apiTimeoutSeconds);
     static const String originWebAllowed = String.fromEnvironment(
