@@ -285,10 +285,24 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       if (!mounted) {
         return;
       }
-      setState(() {
-        _currentUser = user;
-        _isCheckingAuth = false;
-      });
+      if (user != null) {
+        // Usuario ya logueado, redirigir al dashboard
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => CustomerDashboardWeb(user: user),
+              ),
+            );
+          }
+        });
+      } else {
+        setState(() {
+          _currentUser = null;
+          _isCheckingAuth = false;
+        });
+      }
     } catch (e) {
       if (!mounted) {
         return;
