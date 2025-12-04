@@ -115,15 +115,23 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   Future<void> _processPayment() async {
     try {
+      print('🔵 [PaymentScreen] Iniciando proceso de pago...');
+      
       // Get current user
       final user = await AuthService.getCurrentUser();
+      print('🔵 [PaymentScreen] Usuario: ${user?.email ?? "NO ENCONTRADO"}');
+      
       if (user == null) {
+        print('❌ [PaymentScreen] No hay usuario logueado');
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Please login to complete booking')),
         );
         return;
       }
+
+      print('🔵 [PaymentScreen] Usuario ID: ${user.id}');
+      print('🔵 [PaymentScreen] Vehículo: ${widget.vehicleName}');
 
       // Determine vehicle type from vehicle name
       VehicleType vehicleType = VehicleType.sedan;
@@ -138,28 +146,34 @@ class _PaymentScreenState extends State<PaymentScreen> {
         vehicleType = VehicleType.luxury;
       }
 
-      // Create booking payload
+      print('🔵 [PaymentScreen] Tipo de vehículo: $vehicleType');
+
+      // Create booking payload matching Supabase structure
       final bookingPayload = {
-        'userId': user.id,
-        'vehicleType': vehicleType.toString().split('.').last,
-        'pickupLocation': {
-          'address': widget.pickupAddress,
-          'latitude': widget.pickupLat,
-          'longitude': widget.pickupLng,
-        },
-        'destinationLocation': {
-          'address': widget.destinationAddress,
-          'latitude': widget.destinationLat,
-          'longitude': widget.destinationLng,
-        },
-        'requestTime': (widget.selectedDateTime ?? DateTime.now()).toIso8601String(),
-        'estimatedPrice': widget.totalPrice,
-        'paymentMethod': PaymentMethod.card.toString().split('.').last,
-        'status': 'requested',
+        'user_id': user.id,
+        'pickup_address': widget.pickupAddress,
+        'pickup_lat': widget.pickupLat,
+        'pickup_lng': widget.pickupLng,
+        'destination_address': widget.destinationAddress,
+        'destination_lat': widget.destinationLat,
+        'destination_lng': widget.destinationLng,
+        'pickup_time': (widget.selectedDateTime ?? DateTime.now()).toIso8601String(),
+        'vehicle_name': widget.vehicleName,
+        'passengers': 1, // Default value, could be made configurable
+        'price': widget.totalPrice,
+        'distance_miles': widget.distanceMiles,
+        'distance_text': '${widget.distanceMiles.toStringAsFixed(1)} mi',
+        'duration_text': widget.duration,
+        'service_type': vehicleType.toString().split('.').last,
+        'is_scheduled': widget.selectedDateTime != null ? 1 : 0,
+        'status': 'pending',
       };
 
+      print('🔵 [PaymentScreen] Payload para backend: $bookingPayload');
+
       // Save booking
-      await BookingService.createBooking(bookingPayload);
+      final result = await BookingService.createBooking(bookingPayload);
+      print('✅ [PaymentScreen] Reserva creada: $result');
 
       if (!mounted) return;
 
