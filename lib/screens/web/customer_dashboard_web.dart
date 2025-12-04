@@ -47,22 +47,62 @@ class _CustomerDashboardWebState extends State<CustomerDashboardWeb> {
 
     try {
       final bookingsList = await BookingService.fetchBookings();
+      print('🔵 [Dashboard] Bookings raw: $bookingsList');
+      
       if (!mounted) return;
-      // Convert Map to Trip objects
+      
+      // Convert normalized booking format to Trip format
       final trips = bookingsList.map((bookingMap) {
-        return Trip.fromJson(bookingMap);
+        // Transform normalized format to Trip.fromJson format
+        final tripFormat = {
+          'id': bookingMap['id'] ?? bookingMap['backendId'] ?? '',
+          'user_id': bookingMap['userId'] ?? '',
+          'vehicle_type': bookingMap['serviceType'] ?? 
+                         _extractVehicleTypeFromName(bookingMap['vehicleName']),
+          'pickup_location': {
+            'address': bookingMap['pickupAddress'] ?? '',
+            'latitude': bookingMap['pickupLat'] ?? 0.0,
+            'longitude': bookingMap['pickupLng'] ?? 0.0,
+          },
+          'destination_location': {
+            'address': bookingMap['destinationAddress'] ?? '',
+            'latitude': bookingMap['destinationLat'] ?? 0.0,
+            'longitude': bookingMap['destinationLng'] ?? 0.0,
+          },
+          'status': bookingMap['status'] ?? 'requested',
+          'estimated_price': bookingMap['price'],
+          'final_price': bookingMap['price'],
+          'request_time': bookingMap['scheduledAt'] ?? bookingMap['createdAt'] ?? DateTime.now().toIso8601String(),
+          'payment_method': 'card',
+        };
+        
+        print('🔵 [Dashboard] Trip format: $tripFormat');
+        return Trip.fromJson(tripFormat);
       }).toList();
+      
+      print('✅ [Dashboard] Loaded ${trips.length} trips');
+      
       setState(() {
         _bookings = trips;
         _isLoadingBookings = false;
       });
     } catch (e) {
+      print('❌ [Dashboard] Error loading bookings: $e');
       if (!mounted) return;
       setState(() {
         _errorMessage = 'Error loading bookings: ${e.toString()}';
         _isLoadingBookings = false;
       });
     }
+  }
+
+  String _extractVehicleTypeFromName(String? vehicleName) {
+    if (vehicleName == null) return 'sedan';
+    final lower = vehicleName.toLowerCase();
+    if (lower.contains('suv')) return 'suv';
+    if (lower.contains('van')) return 'van';
+    if (lower.contains('luxury') || lower.contains('cadillac') || lower.contains('escalade')) return 'luxury';
+    return 'sedan';
   }
 
   Future<void> _logout() async {
