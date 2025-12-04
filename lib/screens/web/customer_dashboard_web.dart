@@ -789,13 +789,7 @@ class _CustomerDashboardWebState extends State<CustomerDashboardWeb> {
                 children: [
                   TextButton(
                     onPressed: () {
-                      // TODO: Create TripDetailsScreen for viewing existing bookings
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Booking #${booking.id} - ${statusText}'),
-                          duration: const Duration(seconds: 2),
-                        ),
-                      );
+                      _showBookingDetailsDialog(context, booking);
                     },
                     child: const Text('View Details'),
                   ),
@@ -1278,5 +1272,161 @@ class _CustomerDashboardWebState extends State<CustomerDashboardWeb> {
 
   String _formatTime(DateTime date) {
     return '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  }
+
+  void _showBookingDetailsDialog(BuildContext context, Trip booking) {
+    final statusText = booking.status.toString().split('.').last;
+    final vehicleType = booking.vehicleType.toString().split('.').last;
+    
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 600),
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Booking #${booking.id}',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0B3254),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD4AF37).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  statusText.toUpperCase(),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFFD4AF37),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Divider(),
+              const SizedBox(height: 24),
+              
+              // Route
+              const Text(
+                'Route',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF0B3254),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  const Icon(Icons.location_on, color: Color(0xFF2E7D32), size: 24),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      booking.pickupLocation.address,
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  const Icon(Icons.location_on, color: Color(0xFFD4AF37), size: 24),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      booking.destinationLocation.address,
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              const Divider(),
+              const SizedBox(height: 24),
+              
+              // Details
+              const Text(
+                'Details',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF0B3254),
+                ),
+              ),
+              const SizedBox(height: 16),
+              _buildDetailRow('Date', _formatDate(booking.requestTime)),
+              const SizedBox(height: 8),
+              _buildDetailRow('Time', _formatTime(booking.requestTime)),
+              const SizedBox(height: 8),
+              _buildDetailRow('Vehicle', vehicleType.toUpperCase()),
+              const SizedBox(height: 8),
+              _buildDetailRow('Price', '\$${(booking.finalPrice ?? booking.estimatedPrice ?? 0).toStringAsFixed(2)}'),
+              const SizedBox(height: 24),
+              
+              // Action Button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: const Color(0xFF0B3254),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('Close', style: TextStyle(fontSize: 16)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey[600],
+          ),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF0B3254),
+          ),
+        ),
+      ],
+    );
   }
 }
