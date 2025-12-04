@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../../services/booking_service.dart';
+import '../../services/auth_service.dart';
+import '../../models/types.dart';
 
 class PaymentScreen extends StatefulWidget {
   final String pickupAddress;
@@ -110,25 +113,81 @@ class _PaymentScreenState extends State<PaymentScreen> {
     }
   }
 
-  void _processPayment() {
-    // TODO: Integrar con Stripe
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Payment Successful'),
-        content: const Text(
-          'Your booking has been confirmed! You will receive a confirmation email shortly.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).popUntil((route) => route.isFirst);
-            },
-            child: const Text('OK'),
+  Future<void> _processPayment() async {
+    try {
+      // Get current user
+      final user = await AuthService.getCurrentUser();
+      if (user == null) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please login to complete booking')),
+        );
+        return;
+      }
+
+      // Determine vehicle type from vehicle name
+      VehicleType vehicleType = VehicleType.sedan;
+      if (widget.vehicleName.toLowerCase().contains('suv')) {
+        vehicleType = VehicleType.suv;
+      } else if (widget.vehicleName.toLowerCase().contains('van')) {
+        vehicleType = VehicleType.van;
+      } else if (widget.vehicleName.toLowerCase().contains('luxury') ||
+          widget.vehicleName.toLowerCase().contains('executive') ||
+          widget.vehicleName.toLowerCase().contains('escalade') ||
+          widget.vehicleName.toLowerCase().contains('cadillac')) {
+        vehicleType = VehicleType.luxury;
+      }
+
+      // Create booking payload
+      final bookingPayload = {
+        'userId': user.id,
+        'vehicleType': vehicleType.toString().split('.').last,
+        'pickupLocation': {
+          'address': widget.pickupAddress,
+          'latitude': widget.pickupLat,
+          'longitude': widget.pickupLng,
+        },
+        'destinationLocation': {
+          'address': widget.destinationAddress,
+          'latitude': widget.destinationLat,
+          'longitude': widget.destinationLng,
+        },
+        'requestTime': (widget.selectedDateTime ?? DateTime.now()).toIso8601String(),
+        'estimatedPrice': widget.totalPrice,
+        'paymentMethod': PaymentMethod.card.toString().split('.').last,
+        'status': 'requested',
+      };
+
+      // Save booking
+      await BookingService.createBooking(bookingPayload);
+
+      if (!mounted) return;
+
+      // Show success dialog
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Payment Successful'),
+          content: const Text(
+            'Your booking has been confirmed! You will receive a confirmation email shortly.',
           ),
-        ],
-      ),
-    );
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      print('Error creating booking: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error creating booking: $e')),
+      );
+    }
   }
 
   @override
