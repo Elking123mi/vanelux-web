@@ -7,6 +7,7 @@ import '../../models/user.dart';
 import '../../services/auth_service.dart';
 import '../../services/google_maps_service.dart';
 import '../../widgets/route_map_view.dart';
+import 'customer_dashboard_web.dart';
 import 'fleet_page.dart';
 import 'trip_details_web_screen.dart';
 
@@ -310,14 +311,12 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   Future<void> _handleLoginFlow() async {
     final user = await _showLoginDialog();
     if (user != null && mounted) {
-      setState(() {
-        _currentUser = user;
-      });
-      if (!mounted) {
-        return;
-      }
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Welcome back to VaneLux!')),
+      // Navigate to customer dashboard
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CustomerDashboardWeb(user: user),
+        ),
       );
     }
   }
@@ -325,14 +324,12 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   Future<void> _handleSignupFlow() async {
     final user = await _showSignupDialog();
     if (user != null && mounted) {
-      setState(() {
-        _currentUser = user;
-      });
-      if (!mounted) {
-        return;
-      }
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Account created successfully.')), 
+      // Navigate to customer dashboard
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CustomerDashboardWeb(user: user),
+        ),
       );
     }
   }
