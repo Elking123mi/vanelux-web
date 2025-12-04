@@ -285,24 +285,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       if (!mounted) {
         return;
       }
-      if (user != null) {
-        // Usuario ya logueado, redirigir al dashboard
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => CustomerDashboardWeb(user: user),
-              ),
-            );
-          }
-        });
-      } else {
-        setState(() {
-          _currentUser = null;
-          _isCheckingAuth = false;
-        });
-      }
+      setState(() {
+        _currentUser = user;
+        _isCheckingAuth = false;
+      });
     } catch (e) {
       if (!mounted) {
         return;
@@ -325,12 +311,14 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   Future<void> _handleLoginFlow() async {
     final user = await _showLoginDialog();
     if (user != null && mounted) {
-      // Navigate to customer dashboard
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CustomerDashboardWeb(user: user),
-        ),
+      setState(() {
+        _currentUser = user;
+      });
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Welcome back to VaneLux!')),
       );
     }
   }
@@ -338,12 +326,14 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   Future<void> _handleSignupFlow() async {
     final user = await _showSignupDialog();
     if (user != null && mounted) {
-      // Navigate to customer dashboard
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CustomerDashboardWeb(user: user),
-        ),
+      setState(() {
+        _currentUser = user;
+      });
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Account created successfully!')),
       );
     }
   }
@@ -2527,16 +2517,49 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                           color: Color(0xFF0B3254),
                         ),
                       ),
-                      const SizedBox(width: 16),
-                      TextButton(
-                        onPressed: _logout,
-                        child: const Text(
-                          'LOG OUT',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF0B3254),
+                      const SizedBox(width: 8),
+                      PopupMenuButton<String>(
+                        onSelected: (value) {
+                          switch (value) {
+                            case 'dashboard':
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      CustomerDashboardWeb(user: _currentUser!),
+                                ),
+                              );
+                              break;
+                            case 'logout':
+                              _logout();
+                              break;
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'dashboard',
+                            child: Row(
+                              children: [
+                                Icon(Icons.dashboard, size: 20),
+                                SizedBox(width: 12),
+                                Text('Dashboard'),
+                              ],
+                            ),
                           ),
+                          const PopupMenuItem(
+                            value: 'logout',
+                            child: Row(
+                              children: [
+                                Icon(Icons.logout, size: 20),
+                                SizedBox(width: 12),
+                                Text('Log Out'),
+                              ],
+                            ),
+                          ),
+                        ],
+                        icon: const Icon(
+                          Icons.arrow_drop_down,
+                          color: Color(0xFF0B3254),
                         ),
                       ),
                     ],
@@ -2618,13 +2641,50 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           ),
         ),
       );
-      actions.add(const SizedBox(width: 12));
+      actions.add(const SizedBox(width: 8));
       actions.add(
-        TextButton(
-          onPressed: _logout,
-          child: const Text(
-            'LOG OUT',
-            style: TextStyle(color: Color(0xFF0B3254)),
+        PopupMenuButton<String>(
+          onSelected: (value) {
+            switch (value) {
+              case 'dashboard':
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        CustomerDashboardWeb(user: _currentUser!),
+                  ),
+                );
+                break;
+              case 'logout':
+                _logout();
+                break;
+            }
+          },
+          itemBuilder: (context) => [
+            const PopupMenuItem(
+              value: 'dashboard',
+              child: Row(
+                children: [
+                  Icon(Icons.dashboard, size: 20),
+                  SizedBox(width: 12),
+                  Text('Dashboard'),
+                ],
+              ),
+            ),
+            const PopupMenuItem(
+              value: 'logout',
+              child: Row(
+                children: [
+                  Icon(Icons.logout, size: 20),
+                  SizedBox(width: 12),
+                  Text('Log Out'),
+                ],
+              ),
+            ),
+          ],
+          icon: const Icon(
+            Icons.arrow_drop_down,
+            color: Color(0xFF0B3254),
           ),
         ),
       );
