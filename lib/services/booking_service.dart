@@ -6,6 +6,12 @@ import 'local_booking_service.dart';
 class BookingService {
   static const String _endpoint = '${AppConfig.vaneLuxNamespace}/bookings';
 
+  /// Clears local booking cache
+  static Future<void> clearLocalCache() async {
+    await LocalBookingService.clearBookings();
+    print('🧹 [BookingService] Cache local limpiado');
+  }
+
   /// Creates a booking in the backend and returns the normalized payload used by the UI.
   static Future<Map<String, dynamic>> createBooking(
     Map<String, dynamic> payload,

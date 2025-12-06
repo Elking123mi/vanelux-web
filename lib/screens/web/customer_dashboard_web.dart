@@ -46,6 +46,9 @@ class _CustomerDashboardWebState extends State<CustomerDashboardWeb> {
     });
 
     try {
+      // Limpiar caché local antes de cargar para evitar mezcla de datos viejos
+      await BookingService.clearLocalCache();
+      
       final bookingsList = await BookingService.fetchBookings();
       print('🔵 [Dashboard] Bookings raw: $bookingsList');
       
@@ -1255,7 +1258,7 @@ class _CustomerDashboardWebState extends State<CustomerDashboardWeb> {
       trailing: Switch(
         value: value,
         onChanged: onChanged,
-        activeColor: const Color(0xFFD4AF37),
+        activeThumbColor: const Color(0xFFD4AF37),
       ),
     );
   }
