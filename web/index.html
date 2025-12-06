@@ -18,19 +18,52 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="VaneLux - Premium Luxury Transportation Service">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="luxury_taxi_app">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="VaneLux">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>luxury_taxi_app</title>
+  <title>VaneLux - Luxury Transportation</title>
   <link rel="manifest" href="manifest.json">
+  
+  <style>
+    /* Responsive fixes for mobile */
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      width: 100%;
+      height: 100%;
+    }
+    
+    body {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+    
+    /* Prevent zoom on input focus (iOS) */
+    input, select, textarea {
+      font-size: 16px !important;
+    }
+    
+    @media screen and (max-width: 800px) {
+      /* Mobile optimizations */
+      * {
+        -webkit-tap-highlight-color: transparent;
+      }
+    }
+  </style>
 </head>
 <body>
   <script src="maps_proxy.js"></script>
