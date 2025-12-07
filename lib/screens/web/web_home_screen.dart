@@ -2406,13 +2406,16 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   }
 
   Widget _buildHeader(BuildContext context) {
+    final double width = MediaQuery.of(context).size.width;
+    final bool isMobile = width < 800;
+    
     // Show a full nav bar on web/large screens, compact on mobile
     final bool isWeb = kIsWeb;
     if (isWeb) {
       return Container(
-        height: 88,
+        height: isMobile ? 70 : 88,
         color: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 40),
+        padding: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 40),
         child: LayoutBuilder(
           builder: (context, constraints) {
             final navButtons = [
@@ -2568,6 +2571,116 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
               );
             }
 
+            // Mobile-specific simplified header (< 800px)
+            if (isMobile) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Text(
+                    'VANELUX',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0B3254),
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                  const Spacer(),
+                  if (_isCheckingAuth)
+                    const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  else if (_currentUser == null)
+                    TextButton(
+                      onPressed: _navigateToLogin,
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                      ),
+                      child: const Text(
+                        'LOGIN',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF0B3254),
+                        ),
+                      ),
+                    )
+                  else
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircleAvatar(
+                          radius: 16,
+                          backgroundColor: const Color(0xFFD4AF37),
+                          child: Text(
+                            _currentUser!.name.isNotEmpty
+                                ? _currentUser!.name[0].toUpperCase()
+                                : 'U',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF0B3254),
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                        PopupMenuButton<String>(
+                          padding: EdgeInsets.zero,
+                          onSelected: (value) {
+                            switch (value) {
+                              case 'dashboard':
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        CustomerDashboardWeb(user: _currentUser!),
+                                  ),
+                                );
+                                break;
+                              case 'logout':
+                                _logout();
+                                break;
+                            }
+                          },
+                          itemBuilder: (context) => [
+                            const PopupMenuItem(
+                              value: 'dashboard',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.dashboard, size: 20),
+                                  SizedBox(width: 12),
+                                  Text('Dashboard'),
+                                ],
+                              ),
+                            ),
+                            const PopupMenuItem(
+                              value: 'logout',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.logout, size: 20),
+                                  SizedBox(width: 12),
+                                  Text('Log Out'),
+                                ],
+                              ),
+                            ),
+                          ],
+                          icon: const Icon(
+                            Icons.arrow_drop_down,
+                            color: Color(0xFF0B3254),
+                            size: 24,
+                          ),
+                        ),
+                      ],
+                    ),
+                ],
+              );
+            }
+
+            // Desktop/tablet header (>= 800px)
             final bool isNarrow = constraints.maxWidth < 1024;
 
             return Row(

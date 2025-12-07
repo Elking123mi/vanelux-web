@@ -107,17 +107,7 @@ class VaneLuxApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
       },
-      home: kIsWeb 
-        ? LayoutBuilder(
-            builder: (context, constraints) {
-              // Si es web pero en pantalla de móvil (< 800px), usar UI móvil
-              if (constraints.maxWidth < 800) {
-                return const LoginScreen(); // UI móvil optimizada
-              }
-              return const WebHomeScreen(); // UI desktop
-            },
-          )
-        : const LoginScreen(),
+      home: kIsWeb ? const WebHomeScreen() : const LoginScreen(),
     );
   }
 }
