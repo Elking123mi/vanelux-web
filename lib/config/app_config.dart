@@ -34,24 +34,27 @@ class AppConfig {
 
   // Google Maps API Key - USAR VARIABLE DE ENTORNO PARA SEGURIDAD
   // Para Netlify: Configurar en Site settings > Environment variables > GOOGLE_MAPS_API_KEY
-  // Para desarrollo local: Descomentar la línea con la key real
   static const String googleMapsApiKey = String.fromEnvironment(
     'GOOGLE_MAPS_API_KEY',
-    defaultValue: 'CHANGE_ME', // Valor por defecto seguro
+    defaultValue: '', // NO poner la key aquí - usar variable de entorno
   );
-  
-  // Fallback para desarrollo - SOLO usar en local, comentar antes de deploy
-  static String get mapsApiKeyFallback => 
-    googleMapsApiKey == 'CHANGE_ME' 
-      ? 'AIzaSyAfE3eJvvl5jRYcPjey3FuvZ5qVnnPhFFQ' 
-      : googleMapsApiKey;
 
   // OpenAI ChatGPT API Key (configurar en Netlify)
-  static const String openaiApiKey = '';
+  static const String openaiApiKey = String.fromEnvironment(
+    'OPENAI_API_KEY',
+    defaultValue: '',
+  );
 
   // Stripe API Keys (configurar en Netlify)
-  static const String stripePublicKey = '';
-  static const String stripeSecretKey = '';
+  static const String stripePublicKey = String.fromEnvironment(
+    'STRIPE_PUBLIC_KEY',
+    defaultValue: '',
+  );
+  
+  static const String stripeSecretKey = String.fromEnvironment(
+    'STRIPE_SECRET_KEY',
+    defaultValue: '',
+  );
 
   // Environment Configuration
   static const bool isProduction = true;
