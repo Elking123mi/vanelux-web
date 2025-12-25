@@ -32,8 +32,19 @@ class AppConfig {
     // ================= Integrations =================
     static const String vaneLuxBaseUrl = 'https://vane-lux.com';
 
-  // Google Maps API Key
-  static const String googleMapsApiKey = 'AIzaSyAfE3eJvvl5jRYcPjey3FuvZ5qVnnPhFFQ';
+  // Google Maps API Key - USAR VARIABLE DE ENTORNO PARA SEGURIDAD
+  // Para Netlify: Configurar en Site settings > Environment variables > GOOGLE_MAPS_API_KEY
+  // Para desarrollo local: Descomentar la línea con la key real
+  static const String googleMapsApiKey = String.fromEnvironment(
+    'GOOGLE_MAPS_API_KEY',
+    defaultValue: 'CHANGE_ME', // Valor por defecto seguro
+  );
+  
+  // Fallback para desarrollo - SOLO usar en local, comentar antes de deploy
+  static String get mapsApiKeyFallback => 
+    googleMapsApiKey == 'CHANGE_ME' 
+      ? 'AIzaSyAfE3eJvvl5jRYcPjey3FuvZ5qVnnPhFFQ' 
+      : googleMapsApiKey;
 
   // OpenAI ChatGPT API Key (configurar en Netlify)
   static const String openaiApiKey = '';
