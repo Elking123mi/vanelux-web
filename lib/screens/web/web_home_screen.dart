@@ -607,10 +607,28 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                               Navigator.of(dialogContext).pop(user);
                             } catch (e) {
                               setDialogState(() {
-                                errorMessage =
-                                    'We could not create your account. Please try again later.';
+                                // Mostrar el error específico del backend
+                                final errorText = e.toString();
+                                if (errorText.contains('Ya existe un usuario')) {
+                                  errorMessage =
+                                      'This email is already registered. Please login instead.';
+                                } else if (errorText.contains('timeout') ||
+                                    errorText.contains('connection')) {
+                                  errorMessage =
+                                      'Connection timeout. Please check your internet and try again.';
+                                } else if (errorText.contains('Exception:')) {
+                                  // Extraer el mensaje después de "Exception: "
+                                  errorMessage = errorText
+                                      .replaceAll('Exception:', '')
+                                      .trim();
+                                } else {
+                                  errorMessage =
+                                      'We could not create your account. Please try again later.';
+                                }
                                 isLoading = false;
                               });
+                              // Log del error para debugging
+                              print('Registration error: $e');
                             }
                           },
                     child: isLoading

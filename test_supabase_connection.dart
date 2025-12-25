@@ -94,7 +94,7 @@ void main() async {
     print('      Estado: ${b['status']} | Precio: \$${b['price']}');
   }
   
-  print('\n' + '═' * 60);
+  print('\n${'═' * 60}');
   print('🎉 TODAS LAS PRUEBAS PASARON EXITOSAMENTE');
   print('═' * 60);
   print('\n✅ VaneLux está correctamente configurado con Supabase');
