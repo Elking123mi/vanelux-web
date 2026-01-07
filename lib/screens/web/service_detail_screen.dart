@@ -5,9 +5,9 @@ class ServiceDetailScreen extends StatefulWidget {
   final String serviceType;
 
   const ServiceDetailScreen({
-    Key? key,
+    super.key,
     required this.serviceType,
-  }) : super(key: key);
+  });
 
   @override
   State<ServiceDetailScreen> createState() => _ServiceDetailScreenState();
@@ -46,6 +46,44 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           'image': 'assets/images/all airports.jpg',
           'description':
               'Travel in style and comfort with our premium airport transfer service. We provide reliable, punctual transportation to and from all major airports in the area.',
+          'detailedInfo': [
+            {
+              'icon': Icons.schedule,
+              'title': 'Flight Tracking',
+              'description': 'Real-time monitoring of your flight status to ensure on-time pickup',
+            },
+            {
+              'icon': Icons.people,
+              'title': 'Meet & Greet',
+              'description': 'Professional chauffeur waiting at arrivals with your name sign',
+            },
+            {
+              'icon': Icons.luggage,
+              'title': 'Luggage Assistance',
+              'description': 'Complete baggage handling from terminal to vehicle',
+            },
+          ],
+          'packages': [
+            {
+              'name': 'Basic Package',
+              'description': 'Perfect for solo travelers or couples. Includes standard sedan service.',
+              'duration': '1-Way',
+              'price': '\$85',
+            },
+            {
+              'name': 'Standard Package',
+              'description': 'Ideal for families. Includes SUV with luggage space.',
+              'duration': 'Round Trip',
+              'price': '\$150',
+              'badge': 'MOST POPULAR',
+            },
+            {
+              'name': 'Premium Package',
+              'description': 'Luxury sedan with VIP treatment. Perfect for business travelers.',
+              'duration': 'Round Trip',
+              'price': '\$300',
+            },
+          ],
           'features': [
             'Real-time flight tracking',
             'Meet & Greet service',
@@ -91,6 +129,44 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           'image': 'assets/images/point to point.jpg',
           'description':
               'Experience hassle-free direct transportation from any location to your destination. Perfect for business meetings, special occasions, or daily commutes.',
+          'detailedInfo': [
+            {
+              'icon': Icons.maps_home_work,
+              'title': 'Door-to-Door',
+              'description': 'Direct pickup from your location to your exact destination',
+            },
+            {
+              'icon': Icons.gps_fixed,
+              'title': 'Live Tracking',
+              'description': 'Track your ride in real-time with GPS monitoring',
+            },
+            {
+              'icon': Icons.schedule_outlined,
+              'title': 'Flexible Timing',
+              'description': 'Schedule rides anytime, 24/7 availability',
+            },
+          ],
+          'packages': [
+            {
+              'name': 'Single Trip',
+              'description': 'One-time ride within city limits. Perfect for appointments.',
+              'duration': 'One-Way',
+              'price': '\$45',
+            },
+            {
+              'name': 'Round Trip',
+              'description': 'Go and return service with waiting time included.',
+              'duration': 'Round Trip',
+              'price': '\$85',
+              'badge': 'SAVE 15%',
+            },
+            {
+              'name': 'Weekly Pass',
+              'description': 'Unlimited city rides for one week. Best for commuters.',
+              'duration': '7 Days',
+              'price': '\$299',
+            },
+          ],
           'features': [
             'Door-to-door service',
             'Real-time GPS tracking',
@@ -136,6 +212,44 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           'image': 'assets/images/hourly service.jpg',
           'description':
               'Have a personal chauffeur at your disposal for as long as you need. Perfect for business days, shopping trips, or touring the city at your own pace.',
+          'detailedInfo': [
+            {
+              'icon': Icons.timer,
+              'title': 'Flexible Duration',
+              'description': 'Book for as little as 2 hours or for a full day',
+            },
+            {
+              'icon': Icons.map,
+              'title': 'Multiple Destinations',
+              'description': 'Visit as many locations as you want during your rental period',
+            },
+            {
+              'icon': Icons.attach_money,
+              'title': 'All-Inclusive Pricing',
+              'description': 'No hidden fees, all taxes and tolls included',
+            },
+          ],
+          'packages': [
+            {
+              'name': 'Basic Package',
+              'description': 'Perfect for business meetings or short shopping trips. Includes 2 hours of service.',
+              'duration': '2 Hours',
+              'price': '\$120',
+            },
+            {
+              'name': 'Standard Package',
+              'description': 'Ideal for half-day sightseeing or shopping. Includes 4 hours of service.',
+              'duration': '4 Hours',
+              'price': '\$220',
+              'badge': 'MOST POPULAR',
+            },
+            {
+              'name': 'Premium Package',
+              'description': 'Full-day service for extensive tours or business needs. Includes 8 hours.',
+              'duration': '8 Hours',
+              'price': '\$400',
+            },
+          ],
           'features': [
             'Flexible hourly rates',
             'No hidden fees',
@@ -181,6 +295,44 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           'image': 'assets/images/corporate service.jpg',
           'description':
               'Professional transportation services tailored for businesses. Impress clients, facilitate employee travel, and ensure punctuality for all corporate events.',
+          'detailedInfo': [
+            {
+              'icon': Icons.account_circle,
+              'title': 'Account Manager',
+              'description': 'Dedicated support for all your corporate transportation needs',
+            },
+            {
+              'icon': Icons.receipt_long,
+              'title': 'Billing Reports',
+              'description': 'Consolidated monthly invoices with detailed trip reports',
+            },
+            {
+              'icon': Icons.verified_user,
+              'title': 'Priority Service',
+              'description': 'Guaranteed vehicle availability for urgent business needs',
+            },
+          ],
+          'packages': [
+            {
+              'name': 'Starter Plan',
+              'description': 'Perfect for small businesses. Includes 20 rides per month.',
+              'duration': 'Per Month',
+              'price': '\$1,500',
+            },
+            {
+              'name': 'Business Plan',
+              'description': 'For growing companies. Includes 50 rides and priority booking.',
+              'duration': 'Per Month',
+              'price': '\$3,500',
+              'badge': 'MOST POPULAR',
+            },
+            {
+              'name': 'Enterprise Plan',
+              'description': 'Unlimited rides for large corporations with custom solutions.',
+              'duration': 'Per Month',
+              'price': 'Custom',
+            },
+          ],
           'features': [
             'Dedicated account manager',
             'Priority booking',
@@ -226,6 +378,44 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           'image': 'assets/images/weeding.jpg',
           'description':
               'Make your special day even more memorable with our luxury event transportation. Perfect for weddings, proms, anniversaries, and any celebration.',
+          'detailedInfo': [
+            {
+              'icon': Icons.photo_camera,
+              'title': 'Photo Ready',
+              'description': 'Vehicles decorated and prepared for your special photo moments',
+            },
+            {
+              'icon': Icons.local_bar,
+              'title': 'Champagne Service',
+              'description': 'Complimentary champagne and refreshments for celebrations',
+            },
+            {
+              'icon': Icons.event_available,
+              'title': 'Event Coordination',
+              'description': 'Professional planning to ensure everything runs smoothly',
+            },
+          ],
+          'packages': [
+            {
+              'name': 'Prom Package',
+              'description': 'Perfect for prom night. Includes 4 hours with red carpet.',
+              'duration': '4 Hours',
+              'price': '\$399',
+            },
+            {
+              'name': 'Wedding Package',
+              'description': 'Complete wedding transportation with decorations and photos.',
+              'duration': '6 Hours',
+              'price': '\$599',
+              'badge': 'MOST POPULAR',
+            },
+            {
+              'name': 'Luxury Event',
+              'description': 'Full premium experience for any special occasion.',
+              'duration': '8 Hours',
+              'price': '\$899',
+            },
+          ],
           'features': [
             'Red carpet service',
             'Decorated vehicles',
@@ -271,6 +461,44 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           'image': 'assets/images/city tours.png',
           'description':
               'Explore the city\'s best attractions with our guided luxury tours. Customized itineraries, knowledgeable guides, and premium comfort throughout your journey.',
+          'detailedInfo': [
+            {
+              'icon': Icons.route,
+              'title': 'Custom Routes',
+              'description': 'Create your own itinerary or choose from our popular tours',
+            },
+            {
+              'icon': Icons.person_pin,
+              'title': 'Expert Guides',
+              'description': 'Knowledgeable local guides sharing city history and culture',
+            },
+            {
+              'icon': Icons.camera_alt,
+              'title': 'Photo Stops',
+              'description': 'Multiple stops at the best photo spots throughout the tour',
+            },
+          ],
+          'packages': [
+            {
+              'name': 'City Highlights',
+              'description': 'Quick tour of top 5 attractions. Perfect for first-time visitors.',
+              'duration': '4 Hours',
+              'price': '\$299',
+            },
+            {
+              'name': 'Full Day Tour',
+              'description': 'Complete city experience with all major attractions and lunch.',
+              'duration': '8 Hours',
+              'price': '\$499',
+              'badge': 'BEST VALUE',
+            },
+            {
+              'name': 'Custom Tour',
+              'description': 'Design your own tour with our expert guide and driver.',
+              'duration': 'Flexible',
+              'price': '\$99/hr',
+            },
+          ],
           'features': [
             'Customized routes',
             'Expert local guides',
@@ -333,9 +561,12 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             _buildNavBar(context),
             _buildHeroSection(serviceInfo),
             _buildDescriptionSection(serviceInfo),
+            _buildDetailedInfoSection(serviceInfo),
+            _buildPackagesSection(serviceInfo),
             _buildFeaturesSection(serviceInfo),
             _buildOffersSection(serviceInfo),
             _buildPricingSection(serviceInfo),
+            _buildWorldCupSection(),
             _buildBookNowSection(serviceInfo),
             _buildFooter(),
           ],
@@ -376,11 +607,11 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           // Nav items
           _buildNavItem('HOME', () => Navigator.of(context).pop()),
           const SizedBox(width: 30),
-          _buildNavItem('SERVICES', null),
+          _buildNavItem('SERVICES', () => Navigator.of(context).pop()),
           const SizedBox(width: 30),
-          _buildNavItem('FLEET', null),
+          _buildNavItem('FLEET', () => Navigator.of(context).pop()),
           const SizedBox(width: 30),
-          _buildNavItem('ABOUT', null),
+          _buildNavItem('ABOUT', () => Navigator.of(context).pop()),
           const SizedBox(width: 40),
           // User info
           if (userName != null) ...[
@@ -689,6 +920,456 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
               color: Colors.grey[600],
               fontWeight: FontWeight.w500,
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailedInfoSection(Map<String, dynamic> info) {
+    if (!info.containsKey('detailedInfo')) return const SizedBox.shrink();
+    
+    final detailedInfo = info['detailedInfo'] as List;
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 80),
+      color: Colors.white,
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(15),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0B3254),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.info_outline,
+                  color: Color(0xFFFFD700),
+                  size: 32,
+                ),
+              ),
+              const SizedBox(width: 20),
+              const Text(
+                'Custom Hourly Chauffeur Services',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF0B3254),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'Enjoy the flexibility of hiring a luxury chauffeur by the hour. Perfect for business meetings, shopping trips, sightseeing tours, or any occasion where you need a dedicated vehicle and driver at your service.',
+            style: TextStyle(
+              fontSize: 16,
+              height: 1.6,
+              color: Color(0xFF666666),
+            ),
+          ),
+          const SizedBox(height: 50),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: detailedInfo.map((item) {
+              return Expanded(
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 10),
+                  padding: const EdgeInsets.all(25),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0B3254),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(15),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          item['icon'],
+                          size: 40,
+                          color: const Color(0xFFFFD700),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        item['title'],
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        item['description'],
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white.withOpacity(0.8),
+                          height: 1.5,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPackagesSection(Map<String, dynamic> info) {
+    if (!info.containsKey('packages')) return const SizedBox.shrink();
+    
+    final packages = info['packages'] as List;
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 80),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color(0xFFF8F9FA),
+            Colors.white,
+          ],
+        ),
+      ),
+      child: Column(
+        children: [
+          const Text(
+            'Our Hourly Service Packages',
+            style: TextStyle(
+              fontSize: 36,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF0B3254),
+            ),
+          ),
+          const SizedBox(height: 60),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: packages.map((package) {
+              final hasBadge = package.containsKey('badge');
+              return Expanded(
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 15),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: hasBadge
+                        ? Border.all(color: const Color(0xFFFFD700), width: 3)
+                        : Border.all(color: Colors.grey.shade200, width: 1),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 30,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      if (hasBadge)
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFFFD700),
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(20),
+                              topRight: Radius.circular(20),
+                            ),
+                          ),
+                          child: Text(
+                            package['badge'],
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF0B3254),
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                        ),
+                      Padding(
+                        padding: const EdgeInsets.all(30),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              package['name'],
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF0B3254),
+                              ),
+                            ),
+                            const SizedBox(height: 15),
+                            Text(
+                              package['description'],
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[600],
+                                height: 1.5,
+                              ),
+                            ),
+                            const SizedBox(height: 25),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  package['duration'],
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF0B3254),
+                                  ),
+                                ),
+                                Text(
+                                  package['price'],
+                                  style: const TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF0B3254),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: () {},
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF0B3254),
+                                  padding: const EdgeInsets.symmetric(vertical: 15),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Book Now',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 60),
+          Container(
+            padding: const EdgeInsets.all(40),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0B3254),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Column(
+              children: [
+                const Text(
+                  'Custom Hourly Services',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 15),
+                const Text(
+                  'Need a custom duration? We can accommodate any timeframe for your specific needs.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white70,
+                  ),
+                ),
+                const SizedBox(height: 25),
+                ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFFD700),
+                    padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 18),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  child: const Text(
+                    'Request Custom Quote',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0B3254),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWorldCupSection() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 100, vertical: 60),
+      padding: const EdgeInsets.all(60),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF1a4d7a),
+            Color(0xFF0B3254),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 30,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Image.network(
+              'https://upload.wikimedia.org/wikipedia/en/thumb/e/e3/2026_FIFA_World_Cup.svg/1200px-2026_FIFA_World_Cup.svg.png',
+              height: 120,
+              errorBuilder: (context, error, stackTrace) {
+                return const Icon(
+                  Icons.sports_soccer,
+                  size: 80,
+                  color: Color(0xFFFFD700),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 30),
+          const Text(
+            'WORLD CUP 2026',
+            style: TextStyle(
+              fontSize: 48,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFFFFD700),
+              letterSpacing: 2,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            height: 4,
+            width: 300,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [
+                  Color(0xFFFFD700),
+                  Colors.orange,
+                ],
+              ),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'USA • CANADA • MEXICO',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+              letterSpacing: 4,
+            ),
+          ),
+          const SizedBox(height: 40),
+          const Text(
+            '🏆 Official Transportation Partner 🏆',
+            style: TextStyle(
+              fontSize: 20,
+              color: Colors.white,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'Book your luxury transportation for all World Cup 2026 matches!\nExclusive packages available for fans traveling to stadiums.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.white70,
+              height: 1.6,
+            ),
+          ),
+          const SizedBox(height: 35),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton.icon(
+                onPressed: () {},
+                icon: const Icon(Icons.event, size: 24),
+                label: const Text(
+                  'VIEW WORLD CUP PACKAGES',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFFD700),
+                  foregroundColor: const Color(0xFF0B3254),
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  elevation: 10,
+                ),
+              ),
+              const SizedBox(width: 20),
+              OutlinedButton.icon(
+                onPressed: () {},
+                icon: const Icon(Icons.phone, size: 24),
+                label: const Text(
+                  'CALL: +1 917 599-5522',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  side: const BorderSide(color: Colors.white, width: 2),
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
