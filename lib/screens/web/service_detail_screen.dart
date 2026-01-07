@@ -607,7 +607,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           // Nav items
           _buildNavItem('HOME', () => Navigator.of(context).pop()),
           const SizedBox(width: 30),
-          _buildNavItem('SERVICES', () => Navigator.of(context).pop()),
+          _buildServicesMenu(context),
           const SizedBox(width: 30),
           _buildNavItem('FLEET', () => Navigator.of(context).pop()),
           const SizedBox(width: 30),
@@ -670,6 +670,75 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             color: Color(0xFF0B3254),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildServicesMenu(BuildContext context) {
+    return PopupMenuButton<String>(
+      offset: const Offset(0, 50),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: Row(
+          children: [
+            const Text(
+              'SERVICES',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1,
+                color: Color(0xFF0B3254),
+              ),
+            ),
+            const SizedBox(width: 5),
+            Icon(
+              Icons.arrow_drop_down,
+              color: const Color(0xFF0B3254),
+              size: 20,
+            ),
+          ],
+        ),
+      ),
+      itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+        _buildServiceMenuItem(context, 'Airport Transfer', Icons.flight_takeoff),
+        _buildServiceMenuItem(context, 'Point to Point', Icons.location_on),
+        _buildServiceMenuItem(context, 'Hourly Service', Icons.access_time),
+        _buildServiceMenuItem(context, 'Corporate', Icons.business_center),
+        _buildServiceMenuItem(context, 'Events', Icons.celebration),
+        _buildServiceMenuItem(context, 'Tours', Icons.tour),
+      ],
+    );
+  }
+
+  PopupMenuEntry<String> _buildServiceMenuItem(BuildContext context, String title, IconData icon) {
+    return PopupMenuItem<String>(
+      value: title,
+      onTap: () {
+        // Si ya estamos en esa página, no hacer nada
+        if (widget.serviceType == title) return;
+        
+        // Navegar a la nueva página de servicio
+        Future.delayed(Duration.zero, () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ServiceDetailScreen(serviceType: title),
+            ),
+          );
+        });
+      },
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: const Color(0xFF0B3254)),
+          const SizedBox(width: 10),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Color(0xFF0B3254),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -944,31 +1013,71 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                   color: const Color(0xFF0B3254),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
-                  Icons.info_outline,
-                  color: Color(0xFFFFD700),
+                child: Icon(
+                  info['icon'],
+                  color: const Color(0xFFFFD700),
                   size: 32,
                 ),
               ),
               const SizedBox(width: 20),
-              const Text(
-                'Custom Hourly Chauffeur Services',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF0B3254),
+              Expanded(
+                child: Text(
+                  '${info['title']} - Premium Service',
+                  style: const TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF0B3254),
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          const Text(
-            'Enjoy the flexibility of hiring a luxury chauffeur by the hour. Perfect for business meetings, shopping trips, sightseeing tours, or any occasion where you need a dedicated vehicle and driver at your service.',
-            style: TextStyle(
-              fontSize: 16,
-              height: 1.6,
-              color: Color(0xFF666666),
-            ),
+          const SizedBox(height: 40),
+          // Imagen y descripción lado a lado
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Imagen
+              if (info['image'] != null)
+                Expanded(
+                  flex: 2,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(15),
+                    child: Image.asset(
+                      info['image'],
+                      height: 300,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              const SizedBox(width: 40),
+              // Descripción
+              Expanded(
+                flex: 3,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      info['subtitle'] ?? '',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF0B3254),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      info['description'],
+                      style: const TextStyle(
+                        fontSize: 16,
+                        height: 1.8,
+                        color: Color(0xFF666666),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 50),
           Row(
@@ -1148,7 +1257,10 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  // Regresar a la página principal
+                                  Navigator.of(context).pop();
+                                },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF0B3254),
                                   padding: const EdgeInsets.symmetric(vertical: 15),
@@ -1203,7 +1315,10 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 ),
                 const SizedBox(height: 25),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    // Regresar a la página principal
+                    Navigator.of(context).pop();
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFFD700),
                     padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 18),
@@ -1328,7 +1443,10 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ElevatedButton.icon(
-                onPressed: () {},
+                onPressed: () {
+                  // Regresar a la página principal
+                  Navigator.of(context).pop();
+                },
                 icon: const Icon(Icons.event, size: 24),
                 label: const Text(
                   'VIEW WORLD CUP PACKAGES',
@@ -1350,7 +1468,9 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
               ),
               const SizedBox(width: 20),
               OutlinedButton.icon(
-                onPressed: () {},
+                onPressed: () {
+                  // Abrir el teléfono (en web no hace nada, pero en móvil funcionaría)
+                },
                 icon: const Icon(Icons.phone, size: 24),
                 label: const Text(
                   'CALL: +1 917 599-5522',
