@@ -439,62 +439,223 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
   Widget _buildHeroSection(Map<String, dynamic> info) {
     return Container(
-      height: 400,
+      height: 500,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
             info['color'],
-            (info['color'] as Color).withOpacity(0.8),
+            const Color(0xFF0B3254),
+            const Color(0xFF1a4d7a),
           ],
         ),
       ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              info['icon'],
-              size: 80,
-              color: Colors.white,
-            ),
-            const SizedBox(height: 20),
-            Text(
-              info['title'],
-              style: const TextStyle(
-                fontSize: 48,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+      child: Stack(
+        children: [
+          // Efectos de fondo decorativos
+          Positioned(
+            top: -50,
+            right: -50,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.05),
               ),
             ),
-            const SizedBox(height: 10),
-            Text(
-              info['subtitle'],
-              style: const TextStyle(
-                fontSize: 20,
-                color: Colors.white,
-                fontWeight: FontWeight.w300,
+          ),
+          Positioned(
+            bottom: -100,
+            left: -100,
+            child: Container(
+              width: 400,
+              height: 400,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.03),
               ),
             ),
-          ],
-        ),
+          ),
+          // Contenido principal
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(30),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.3),
+                      width: 2,
+                    ),
+                  ),
+                  child: Icon(
+                    info['icon'],
+                    size: 100,
+                    color: const Color(0xFFFFD700),
+                  ),
+                ),
+                const SizedBox(height: 30),
+                Text(
+                  info['title'],
+                  style: const TextStyle(
+                    fontSize: 56,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    letterSpacing: 1.5,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black26,
+                        offset: Offset(2, 2),
+                        blurRadius: 10,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 15),
+                Text(
+                  info['subtitle'],
+                  style: const TextStyle(
+                    fontSize: 24,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w300,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 40),
+                // Botón decorativo
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFD700),
+                    borderRadius: BorderRadius.circular(30),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.star, color: Color(0xFF0B3254), size: 20),
+                      SizedBox(width: 10),
+                      Text(
+                        'Premium Service',
+                        style: TextStyle(
+                          color: Color(0xFF0B3254),
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildDescriptionSection(Map<String, dynamic> info) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 80),
+      padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 100),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.white,
+            Color(0xFFFAFAFA),
+          ],
+        ),
+      ),
       child: Column(
         children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFD700).withOpacity(0.2),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Text(
+              'WHY CHOOSE US',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF0B3254),
+                letterSpacing: 2,
+              ),
+            ),
+          ),
+          const SizedBox(height: 30),
           Text(
             info['description'],
             textAlign: TextAlign.center,
             style: const TextStyle(
-              fontSize: 20,
-              height: 1.6,
-              color: Color(0xFF333333),
+              fontSize: 22,
+              height: 1.8,
+              color: Color(0xFF444444),
+              fontWeight: FontWeight.w400,
+              letterSpacing: 0.3,
+            ),
+          ),
+          const SizedBox(height: 50),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildStatCard('500+', 'Happy Clients'),
+              const SizedBox(width: 40),
+              _buildStatCard('24/7', 'Support'),
+              const SizedBox(width: 40),
+              _buildStatCard('100%', 'Satisfaction'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatCard(String number, String label) {
+    return Container(
+      padding: const EdgeInsets.all(25),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Text(
+            number,
+            style: const TextStyle(
+              fontSize: 36,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF0B3254),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
@@ -562,109 +723,173 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     if (offers.isEmpty) return const SizedBox.shrink();
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 80),
+      padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 100),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            const Color(0xFF0B3254).withOpacity(0.03),
+            const Color(0xFFFFD700).withOpacity(0.05),
+          ],
+        ),
+      ),
       child: Column(
         children: [
-          const Text(
-            '🔥 Special Offers & Promotions',
-            style: TextStyle(
-              fontSize: 36,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF0B3254),
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(15),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFD700),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFFFD700).withOpacity(0.3),
+                      blurRadius: 20,
+                      spreadRadius: 5,
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.local_fire_department,
+                  color: Color(0xFF0B3254),
+                  size: 32,
+                ),
+              ),
+              const SizedBox(width: 20),
+              const Text(
+                'Special Offers & Promotions',
+                style: TextStyle(
+                  fontSize: 42,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF0B3254),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 15),
           const Text(
             'Save more with our exclusive deals',
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 20,
               color: Color(0xFF666666),
             ),
           ),
-          const SizedBox(height: 50),
+          const SizedBox(height: 60),
           Row(
             children: offers.map((offer) {
               return Expanded(
                 child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 10),
-                  padding: const EdgeInsets.all(30),
+                  margin: const EdgeInsets.symmetric(horizontal: 15),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFE0E0E0)),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: const Color(0xFFFFD700),
+                      width: 2,
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                        color: const Color(0xFFFFD700).withOpacity(0.2),
+                        blurRadius: 30,
+                        offset: const Offset(0, 10),
                       ),
                     ],
                   ),
                   child: Column(
                     children: [
+                      // Badge de descuento
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 10,
-                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 30),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFFD700),
-                          borderRadius: BorderRadius.circular(25),
+                          gradient: const LinearGradient(
+                            colors: [
+                              Color(0xFFFFD700),
+                              Color(0xFFFFA500),
+                            ],
+                          ),
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(18),
+                            topRight: Radius.circular(18),
+                          ),
                         ),
-                        child: Text(
-                          offer['discount'],
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF0B3254),
+                        child: Center(
+                          child: Text(
+                            offer['discount'],
+                            style: const TextStyle(
+                              fontSize: 40,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF0B3254),
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black12,
+                                  offset: Offset(2, 2),
+                                  blurRadius: 4,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 20),
-                      Text(
-                        offer['title'],
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF0B3254),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        offer['description'],
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Color(0xFF666666),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 15,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF0F0F0),
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
+                      // Contenido
+                      Padding(
+                        padding: const EdgeInsets.all(30),
+                        child: Column(
                           children: [
-                            const Text(
-                              'Code: ',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Color(0xFF666666),
-                              ),
-                            ),
                             Text(
-                              offer['code'],
+                              offer['title'],
+                              textAlign: TextAlign.center,
                               style: const TextStyle(
-                                fontSize: 12,
+                                fontSize: 24,
                                 fontWeight: FontWeight.bold,
                                 color: Color(0xFF0B3254),
+                                height: 1.3,
+                              ),
+                            ),
+                            const SizedBox(height: 15),
+                            Text(
+                              offer['description'],
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey[600],
+                                height: 1.5,
+                              ),
+                            ),
+                            const SizedBox(height: 25),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF0B3254).withOpacity(0.05),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: const Color(0xFF0B3254).withOpacity(0.2),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.confirmation_number,
+                                    color: Color(0xFF0B3254),
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    'Code: ${offer['code']}',
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF0B3254),
+                                      letterSpacing: 1,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
@@ -686,49 +911,88 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     if (pricing.isEmpty) return const SizedBox.shrink();
 
     return Container(
-      color: const Color(0xFFF8F9FA),
-      padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 80),
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 100),
       child: Column(
         children: [
           const Text(
-            'Pricing',
+            'Transparent Pricing',
             style: TextStyle(
-              fontSize: 36,
+              fontSize: 42,
               fontWeight: FontWeight.bold,
               color: Color(0xFF0B3254),
             ),
           ),
-          const SizedBox(height: 50),
+          const SizedBox(height: 15),
+          Text(
+            'No hidden fees, just premium service',
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 60),
           Container(
-            padding: const EdgeInsets.all(40),
+            padding: const EdgeInsets.all(50),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(25),
+              border: Border.all(
+                color: const Color(0xFF0B3254).withOpacity(0.1),
+                width: 2,
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
+                  color: const Color(0xFF0B3254).withOpacity(0.08),
+                  blurRadius: 40,
+                  offset: const Offset(0, 15),
                 ),
               ],
             ),
             child: Column(
               children: pricing.entries.map((entry) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 15),
+                return Container(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        color: Colors.grey[200]!,
+                        width: 1,
+                      ),
+                    ),
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        entry.key,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          color: Color(0xFF333333),
-                        ),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFD700).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(
+                              Icons.check_circle,
+                              color: Color(0xFFFFD700),
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(width: 20),
+                          Text(
+                            entry.key,
+                            style: const TextStyle(
+                              fontSize: 20,
+                              color: Color(0xFF333333),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
                       Text(
                         entry.value,
                         style: const TextStyle(
-                          fontSize: 18,
+                          fontSize: 24,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF0B3254),
                         ),
@@ -739,14 +1003,25 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
               }).toList(),
             ),
           ),
-          const SizedBox(height: 30),
-          const Text(
-            '* Prices may vary based on distance, time, and vehicle availability',
-            style: TextStyle(
-              fontSize: 14,
-              color: Color(0xFF999999),
-              fontStyle: FontStyle.italic,
-            ),
+          const SizedBox(height: 40),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.info_outline,
+                size: 18,
+                color: Colors.grey[500],
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Prices may vary based on distance, time, and vehicle availability',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[500],
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -755,83 +1030,163 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
   Widget _buildBookNowSection(Map<String, dynamic> info) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 100),
+      padding: const EdgeInsets.symmetric(vertical: 120),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
+            const Color(0xFF0B3254),
+            const Color(0xFF1a4d7a),
             info['color'],
-            (info['color'] as Color).withOpacity(0.8),
           ],
         ),
       ),
       child: Center(
         child: Column(
           children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.rocket_launch,
+                size: 50,
+                color: Color(0xFFFFD700),
+              ),
+            ),
+            const SizedBox(height: 30),
             const Text(
               'Ready to Book?',
               style: TextStyle(
-                fontSize: 42,
+                fontSize: 52,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
+                letterSpacing: 1,
               ),
             ),
             const SizedBox(height: 20),
             const Text(
               'Experience luxury transportation today',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 22,
                 color: Colors.white,
+                fontWeight: FontWeight.w300,
               ),
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 50),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ElevatedButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: info['color'],
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 50,
-                      vertical: 20,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                  child: const Text(
-                    'BOOK NOW',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1,
+                MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 60,
+                        vertical: 25,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFD700),
+                        borderRadius: BorderRadius.circular(35),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFFFFD700).withOpacity(0.4),
+                            blurRadius: 30,
+                            offset: const Offset(0, 15),
+                          ),
+                        ],
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(
+                            Icons.calendar_today,
+                            color: Color(0xFF0B3254),
+                            size: 24,
+                          ),
+                          SizedBox(width: 15),
+                          Text(
+                            'BOOK NOW',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF0B3254),
+                              letterSpacing: 2,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 20),
-                OutlinedButton(
-                  onPressed: () {},
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    side: const BorderSide(color: Colors.white, width: 2),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 50,
-                      vertical: 20,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+                const SizedBox(width: 25),
+                MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    onTap: () {},
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 60,
+                        vertical: 25,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.transparent,
+                        border: Border.all(
+                          color: Colors.white,
+                          width: 2,
+                        ),
+                        borderRadius: BorderRadius.circular(35),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(
+                            Icons.phone,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                          SizedBox(width: 15),
+                          Text(
+                            'CONTACT US',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  child: const Text(
-                    'CONTACT US',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1,
-                    ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 40),
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.phone, color: Colors.white70, size: 18),
+                SizedBox(width: 8),
+                Text(
+                  '+1 917 599-5522',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                SizedBox(width: 30),
+                Icon(Icons.access_time, color: Colors.white70, size: 18),
+                SizedBox(width: 8),
+                Text(
+                  'Available 24/7',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
