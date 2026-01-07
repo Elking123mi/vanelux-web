@@ -9,6 +9,7 @@ import '../../services/google_maps_service.dart';
 import '../../widgets/route_map_view.dart';
 import 'customer_dashboard_web.dart';
 import 'fleet_page.dart';
+import 'service_detail_screen.dart';
 import 'trip_details_web_screen.dart';
 
 class _QuoteVehicleOption {
@@ -2065,42 +2066,82 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Airport Transfer',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF0B3254),
+                            MouseRegion(
+                              cursor: SystemMouseCursors.click,
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).pop();
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const ServiceDetailScreen(
+                                        serviceType: 'Airport Transfer',
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: const Text(
+                                  'Airport Transfer',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF0B3254),
+                                  ),
+                                ),
                               ),
                             ),
                             const SizedBox(height: 8),
                             TextButton(
                               onPressed: () {
                                 Navigator.of(context).pop();
-                                _scrollToSection(_servicesKey);
-                                setState(() {
-                                  selectedServiceType = 'To Airport';
-                                });
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const ServiceDetailScreen(
+                                      serviceType: 'Airport Transfer',
+                                    ),
+                                  ),
+                                );
                               },
                               child: const Text('To and from all airports'),
                             ),
                             const SizedBox(height: 12),
-                            const Text(
-                              'Hourly Service',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF0B3254),
+                            MouseRegion(
+                              cursor: SystemMouseCursors.click,
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).pop();
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const ServiceDetailScreen(
+                                        serviceType: 'Hourly Service',
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: const Text(
+                                  'Hourly Service',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF0B3254),
+                                  ),
+                                ),
                               ),
                             ),
                             const SizedBox(height: 8),
                             TextButton(
                               onPressed: () {
                                 Navigator.of(context).pop();
-                                _scrollToSection(_servicesKey);
-                                setState(() {
-                                  selectedServiceType = 'Hourly/As Directed';
-                                });
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const ServiceDetailScreen(
+                                      serviceType: 'Hourly Service',
+                                    ),
+                                  ),
+                                );
                               },
                               child: const Text('By the hour'),
                             ),
@@ -2113,42 +2154,82 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Point to Point',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF0B3254),
+                            MouseRegion(
+                              cursor: SystemMouseCursors.click,
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).pop();
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const ServiceDetailScreen(
+                                        serviceType: 'Point to Point',
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: const Text(
+                                  'Point to Point',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF0B3254),
+                                  ),
+                                ),
                               ),
                             ),
                             const SizedBox(height: 8),
                             TextButton(
                               onPressed: () {
                                 Navigator.of(context).pop();
-                                _scrollToSection(_servicesKey);
-                                setState(() {
-                                  selectedServiceType = 'Point to Point';
-                                });
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const ServiceDetailScreen(
+                                      serviceType: 'Point to Point',
+                                    ),
+                                  ),
+                                );
                               },
                               child: const Text('Direct transfers'),
                             ),
                             const SizedBox(height: 12),
-                            const Text(
-                              'Corporate',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF0B3254),
+                            MouseRegion(
+                              cursor: SystemMouseCursors.click,
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).pop();
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const ServiceDetailScreen(
+                                        serviceType: 'Corporate',
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: const Text(
+                                  'Corporate',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF0B3254),
+                                  ),
+                                ),
                               ),
                             ),
                             const SizedBox(height: 8),
                             TextButton(
                               onPressed: () {
                                 Navigator.of(context).pop();
-                                _scrollToSection(_servicesKey);
-                                setState(() {
-                                  selectedServiceType = 'Corporate';
-                                });
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const ServiceDetailScreen(
+                                      serviceType: 'Corporate',
+                                    ),
+                                  ),
+                                );
                               },
                               child: const Text('Business travel'),
                             ),
@@ -2161,42 +2242,82 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Events',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF0B3254),
+                            MouseRegion(
+                              cursor: SystemMouseCursors.click,
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).pop();
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const ServiceDetailScreen(
+                                        serviceType: 'Events',
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: const Text(
+                                  'Events',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF0B3254),
+                                  ),
+                                ),
                               ),
                             ),
                             const SizedBox(height: 8),
                             TextButton(
                               onPressed: () {
                                 Navigator.of(context).pop();
-                                _scrollToSection(_servicesKey);
-                                setState(() {
-                                  selectedServiceType = 'Wedding';
-                                });
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const ServiceDetailScreen(
+                                      serviceType: 'Events',
+                                    ),
+                                  ),
+                                );
                               },
                               child: const Text('Wedding, party'),
                             ),
                             const SizedBox(height: 12),
-                            const Text(
-                              'Tours',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF0B3254),
+                            MouseRegion(
+                              cursor: SystemMouseCursors.click,
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).pop();
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const ServiceDetailScreen(
+                                        serviceType: 'Tours',
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: const Text(
+                                  'Tours',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF0B3254),
+                                  ),
+                                ),
                               ),
                             ),
                             const SizedBox(height: 8),
                             TextButton(
                               onPressed: () {
                                 Navigator.of(context).pop();
-                                _scrollToSection(_servicesKey);
-                                setState(() {
-                                  selectedServiceType = 'Tour';
-                                });
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const ServiceDetailScreen(
+                                      serviceType: 'Tours',
+                                    ),
+                                  ),
+                                );
                               },
                               child: const Text('City tours'),
                             ),
