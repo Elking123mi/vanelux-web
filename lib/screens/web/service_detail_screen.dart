@@ -14,7 +14,6 @@ class ServiceDetailScreen extends StatefulWidget {
 }
 
 class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
-  final AuthService _authService = AuthService();
   String? userName;
 
   @override
@@ -25,10 +24,10 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
   Future<void> _loadUserData() async {
     try {
-      final user = _authService.currentUser;
+      final user = await AuthService.getCurrentUser();
       if (user != null && mounted) {
         setState(() {
-          userName = user['name'] ?? user['email']?.split('@')[0];
+          userName = user.name;
         });
       }
     } catch (e) {
