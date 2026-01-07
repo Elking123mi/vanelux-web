@@ -3341,6 +3341,26 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   }
 
   Widget _buildServiceCard(String title, String description, IconData icon) {
+    // Mapear títulos a los tipos de servicio para navegación
+    String getServiceType(String title) {
+      switch (title) {
+        case 'Point to Point':
+          return 'Point to Point';
+        case 'Hourly Service':
+          return 'Hourly Service';
+        case 'Airport Transfer':
+          return 'Airport Transfer';
+        case 'Weddings':
+          return 'Events';
+        case 'Proms':
+          return 'Events';
+        case 'Tours':
+          return 'Tours';
+        default:
+          return title;
+      }
+    }
+
     return Container(
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
@@ -3386,7 +3406,16 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           ),
           const SizedBox(height: 24),
           ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ServiceDetailScreen(
+                    serviceType: getServiceType(title),
+                  ),
+                ),
+              );
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFD4AF37),
               foregroundColor: const Color(0xFF0B3254),
