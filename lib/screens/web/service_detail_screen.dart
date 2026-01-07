@@ -119,12 +119,6 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             'Luxury Sedan': '\$150 - \$200',
             'Van': '\$130 - \$180',
           },
-          'vehicles': [
-            {'name': 'Mercedes S-Class', 'image': 'assets/images/mercdes-s-class.png'},
-            {'name': 'BMW 7 Series', 'image': 'assets/images/bmw 7 series.jpg'},
-            {'name': 'Audi A8', 'image': 'assets/images/audi a8.jpg'},
-            {'name': 'Cadillac Escalade', 'image': 'assets/images/cadillac-scalade.png'},
-          ],
         };
 
       case 'Point to Point':
@@ -208,11 +202,6 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             'Long Distance': '\$200+',
             'Luxury Option': '+35%',
           },
-          'vehicles': [
-            {'name': 'Mercedes S-Class', 'image': 'assets/images/mercdes-s-class.png'},
-            {'name': 'BMW 7 Series', 'image': 'assets/images/bmw 7 series.jpg'},
-            {'name': 'Suburban', 'image': 'assets/images/suburban.png'},
-          ],
         };
 
       case 'Hourly Service':
@@ -296,11 +285,6 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             '4 Hours': '\$220',
             'Additional Hour': '\$50',
           },
-          'vehicles': [
-            {'name': 'Mercedes S-Class', 'image': 'assets/images/mercdes-s-class.png'},
-            {'name': 'BMW 7 Series', 'image': 'assets/images/bmw 7 series.jpg'},
-            {'name': 'Audi A8', 'image': 'assets/images/audi a8.jpg'},
-          ],
         };
 
       case 'Corporate':
@@ -384,12 +368,6 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             'Sprinter Van': '\$180 - \$250',
             'Custom Quote': 'Contact us',
           },
-          'vehicles': [
-            {'name': 'Mercedes S-Class', 'image': 'assets/images/mercdes-s-class.png'},
-            {'name': 'Cadillac Escalade', 'image': 'assets/images/cadillac-scalade.png'},
-            {'name': 'Mercedes Sprinter', 'image': 'assets/images/mercedez-sprinter.png'},
-            {'name': 'Suburban', 'image': 'assets/images/suburban.png'},
-          ],
         };
 
       case 'Events':
@@ -473,11 +451,6 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             'Luxury Package': '\$1,000+',
             'Custom Package': 'Contact us',
           },
-          'vehicles': [
-            {'name': 'Mercedes S-Class', 'image': 'assets/images/mercdes-s-class.png'},
-            {'name': 'Cadillac Escalade', 'image': 'assets/images/cadillac-scalade.png'},
-            {'name': 'Suburban RTS', 'image': 'assets/images/suburban rts.png'},
-          ],
         };
 
       case 'Tours':
@@ -561,11 +534,6 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             'Multi-Day Package': '\$999+',
             'Private Guide': '+\$100',
           },
-          'vehicles': [
-            {'name': 'Mercedes S-Class', 'image': 'assets/images/mercdes-s-class.png'},
-            {'name': 'Suburban', 'image': 'assets/images/suburban.png'},
-            {'name': 'Mercedes Sprinter', 'image': 'assets/images/mercedez-sprinter.png'},
-          ],
         };
 
       default:

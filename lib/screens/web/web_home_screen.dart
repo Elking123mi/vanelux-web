@@ -168,6 +168,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   final GlobalKey _aboutKey = GlobalKey();
   final GlobalKey _contactKey = GlobalKey();
 
+  // Fleet carousel state
+  int _currentVehicleIndex = 0;
+  Timer? _carouselTimer;
+
   // Booking form state
   String? selectedServiceType;
   final TextEditingController pickupController = TextEditingController();
@@ -257,6 +261,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     _showDestinationDropdown = false;
     // NO cerrar dropdown al perder foco - esto causaba el problema
     _loadCurrentUser();
+    _startCarousel();
   }
 
   @override
@@ -267,7 +272,18 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     destinationFocusNode.dispose();
     _pickupDebounce?.cancel();
     _destinationDebounce?.cancel();
+    _carouselTimer?.cancel();
     super.dispose();
+  }
+
+  void _startCarousel() {
+    _carouselTimer = Timer.periodic(const Duration(seconds: 4), (timer) {
+      if (mounted) {
+        setState(() {
+          _currentVehicleIndex = (_currentVehicleIndex + 1) % 7; // 7 vehículos
+        });
+      }
+    });
   }
 
   void _scrollToSection(GlobalKey key) {
@@ -2336,179 +2352,6 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     );
   }
 
-  void _showVehicleDetails({
-    required String name,
-    required String description,
-    required String capacity,
-    required String price,
-  }) {
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return Dialog(
-          insetPadding: const EdgeInsets.symmetric(
-            horizontal: 40,
-            vertical: 80,
-          ),
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            child: Row(
-              children: [
-                // Left - Image + details
-                Expanded(
-                  flex: 3,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        height: 220,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Center(
-                          child: Icon(
-                            Icons.directions_car,
-                            size: 120,
-                            color: Colors.grey[400],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        name,
-                        style: const TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF0B3254),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        description,
-                        style: TextStyle(fontSize: 16, color: Colors.grey[700]),
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Icon(Icons.people, color: Colors.grey[700]),
-                          const SizedBox(width: 8),
-                          Text(
-                            capacity,
-                            style: TextStyle(color: Colors.grey[700]),
-                          ),
-                          const SizedBox(width: 24),
-                          Icon(Icons.wifi, color: Colors.grey[700]),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Free WiFi',
-                            style: TextStyle(color: Colors.grey[700]),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(width: 24),
-
-                // Right - Pricing panel
-                Container(
-                  width: 300,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey[300]!),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Total price',
-                        style: TextStyle(fontSize: 14, color: Colors.grey),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        price,
-                        style: const TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF0B3254),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      const Divider(),
-                      const SizedBox(height: 8),
-                      _buildPriceLine('Base service (N/A):', '\$95.00'),
-                      _buildPriceLine('Credit card fee (4%):', '\$3.80'),
-                      _buildPriceLine('STC charge (14%):', '\$13.30'),
-                      _buildPriceLine('Admin fee:', '\$15.00'),
-                      const SizedBox(height: 8),
-                      const Divider(),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'Vehicle Year (Optional)',
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(height: 8),
-                      DropdownButtonFormField<String>(
-                        initialValue: 'Standard Model',
-                        items: const [
-                          DropdownMenuItem(
-                            value: 'Standard Model',
-                            child: Text('Standard Model'),
-                          ),
-                          DropdownMenuItem(
-                            value: '2025 Model',
-                            child: Text('2025 Model'),
-                          ),
-                        ],
-                        onChanged: (_) {},
-                      ),
-                      const SizedBox(height: 16),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            ScaffoldMessenger.of(this.context).showSnackBar(
-                              const SnackBar(content: Text('Vehicle selected')),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF0B3254),
-                            foregroundColor: const Color(0xFFD4AF37),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                          ),
-                          child: const Text('Select Vehicle'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildPriceLine(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-          Text(value, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -3438,358 +3281,354 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   Widget _buildFleetSection(BuildContext context) {
     final double width = MediaQuery.of(context).size.width;
     final bool isCompact = width < 900;
-    final EdgeInsets padding = EdgeInsets.symmetric(
-      vertical: isCompact ? 48 : 80,
-      horizontal: isCompact ? 16 : 40,
-    );
 
     final vehicles = [
       {
         'name': 'Mercedes S-Class',
+        'subtitle': 'Mercedes S550, BMW 750 or similar',
         'description': 'Luxury sedan perfect for executive transport',
-        'capacity': 'Up to 3 passengers',
-        'price': '\$120/hour',
+        'capacity': 'max. 3',
+        'luggage': 'max. 3',
+        'image': 'assets/images/mercdes-s-class.png',
+        'category': 'First Class',
       },
       {
         'name': 'BMW 7 Series',
+        'subtitle': 'Premium comfort with advanced technology',
         'description': 'Premium comfort with advanced technology',
-        'capacity': 'Up to 3 passengers',
-        'price': '\$115/hour',
+        'capacity': 'max. 3',
+        'luggage': 'max. 3',
+        'image': 'assets/images/bmw 7 series.jpg',
+        'category': 'First Class',
       },
       {
         'name': 'Audi A8',
+        'subtitle': 'Sophisticated design meets performance',
         'description': 'Sophisticated design meets cutting-edge performance',
-        'capacity': 'Up to 3 passengers',
-        'price': '\$110/hour',
+        'capacity': 'max. 3',
+        'luggage': 'max. 3',
+        'image': 'assets/images/audi a8.jpg',
+        'category': 'First Class',
       },
       {
-        'name': 'Rolls-Royce Ghost',
-        'description': 'The epitome of luxury and elegance',
-        'capacity': 'Up to 4 passengers',
-        'price': '\$250/hour',
+        'name': 'Cadillac Escalade',
+        'subtitle': 'Spacious luxury SUV',
+        'description': 'Spacious SUV for families and groups',
+        'capacity': 'max. 6',
+        'luggage': 'max. 6',
+        'image': 'assets/images/cadillac-scalade.png',
+        'category': 'SUV',
       },
       {
-        'name': 'Bentley Flying Spur',
-        'description': 'Handcrafted luxury with unmatched comfort',
-        'capacity': 'Up to 4 passengers',
-        'price': '\$230/hour',
+        'name': 'Suburban',
+        'subtitle': 'Comfortable group transportation',
+        'description': 'Comfortable group transportation',
+        'capacity': 'max. 7',
+        'luggage': 'max. 7',
+        'image': 'assets/images/suburban.png',
+        'category': 'SUV',
+      },
+      {
+        'name': 'Suburban RTS',
+        'subtitle': 'Extended SUV for special events',
+        'description': 'Extended SUV for special events',
+        'capacity': 'max. 7',
+        'luggage': 'max. 7',
+        'image': 'assets/images/suburban rts.png',
+        'category': 'SUV',
       },
       {
         'name': 'Mercedes Sprinter',
+        'subtitle': 'Luxury van for group transportation',
         'description': 'Luxury van for group transportation',
-        'capacity': 'Up to 14 passengers',
-        'price': '\$180/hour',
+        'capacity': 'max. 14',
+        'luggage': 'max. 14',
+        'image': 'assets/images/mercedez-sprinter.png',
+        'category': 'VAN',
       },
     ];
 
+    final currentVehicle = vehicles[_currentVehicleIndex];
+
     return Container(
-      padding: padding,
+      padding: EdgeInsets.symmetric(
+        vertical: isCompact ? 48 : 80,
+        horizontal: 20,
+      ),
       color: Colors.white,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            'Our Luxury Fleet',
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0B3254),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Text(
+              'OUR FLEET',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFFFFD700),
+                letterSpacing: 2,
+              ),
+            ),
+          ),
+          const SizedBox(height: 30),
+          const Text(
+            'Comfort, privacy and luxury.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: isCompact ? 32 : 42,
+              fontSize: 42,
               fontWeight: FontWeight.bold,
-              color: const Color(0xFF0B3254),
+              color: Color(0xFF0B3254),
             ),
           ),
           const SizedBox(height: 16),
-          Text(
-            'Choose from our collection of premium vehicles',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: isCompact ? 16 : 18, color: Colors.grey),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 40),
+            child: Text(
+              'Experience the ultimate private chauffeur service. Encounter every destination in our top of the line vehicles, where high end luxury meets safe, private and reliable journeys; just what the upscale modern day passenger needs',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
+                height: 1.6,
+              ),
+            ),
           ),
-          const SizedBox(height: 48),
-
-          if (isCompact)
-            Column(
-              children: [
-                for (int i = 0; i < vehicles.length; i++) ...[
-                  _buildVehicleCard(
-                    vehicles[i]['name'] as String,
-                    vehicles[i]['description'] as String,
-                    vehicles[i]['capacity'] as String,
-                    vehicles[i]['price'] as String,
-                  ),
-                  if (i != vehicles.length - 1) const SizedBox(height: 24),
-                ],
-              ],
-            )
-          else ...[
-            _buildVehicleRow(vehicles.sublist(0, 3)),
-            const SizedBox(height: 40),
-            _buildVehicleRow(vehicles.sublist(3)),
-          ],
-
-          const SizedBox(height: 40),
-
-          Wrap(
-            spacing: 16,
-            runSpacing: 16,
-            alignment: WrapAlignment.center,
+          const SizedBox(height: 60),
+          
+          // Carrusel de vehículos
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0B3254),
-                  foregroundColor: const Color(0xFFD4AF37),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 40,
-                    vertical: 16,
+              // Botón anterior
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    _currentVehicleIndex = (_currentVehicleIndex - 1 + vehicles.length) % vehicles.length;
+                  });
+                },
+                icon: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: const Text(
-                  'VIEW ALL VEHICLES',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.2,
+                  child: const Icon(
+                    Icons.arrow_back_ios_new,
+                    color: Color(0xFF0B3254),
+                    size: 20,
                   ),
                 ),
               ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(
-                    context,
-                  ).push(MaterialPageRoute(builder: (_) => const FleetScreen()));
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0B3254),
-                  foregroundColor: const Color(0xFFD4AF37),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 40,
-                    vertical: 16,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+              const SizedBox(width: 40),
+              
+              // Imagen del vehículo
+              Expanded(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 500),
+                  child: Container(
+                    key: ValueKey(_currentVehicleIndex),
+                    constraints: const BoxConstraints(maxWidth: 800),
+                    child: Column(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: Image.asset(
+                            currentVehicle['image']!,
+                            height: 400,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                height: 400,
+                                color: Colors.grey[200],
+                                child: const Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.directions_car,
+                                      size: 100,
+                                      color: Colors.grey,
+                                    ),
+                                    SizedBox(height: 20),
+                                    Text(
+                                      'Premium Vehicle',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 40),
+                        Text(
+                          currentVehicle['category']!,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF0B3254),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          currentVehicle['name']!,
+                          style: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF0B3254),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          currentVehicle['subtitle']!,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        const SizedBox(height: 30),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.people,
+                                  size: 20,
+                                  color: Color(0xFF0B3254),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  currentVehicle['capacity']!,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF0B3254),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(width: 40),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.luggage,
+                                  size: 20,
+                                  color: Color(0xFF0B3254),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  currentVehicle['luggage']!,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF0B3254),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                child: const Text(
-                  'OPEN FULL FLEET',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.0,
+              ),
+              
+              const SizedBox(width: 40),
+              // Botón siguiente
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    _currentVehicleIndex = (_currentVehicleIndex + 1) % vehicles.length;
+                  });
+                },
+                icon: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.arrow_forward_ios,
+                    color: Color(0xFF0B3254),
+                    size: 20,
                   ),
                 ),
               ),
             ],
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildVehicleRow(List<Map<String, String>> vehicles) {
-    return Row(
-      children: [
-        for (int i = 0; i < vehicles.length; i++) ...[
-          Expanded(
-            child: _buildVehicleCard(
-              vehicles[i]['name']!,
-              vehicles[i]['description']!,
-              vehicles[i]['capacity']!,
-              vehicles[i]['price']!,
+          
+          const SizedBox(height: 40),
+          
+          // Indicadores de punto
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(
+              vehicles.length,
+              (index) => Container(
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                width: _currentVehicleIndex == index ? 30 : 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: _currentVehicleIndex == index
+                      ? const Color(0xFFFFD700)
+                      : Colors.grey[300],
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
             ),
           ),
-          if (i != vehicles.length - 1) const SizedBox(width: 30),
+          
+          const SizedBox(height: 60),
+          
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const FleetScreen()),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF0B3254),
+              foregroundColor: const Color(0xFFFFD700),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 50,
+                vertical: 20,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+            ),
+            child: const Text(
+              'VIEW FULL FLEET',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.5,
+              ),
+            ),
+          ),
         ],
-      ],
-    );
-  }
-
-  Widget _buildVehicleCard(
-    String name,
-    String description,
-    String capacity,
-    String price,
-  ) {
-    return InkWell(
-      onTap: () => _showVehicleDetails(
-        name: name,
-        description: description,
-        capacity: capacity,
-        price: price,
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey[300]!),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 15,
-              offset: const Offset(0, 5),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Vehicle Image Placeholder - Professional looking
-            Container(
-              height: 200,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    const Color(0xFF0B3254).withOpacity(0.1),
-                    const Color(0xFFD4AF37).withOpacity(0.1),
-                  ],
-                ),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(12),
-                  topRight: Radius.circular(12),
-                ),
-              ),
-              child: Stack(
-                children: [
-                  Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 120,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF0B3254).withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(
-                            Icons.directions_car,
-                            size: 40,
-                            color: const Color(0xFF0B3254),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Premium Vehicle',
-                          style: TextStyle(
-                            color: const Color(0xFF0B3254),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Professional overlay effect
-                  Positioned(
-                    top: 16,
-                    right: 16,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFD4AF37),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: const Text(
-                        'LUXURY',
-                        style: TextStyle(
-                          color: Color(0xFF0B3254),
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Vehicle Info
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF0B3254),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    description,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                      height: 1.4,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Icon(Icons.people, size: 16, color: Colors.grey[600]),
-                      const SizedBox(width: 6),
-                      Text(
-                        capacity,
-                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        price,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFFD4AF37),
-                        ),
-                      ),
-                      ElevatedButton(
-                        onPressed: () => _showVehicleDetails(
-                          name: name,
-                          description: description,
-                          capacity: capacity,
-                          price: price,
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFD4AF37),
-                          foregroundColor: const Color(0xFF0B3254),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                        ),
-                        child: const Text(
-                          'Book Now',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
