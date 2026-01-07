@@ -12,3 +12,5 @@
 [build.environment]
   FLUTTER_VERSION = "stable"
   # Variable GOOGLE_MAPS_API_KEY debe estar configurada en Netlify Site Settings > Environment Variables
+  # Desactivar detección de Google Maps API Key - es esperado que esté en el código compilado de web
+  SECRETS_SCAN_SMART_DETECTION_OMIT_VALUES = "AIza"
