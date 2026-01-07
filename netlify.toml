@@ -5,11 +5,11 @@
     export PATH="$PATH:`pwd`/flutter/bin" && \
     flutter config --enable-web && \
     flutter pub get && \
-    flutter build web --release --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
+    flutter build web --release --dart-define=GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY:-AIzaSyAfE3eJvvl5jRYcPjey3FuvZ5qVnnPhFFQ}
   """
   publish = "build/web"
 
 [build.environment]
   FLUTTER_VERSION = "stable"
   # IMPORTANTE: Configurar GOOGLE_MAPS_API_KEY en Netlify Site Settings > Environment Variables
-  # El valor NO debe estar aquí, se configura en el dashboard de Netlify
+  # Mientras tanto, usa un valor por defecto con ${VARIABLE:-default}
