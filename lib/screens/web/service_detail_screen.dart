@@ -43,6 +43,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           'subtitle': 'Premium Transportation to All Major Airports',
           'icon': Icons.flight_takeoff,
           'color': const Color(0xFF0B3254),
+          'image': 'assets/images/all airports.jpg',
           'description':
               'Travel in style and comfort with our premium airport transfer service. We provide reliable, punctual transportation to and from all major airports in the area.',
           'features': [
@@ -87,6 +88,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           'subtitle': 'Direct Luxury Transportation Anywhere',
           'icon': Icons.location_on,
           'color': const Color(0xFF0B3254),
+          'image': 'assets/images/point to point.jpg',
           'description':
               'Experience hassle-free direct transportation from any location to your destination. Perfect for business meetings, special occasions, or daily commutes.',
           'features': [
@@ -131,6 +133,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           'subtitle': 'Your Personal Chauffeur By The Hour',
           'icon': Icons.access_time,
           'color': const Color(0xFF0B3254),
+          'image': 'assets/images/hourly service.jpg',
           'description':
               'Have a personal chauffeur at your disposal for as long as you need. Perfect for business days, shopping trips, or touring the city at your own pace.',
           'features': [
@@ -175,6 +178,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           'subtitle': 'Executive Transportation Solutions',
           'icon': Icons.business_center,
           'color': const Color(0xFF0B3254),
+          'image': 'assets/images/corporate service.jpg',
           'description':
               'Professional transportation services tailored for businesses. Impress clients, facilitate employee travel, and ensure punctuality for all corporate events.',
           'features': [
@@ -219,6 +223,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           'subtitle': 'Make Your Celebration Unforgettable',
           'icon': Icons.celebration,
           'color': const Color(0xFF0B3254),
+          'image': 'assets/images/weeding.jpg',
           'description':
               'Make your special day even more memorable with our luxury event transportation. Perfect for weddings, proms, anniversaries, and any celebration.',
           'features': [
@@ -263,6 +268,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           'subtitle': 'Discover The City In Style',
           'icon': Icons.tour,
           'color': const Color(0xFF0B3254),
+          'image': 'assets/images/city tours.png',
           'description':
               'Explore the city\'s best attractions with our guided luxury tours. Customized itineraries, knowledgeable guides, and premium comfort throughout your journey.',
           'features': [
@@ -441,18 +447,44 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     return Container(
       height: 500,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            info['color'],
-            const Color(0xFF0B3254),
-            const Color(0xFF1a4d7a),
-          ],
-        ),
+        image: info['image'] != null
+            ? DecorationImage(
+                image: AssetImage(info['image']),
+                fit: BoxFit.cover,
+                colorFilter: ColorFilter.mode(
+                  Colors.black.withOpacity(0.5),
+                  BlendMode.darken,
+                ),
+              )
+            : null,
+        gradient: info['image'] == null
+            ? LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  info['color'],
+                  const Color(0xFF0B3254),
+                  const Color(0xFF1a4d7a),
+                ],
+              )
+            : null,
       ),
       child: Stack(
         children: [
+          // Overlay oscuro para mejorar legibilidad del texto
+          if (info['image'] != null)
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.3),
+                    Colors.black.withOpacity(0.6),
+                  ],
+                ),
+              ),
+            ),
           // Efectos de fondo decorativos
           Positioned(
             top: -50,
