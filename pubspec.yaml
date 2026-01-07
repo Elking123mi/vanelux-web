@@ -97,6 +97,13 @@ flutter:
     - assets/images/hourly service.jpg
     - assets/images/point to point.jpg
     - assets/images/weeding.jpg
+    - assets/images/audi a8.jpg
+    - assets/images/bmw 7 series.jpg
+    - assets/images/cadillac-scalade.png
+    - assets/images/mercdes-s-class.png
+    - assets/images/mercedez-sprinter.png
+    - assets/images/suburban rts.png
+    - assets/images/suburban.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

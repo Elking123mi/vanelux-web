@@ -118,6 +118,12 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             'Luxury Sedan': '\$150 - \$200',
             'Van': '\$130 - \$180',
           },
+          'vehicles': [
+            {'name': 'Mercedes S-Class', 'image': 'assets/images/mercdes-s-class.png'},
+            {'name': 'BMW 7 Series', 'image': 'assets/images/bmw 7 series.jpg'},
+            {'name': 'Audi A8', 'image': 'assets/images/audi a8.jpg'},
+            {'name': 'Cadillac Escalade', 'image': 'assets/images/cadillac-scalade.png'},
+          ],
         };
 
       case 'Point to Point':
@@ -201,6 +207,11 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             'Long Distance': '\$200+',
             'Luxury Option': '+35%',
           },
+          'vehicles': [
+            {'name': 'Mercedes S-Class', 'image': 'assets/images/mercdes-s-class.png'},
+            {'name': 'BMW 7 Series', 'image': 'assets/images/bmw 7 series.jpg'},
+            {'name': 'Suburban', 'image': 'assets/images/suburban.png'},
+          ],
         };
 
       case 'Hourly Service':
@@ -284,6 +295,11 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             '4 Hours': '\$220',
             'Additional Hour': '\$50',
           },
+          'vehicles': [
+            {'name': 'Mercedes S-Class', 'image': 'assets/images/mercdes-s-class.png'},
+            {'name': 'BMW 7 Series', 'image': 'assets/images/bmw 7 series.jpg'},
+            {'name': 'Audi A8', 'image': 'assets/images/audi a8.jpg'},
+          ],
         };
 
       case 'Corporate':
@@ -367,6 +383,12 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             'Sprinter Van': '\$180 - \$250',
             'Custom Quote': 'Contact us',
           },
+          'vehicles': [
+            {'name': 'Mercedes S-Class', 'image': 'assets/images/mercdes-s-class.png'},
+            {'name': 'Cadillac Escalade', 'image': 'assets/images/cadillac-scalade.png'},
+            {'name': 'Mercedes Sprinter', 'image': 'assets/images/mercedez-sprinter.png'},
+            {'name': 'Suburban', 'image': 'assets/images/suburban.png'},
+          ],
         };
 
       case 'Events':
@@ -450,6 +472,11 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             'Luxury Package': '\$1,000+',
             'Custom Package': 'Contact us',
           },
+          'vehicles': [
+            {'name': 'Mercedes S-Class', 'image': 'assets/images/mercdes-s-class.png'},
+            {'name': 'Cadillac Escalade', 'image': 'assets/images/cadillac-scalade.png'},
+            {'name': 'Suburban RTS', 'image': 'assets/images/suburban rts.png'},
+          ],
         };
 
       case 'Tours':
@@ -533,6 +560,11 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             'Multi-Day Package': '\$999+',
             'Private Guide': '+\$100',
           },
+          'vehicles': [
+            {'name': 'Mercedes S-Class', 'image': 'assets/images/mercdes-s-class.png'},
+            {'name': 'Suburban', 'image': 'assets/images/suburban.png'},
+            {'name': 'Mercedes Sprinter', 'image': 'assets/images/mercedez-sprinter.png'},
+          ],
         };
 
       default:
@@ -1743,6 +1775,9 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     final pricing = info['pricing'] as Map<String, String>;
     if (pricing.isEmpty) return const SizedBox.shrink();
 
+    // Mostrar vehículos si existen
+    final hasVehicles = info.containsKey('vehicles');
+
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 100),
@@ -1765,6 +1800,86 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             ),
           ),
           const SizedBox(height: 60),
+          
+          // Mostrar vehículos con imágenes si existen
+          if (hasVehicles) ...[
+            const Text(
+              'Our Fleet',
+              style: TextStyle(
+                fontSize: 36,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF0B3254),
+              ),
+            ),
+            const SizedBox(height: 40),
+            Wrap(
+              spacing: 30,
+              runSpacing: 30,
+              alignment: WrapAlignment.center,
+              children: (info['vehicles'] as List).map((vehicle) {
+                return Container(
+                  width: 280,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: const Color(0xFF0B3254).withOpacity(0.1),
+                      width: 2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF0B3254).withOpacity(0.08),
+                        blurRadius: 30,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      ClipRRect(
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(20),
+                          topRight: Radius.circular(20),
+                        ),
+                        child: Image.asset(
+                          vehicle['image'],
+                          height: 180,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              height: 180,
+                              color: Colors.grey[200],
+                              child: const Icon(
+                                Icons.directions_car,
+                                size: 80,
+                                color: Colors.grey,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Text(
+                          vehicle['name'],
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF0B3254),
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 80),
+          ],
+          
+          // Tabla de precios
           Container(
             padding: const EdgeInsets.all(50),
             decoration: BoxDecoration(
