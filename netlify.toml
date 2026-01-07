@@ -8,6 +8,8 @@
     flutter build web --release --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
   """
   publish = "build/web"
+  # No usar Netlify Functions para esta app
+  functions = ""
 
 [build.environment]
   FLUTTER_VERSION = "stable"
