@@ -33,7 +33,7 @@ Ahora la API Key se pasa como **variable de entorno** en vez de estar hardcodead
 
 **Variable 1:**
 - **Key:** `GOOGLE_MAPS_API_KEY`
-- **Value:** `AIzaSyAfE3eJvvl5jRYcPjey3FuvZ5qVnnPhFFQ`
+- **Value:** `[TU_GOOGLE_MAPS_API_KEY]` (usa tu propia API key de Google Cloud Console)
 - **Scopes:** Selecciona "All scopes"
 
 ### 4️⃣ **Guardar y Redesplegar**
