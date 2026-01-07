@@ -11,5 +11,4 @@
 
 [build.environment]
   FLUTTER_VERSION = "stable"
-  # IMPORTANTE: Configurar GOOGLE_MAPS_API_KEY en Netlify Site Settings > Environment Variables
-  # Mientras tanto, usa un valor por defecto con ${VARIABLE:-default}
+  # Variable GOOGLE_MAPS_API_KEY configurada en Netlify Environment Variables
