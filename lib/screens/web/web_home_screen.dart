@@ -9,6 +9,7 @@ import '../../services/google_maps_service.dart';
 import '../../widgets/route_map_view.dart';
 import 'customer_dashboard_web.dart';
 import 'fleet_page.dart';
+import 'fleet_screen.dart';
 import 'service_detail_screen.dart';
 import 'trip_details_web_screen.dart';
 
@@ -3024,7 +3025,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
               // Navigate to a dedicated Fleet page instead of scrolling
               Navigator.of(
                 context,
-              ).push(MaterialPageRoute(builder: (_) => FleetPage()));
+              ).push(MaterialPageRoute(builder: (_) => const FleetScreen()));
               break;
             case 'ABOUT':
               _scrollToSection(_aboutKey);
@@ -3557,7 +3558,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                 onPressed: () {
                   Navigator.of(
                     context,
-                  ).push(MaterialPageRoute(builder: (_) => FleetPage()));
+                  ).push(MaterialPageRoute(builder: (_) => const FleetScreen()));
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF0B3254),

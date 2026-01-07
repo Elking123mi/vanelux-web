@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
+import 'fleet_screen.dart';
 
 class ServiceDetailScreen extends StatefulWidget {
   final String serviceType;
@@ -641,7 +642,11 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           const SizedBox(width: 30),
           _buildServicesMenu(context),
           const SizedBox(width: 30),
-          _buildNavItem('FLEET', () => Navigator.of(context).pop()),
+          _buildNavItem('FLEET', () {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const FleetScreen()),
+            );
+          }),
           const SizedBox(width: 30),
           _buildNavItem('ABOUT', () => Navigator.of(context).pop()),
           const SizedBox(width: 40),
