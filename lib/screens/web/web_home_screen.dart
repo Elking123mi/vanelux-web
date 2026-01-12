@@ -172,6 +172,9 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   int _currentVehicleIndex = 0;
   Timer? _carouselTimer;
 
+  // Mobile menu state
+  bool _isMobileMenuOpen = false;
+
   // Booking form state
   String? selectedServiceType;
   final TextEditingController pickupController = TextEditingController();
@@ -1227,7 +1230,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   }
 
   Widget _buildBookingForm(bool isCompact) {
-    final double maxWidth = isCompact ? 620 : 460;
+    final double maxWidth = isCompact ? double.infinity : 460;
     return ConstrainedBox(
       constraints: BoxConstraints(maxWidth: maxWidth),
       child: LayoutBuilder(
@@ -1236,7 +1239,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           final String dateLabel = _formatDateTime(selectedDateTime);
 
           return Container(
-            padding: const EdgeInsets.all(28),
+            padding: EdgeInsets.all(isCompact ? 20 : 28),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
@@ -2354,8 +2357,74 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final double width = MediaQuery.of(context).size.width;
+    final bool isMobile = width < 800;
+
     return Scaffold(
       backgroundColor: Colors.white,
+      // Drawer para menú móvil
+      drawer: isMobile
+          ? Drawer(
+              child: Container(
+                color: const Color(0xFF0B3254),
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    DrawerHeader(
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF0B3254),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            'VANELUX',
+                            style: TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFFFFD700),
+                              letterSpacing: 2,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Luxury Transportation',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white.withOpacity(0.8),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    _buildMobileMenuItem('HOME', Icons.home),
+                    _buildMobileMenuItem('SERVICES', Icons.car_rental),
+                    _buildMobileMenuItem('FLEET', Icons.directions_car),
+                    _buildMobileMenuItem('ABOUT', Icons.info),
+                    _buildMobileMenuItem('CONTACT', Icons.contact_mail),
+                    const Divider(color: Colors.white24, height: 32),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.phone, color: Color(0xFFFFD700), size: 20),
+                          const SizedBox(width: 12),
+                          Text(
+                            '+1 917 599-5522',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.white.withOpacity(0.9),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : null,
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -2385,6 +2454,26 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildMobileMenuItem(String label, IconData icon) {
+    return ListTile(
+      leading: Icon(icon, color: const Color(0xFFFFD700)),
+      title: Text(
+        label,
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+          fontSize: 16,
+        ),
+      ),
+      onTap: () {
+        Navigator.pop(context); // Cerrar drawer
+        _scrollToSection(label);
+      },
+    );
+  }
     );
   }
 
@@ -2559,6 +2648,22 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  // Menú hamburguesa
+                  Builder(
+                    builder: (BuildContext context) {
+                      return IconButton(
+                        icon: const Icon(
+                          Icons.menu,
+                          color: Color(0xFF0B3254),
+                          size: 28,
+                        ),
+                        onPressed: () {
+                          Scaffold.of(context).openDrawer();
+                        },
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 8),
                   const Text(
                     'VANELUX',
                     style: TextStyle(
@@ -2580,7 +2685,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                       onPressed: _navigateToLogin,
                       style: TextButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
+                          horizontal: 12,
                           vertical: 8,
                         ),
                       ),
@@ -2594,70 +2699,59 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                       ),
                     )
                   else
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CircleAvatar(
-                          radius: 16,
-                          backgroundColor: const Color(0xFFD4AF37),
-                          child: Text(
-                            _currentUser!.name.isNotEmpty
-                                ? _currentUser!.name[0].toUpperCase()
-                                : 'U',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF0B3254),
-                              fontSize: 14,
-                            ),
+                    PopupMenuButton<String>(
+                      onSelected: (value) {
+                        switch (value) {
+                          case 'dashboard':
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    CustomerDashboardWeb(user: _currentUser!),
+                              ),
+                            );
+                            break;
+                          case 'logout':
+                            _logout();
+                            break;
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'dashboard',
+                          child: Row(
+                            children: [
+                              Icon(Icons.dashboard, size: 20),
+                              SizedBox(width: 12),
+                              Text('Dashboard'),
+                            ],
                           ),
                         ),
-                        PopupMenuButton<String>(
-                          padding: EdgeInsets.zero,
-                          onSelected: (value) {
-                            switch (value) {
-                              case 'dashboard':
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        CustomerDashboardWeb(user: _currentUser!),
-                                  ),
-                                );
-                                break;
-                              case 'logout':
-                                _logout();
-                                break;
-                            }
-                          },
-                          itemBuilder: (context) => [
-                            const PopupMenuItem(
-                              value: 'dashboard',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.dashboard, size: 20),
-                                  SizedBox(width: 12),
-                                  Text('Dashboard'),
-                                ],
-                              ),
-                            ),
-                            const PopupMenuItem(
-                              value: 'logout',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.logout, size: 20),
-                                  SizedBox(width: 12),
-                                  Text('Log Out'),
-                                ],
-                              ),
-                            ),
-                          ],
-                          icon: const Icon(
-                            Icons.arrow_drop_down,
-                            color: Color(0xFF0B3254),
-                            size: 24,
+                        const PopupMenuItem(
+                          value: 'logout',
+                          child: Row(
+                            children: [
+                              Icon(Icons.logout, size: 20),
+                              SizedBox(width: 12),
+                              Text('Log Out'),
+                            ],
                           ),
                         ),
                       ],
+                      child: CircleAvatar(
+                        radius: 16,
+                        backgroundColor: const Color(0xFFD4AF37),
+                        child: Text(
+                          _currentUser!.name.isNotEmpty
+                              ? _currentUser!.name[0].toUpperCase()
+                              : 'U',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF0B3254),
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
                     ),
                 ],
               );
@@ -3399,185 +3493,370 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           ),
           const SizedBox(height: 60),
           
-          // Carrusel de vehículos
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Botón anterior
-              IconButton(
-                onPressed: () {
-                  setState(() {
-                    _currentVehicleIndex = (_currentVehicleIndex - 1 + vehicles.length) % vehicles.length;
-                  });
-                },
-                icon: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.arrow_back_ios_new,
-                    color: Color(0xFF0B3254),
-                    size: 20,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 40),
-              
-              // Imagen del vehículo
-              Expanded(
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 500),
-                  child: Container(
-                    key: ValueKey(_currentVehicleIndex),
-                    constraints: const BoxConstraints(maxWidth: 800),
-                    child: Column(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
-                          child: Image.asset(
-                            currentVehicle['image']!,
-                            height: 400,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                height: 400,
-                                color: Colors.grey[200],
-                                child: const Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.directions_car,
-                                      size: 100,
-                                      color: Colors.grey,
+          // Carrusel de vehículos - Responsive
+          isCompact
+              ? Column(
+                  children: [
+                    // Imagen del vehículo en móvil
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 500),
+                      child: Container(
+                        key: ValueKey(_currentVehicleIndex),
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: Image.asset(
+                                currentVehicle['image']!,
+                                height: 250,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    height: 250,
+                                    width: double.infinity,
+                                    color: Colors.grey[200],
+                                    child: const Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.directions_car,
+                                          size: 80,
+                                          color: Colors.grey,
+                                        ),
+                                        SizedBox(height: 12),
+                                        Text(
+                                          'Premium Vehicle',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    SizedBox(height: 20),
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            Text(
+                              currentVehicle['category']!,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF0B3254),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              currentVehicle['name']!,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF0B3254),
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 20),
+                              child: Text(
+                                currentVehicle['subtitle']!,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.people,
+                                      size: 18,
+                                      color: Color(0xFF0B3254),
+                                    ),
+                                    const SizedBox(width: 6),
                                     Text(
-                                      'Premium Vehicle',
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        color: Colors.grey,
+                                      currentVehicle['capacity']!,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xFF0B3254),
                                       ),
                                     ),
                                   ],
                                 ),
-                              );
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 40),
-                        Text(
-                          currentVehicle['category']!,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF0B3254),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          currentVehicle['name']!,
-                          style: const TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF0B3254),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          currentVehicle['subtitle']!,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                        const SizedBox(height: 30),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.people,
-                                  size: 20,
-                                  color: Color(0xFF0B3254),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  currentVehicle['capacity']!,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFF0B3254),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(width: 40),
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.luggage,
-                                  size: 20,
-                                  color: Color(0xFF0B3254),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  currentVehicle['luggage']!,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFF0B3254),
-                                  ),
+                                const SizedBox(width: 30),
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.luggage,
+                                      size: 18,
+                                      color: Color(0xFF0B3254),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      currentVehicle['luggage']!,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xFF0B3254),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
                           ],
                         ),
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                    // Botones de navegación en móvil
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _currentVehicleIndex = (_currentVehicleIndex - 1 + vehicles.length) % vehicles.length;
+                            });
+                          },
+                          icon: Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.arrow_back_ios_new,
+                              color: Color(0xFF0B3254),
+                              size: 18,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 30),
+                        IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _currentVehicleIndex = (_currentVehicleIndex + 1) % vehicles.length;
+                            });
+                          },
+                          icon: Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.arrow_forward_ios,
+                              color: Color(0xFF0B3254),
+                              size: 18,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
-                  ),
-                ),
-              ),
-              
-              const SizedBox(width: 40),
-              // Botón siguiente
-              IconButton(
-                onPressed: () {
-                  setState(() {
-                    _currentVehicleIndex = (_currentVehicleIndex + 1) % vehicles.length;
-                  });
-                },
-                icon: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
+                  ],
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Botón anterior en desktop
+                    IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _currentVehicleIndex = (_currentVehicleIndex - 1 + vehicles.length) % vehicles.length;
+                        });
+                      },
+                      icon: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 10,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.arrow_back_ios_new,
+                          color: Color(0xFF0B3254),
+                          size: 20,
+                        ),
                       ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.arrow_forward_ios,
-                    color: Color(0xFF0B3254),
-                    size: 20,
-                  ),
+                    ),
+                    const SizedBox(width: 40),
+                    
+                    // Imagen del vehículo en desktop
+                    Expanded(
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 500),
+                        child: Container(
+                          key: ValueKey(_currentVehicleIndex),
+                          constraints: const BoxConstraints(maxWidth: 800),
+                          child: Column(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: Image.asset(
+                                  currentVehicle['image']!,
+                                  height: 400,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      height: 400,
+                                      color: Colors.grey[200],
+                                      child: const Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.directions_car,
+                                            size: 100,
+                                            color: Colors.grey,
+                                          ),
+                                          SizedBox(height: 20),
+                                          Text(
+                                            'Premium Vehicle',
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              const SizedBox(height: 40),
+                              Text(
+                                currentVehicle['category']!,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF0B3254),
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                currentVehicle['name']!,
+                                style: const TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF0B3254),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                currentVehicle['subtitle']!,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                              const SizedBox(height: 30),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.people,
+                                        size: 20,
+                                        color: Color(0xFF0B3254),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        currentVehicle['capacity']!,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color: Color(0xFF0B3254),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(width: 40),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.luggage,
+                                        size: 20,
+                                        color: Color(0xFF0B3254),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        currentVehicle['luggage']!,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color: Color(0xFF0B3254),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    
+                    const SizedBox(width: 40),
+                    // Botón siguiente en desktop
+                    IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _currentVehicleIndex = (_currentVehicleIndex + 1) % vehicles.length;
+                        });
+                      },
+                      icon: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 10,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.arrow_forward_ios,
+                          color: Color(0xFF0B3254),
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
           
           const SizedBox(height: 40),
           
@@ -3611,18 +3890,18 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF0B3254),
               foregroundColor: const Color(0xFFFFD700),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 50,
-                vertical: 20,
+              padding: EdgeInsets.symmetric(
+                horizontal: isCompact ? 32 : 50,
+                vertical: isCompact ? 16 : 20,
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30),
               ),
             ),
-            child: const Text(
+            child: Text(
               'VIEW FULL FLEET',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: isCompact ? 14 : 16,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.5,
               ),
