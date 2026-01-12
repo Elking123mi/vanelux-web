@@ -2470,10 +2470,25 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       ),
       onTap: () {
         Navigator.pop(context); // Cerrar drawer
-        _scrollToSection(label);
+        // Navegar según la sección
+        switch (label) {
+          case 'HOME':
+            _scrollToSection(_heroKey);
+            break;
+          case 'SERVICES':
+            _scrollToSection(_servicesKey);
+            break;
+          case 'FLEET':
+            _scrollToSection(_fleetKey);
+            break;
+          case 'ABOUT':
+            _scrollToSection(_aboutKey);
+            break;
+          case 'CONTACT':
+            _scrollToSection(_contactKey);
+            break;
+        }
       },
-    );
-  }
     );
   }
 
