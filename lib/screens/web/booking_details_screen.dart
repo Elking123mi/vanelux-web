@@ -143,12 +143,15 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 900;
+    
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          // BARRA DE NAVEGACIÓN SUPERIOR
-          _buildTopNavBar(),
+          // BARRA DE NAVEGACIÓN SUPERIOR (solo desktop)
+          if (!isMobile) _buildTopNavBar(),
 
           // INDICADOR DE PASOS
           _buildStepIndicator(),
@@ -158,26 +161,26 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
             child: SingleChildScrollView(
               child: Container(
                 constraints: const BoxConstraints(maxWidth: 1400),
-                padding: const EdgeInsets.all(80),
+                padding: EdgeInsets.all(isMobile ? 20 : 80),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'STEP 4 OF 5',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: isMobile ? 12 : 14,
                         fontWeight: FontWeight.w600,
                         color: Colors.grey,
                         letterSpacing: 1.5,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
+                    Text(
                       'Booking Details',
                       style: TextStyle(
-                        fontSize: 36,
+                        fontSize: isMobile ? 24 : 36,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF0B3254),
+                        color: const Color(0xFF0B3254),
                       ),
                     ),
                     const SizedBox(height: 32),
@@ -192,62 +195,121 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
 
                     const SizedBox(height: 40),
 
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // COLUMNA IZQUIERDA - Extra Services
-                        Expanded(
-                          flex: 3,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildExtraServices(),
-                              const SizedBox(height: 32),
-                              _buildSpecialRequests(),
-                            ],
-                          ),
-                        ),
+                    // Layout responsivo
+                    isMobile
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // En móvil: todo en columna
+                            _buildExtraServices(),
+                            const SizedBox(height: 24),
+                            _buildSpecialRequests(),
+                            const SizedBox(height: 24),
+                            _buildBookingSummary(),
+                            const SizedBox(height: 24),
+                            _buildMap(),
+                          ],
+                        )
+                      : Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // COLUMNA IZQUIERDA - Extra Services
+                            Expanded(
+                              flex: 3,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildExtraServices(),
+                                  const SizedBox(height: 32),
+                                  _buildSpecialRequests(),
+                                ],
+                              ),
+                            ),
 
-                        const SizedBox(width: 40),
+                            const SizedBox(width: 40),
 
-                        // COLUMNA DERECHA - Booking Summary + Map
-                        Expanded(
-                          flex: 2,
-                          child: Column(
-                            children: [
-                              _buildBookingSummary(),
-                              const SizedBox(height: 24),
-                              _buildMap(),
-                            ],
-                          ),
+                            // COLUMNA DERECHA - Booking Summary + Map
+                            Expanded(
+                              flex: 2,
+                              child: Column(
+                                children: [
+                                  _buildBookingSummary(),
+                                  const SizedBox(height: 24),
+                                  _buildMap(),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
 
                     const SizedBox(height: 40),
 
                     // BOTONES
-                    Row(
-                      children: [
-                        TextButton.icon(
-                          onPressed: () => Navigator.pop(context),
-                          icon: const Icon(Icons.arrow_back),
-                          label: const Text('Back'),
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 16,
+                    isMobile
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            ElevatedButton(
+                              onPressed: _proceedToPayment,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF4169E1),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Proceed to Payment',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  SizedBox(width: 8),
+                                  Icon(Icons.arrow_forward, color: Colors.white),
+                                ],
+                              ),
                             ),
-                          ),
-                        ),
-                        const Spacer(),
-                        ElevatedButton(
-                          onPressed: _proceedToPayment,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF4169E1),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 48,
-                              vertical: 16,
+                            const SizedBox(height: 12),
+                            TextButton.icon(
+                              onPressed: () => Navigator.pop(context),
+                              icon: const Icon(Icons.arrow_back),
+                              label: const Text('Back'),
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                      : Row(
+                          children: [
+                            TextButton.icon(
+                              onPressed: () => Navigator.pop(context),
+                              icon: const Icon(Icons.arrow_back),
+                              label: const Text('Back'),
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 16,
+                                ),
+                              ),
+                            ),
+                            const Spacer(),
+                            ElevatedButton(
+                              onPressed: _proceedToPayment,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF4169E1),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 48,
+                                  vertical: 16,
                             ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),

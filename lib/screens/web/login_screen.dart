@@ -51,15 +51,15 @@ class _LoginWebScreenState extends State<LoginWebScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final bool isMobile = width < 800;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 900;
     
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          // BARRA DE NAVEGACIÓN SUPERIOR
-          _buildTopNavBar(),
+          // BARRA DE NAVEGACIÓN SUPERIOR (solo en desktop)
+          if (!isMobile) _buildTopNavBar(),
 
           // INDICADOR DE PASOS
           _buildStepIndicator(),
@@ -70,34 +70,295 @@ class _LoginWebScreenState extends State<LoginWebScreen> {
               child: Center(
                 child: Container(
                   constraints: const BoxConstraints(maxWidth: 1200),
-                  padding: EdgeInsets.all(isMobile ? 16 : 80),
+                  padding: EdgeInsets.all(isMobile ? 20 : 80),
                   child: Column(
                     children: [
                       Text(
                         'Step 3 of 5: Login or Continue as Guest',
                         style: TextStyle(
-                          fontSize: isMobile ? 22 : 32,
+                          fontSize: isMobile ? 20 : 32,
                           fontWeight: FontWeight.w600,
                           color: const Color(0xFF0B3254),
                         ),
-                        textAlign: isMobile ? TextAlign.center : TextAlign.start,
+                        textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 12),
                       Text(
                         'Please login to your account or continue as a guest to proceed with your booking',
                         style: TextStyle(fontSize: isMobile ? 14 : 16, color: Colors.grey),
-                        textAlign: isMobile ? TextAlign.center : TextAlign.start,
+                        textAlign: TextAlign.center,
                       ),
-                      SizedBox(height: isMobile ? 24 : 48),
+                      const SizedBox(height: 48),
 
-                      // DOS COLUMNAS EN DESKTOP, UNA COLUMNA EN MÓVIL
-                      Flex(
-                        direction: isMobile ? Axis.vertical : Axis.horizontal,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // COLUMNA IZQUIERDA - Continue as Guest
-                          if (!isMobile) Expanded(
-                            child: Container(
+                      // DOS COLUMNAS (desktop) o UNA COLUMNA (móvil)
+                      isMobile
+                        ? _buildMobileLayout()
+                        : _buildDesktopLayout(),
+
+                      const SizedBox(height: 40),
+                      TextButton.icon(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.arrow_back),
+                        label: const Text('Back to Vehicle Selection'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMobileLayout() {
+    return Column(
+      children: [
+        // Solo el botón de continuar como invitado (simplificado)
+        Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: Colors.grey[300]!),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Continue as Guest',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF0B3254),
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: () {
+                    // Navegar al paso 4 (Details)
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            BookingDetailsScreen(
+                              pickupAddress:
+                                  widget.pickupAddress,
+                              destinationAddress:
+                                  widget.destinationAddress,
+                              pickupLat: widget.pickupLat,
+                              pickupLng: widget.pickupLng,
+                              destinationLat:
+                                  widget.destinationLat,
+                              destinationLng:
+                                  widget.destinationLng,
+                              selectedDateTime:
+                                  widget.selectedDateTime,
+                              vehicleName:
+                                  widget.vehicleName,
+                              totalPrice: widget.totalPrice,
+                              distanceMiles:
+                                  widget.distanceMiles,
+                              duration: widget.duration,
+                              serviceType:
+                                  widget.serviceType,
+                            ),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(
+                      0xFF0B3254,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        8,
+                      ),
+                    ),
+                  ),
+                  child: const Text(
+                    'CONTINUE AS GUEST',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 24),
+
+        // Formulario de login simplificado
+        Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: Colors.grey[300]!),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Login to Your Account',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF0B3254),
+                ),
+              ),
+              const SizedBox(height: 24),
+              TextField(
+                controller: _emailController,
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  contentPadding:
+                      const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _passwordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  contentPadding:
+                      const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : () async {
+                    // Validar campos
+                    if (_emailController.text.trim().isEmpty || 
+                        _passwordController.text.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Please enter email and password'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                      return;
+                    }
+
+                    setState(() => _isLoading = true);
+
+                    try {
+                      // Llamar al servicio de autenticación
+                      await AuthService.login(
+                        _emailController.text.trim(),
+                        _passwordController.text,
+                      );
+
+                      if (mounted) {
+                        // Navegar al paso 4 (Details)
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                BookingDetailsScreen(
+                                  pickupAddress:
+                                      widget.pickupAddress,
+                                  destinationAddress:
+                                      widget.destinationAddress,
+                                  pickupLat: widget.pickupLat,
+                                  pickupLng: widget.pickupLng,
+                                  destinationLat:
+                                      widget.destinationLat,
+                                  destinationLng:
+                                      widget.destinationLng,
+                                  selectedDateTime:
+                                      widget.selectedDateTime,
+                                  vehicleName:
+                                      widget.vehicleName,
+                                  totalPrice: widget.totalPrice,
+                                  distanceMiles:
+                                      widget.distanceMiles,
+                                  duration: widget.duration,
+                                  serviceType:
+                                      widget.serviceType,
+                                ),
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      setState(() => _isLoading = false);
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Login failed: ${e.toString()}'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(
+                      0xFF4169E1,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        8,
+                      ),
+                    ),
+                  ),
+                  child: _isLoading 
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text(
+                        'LOGIN',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDesktopLayout() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // COLUMNA IZQUIERDA - Continue as Guest
+        Expanded(
+          child: Container(
                               padding: const EdgeInsets.all(32),
                               decoration: BoxDecoration(
                                 color: Colors.white,
@@ -319,179 +580,8 @@ class _LoginWebScreenState extends State<LoginWebScreen> {
                               ),
                             ),
                           ),
-                          if (isMobile) Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(24),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              border: Border.all(color: Colors.grey[300]!),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Continue as Guest',
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF0B3254),
-                                  ),
-                                ),
-                                const SizedBox(height: 20),
-                                const Text(
-                                  'Email address *',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                TextField(
-                                  controller: _guestEmailController,
-                                  decoration: InputDecoration(
-                                    hintText: 'Enter your email',
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 12,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                const Text(
-                                  'First name *',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                TextField(
-                                  controller: _guestFirstNameController,
-                                  decoration: InputDecoration(
-                                    hintText: 'First name',
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 12,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                const Text(
-                                  'Last name *',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                TextField(
-                                  controller: _guestLastNameController,
-                                  decoration: InputDecoration(
-                                    hintText: 'Last name',
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 12,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                const Text(
-                                  'Phone *',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Container(
-                                      width: 70,
-                                      height: 48,
-                                      decoration: BoxDecoration(
-                                        border: Border.all(color: Colors.grey[300]!),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: const Center(
-                                        child: Text('+1', style: TextStyle(fontSize: 14)),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: TextField(
-                                        controller: _guestPhoneController,
-                                        decoration: InputDecoration(
-                                          hintText: 'Phone number',
-                                          border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(8),
-                                          ),
-                                          contentPadding: const EdgeInsets.symmetric(
-                                            horizontal: 16,
-                                            vertical: 12,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 24),
-                                SizedBox(
-                                  width: double.infinity,
-                                  height: 48,
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => BookingDetailsScreen(
-                                            pickupAddress: widget.pickupAddress,
-                                            destinationAddress: widget.destinationAddress,
-                                            pickupLat: widget.pickupLat,
-                                            pickupLng: widget.pickupLng,
-                                            destinationLat: widget.destinationLat,
-                                            destinationLng: widget.destinationLng,
-                                            selectedDateTime: widget.selectedDateTime,
-                                            vehicleName: widget.vehicleName,
-                                            totalPrice: widget.totalPrice,
-                                            distanceMiles: widget.distanceMiles,
-                                            duration: widget.duration,
-                                            serviceType: widget.serviceType,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF0B3254),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                    ),
-                                    child: const Text(
-                                      'CONTINUE AS GUEST',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
 
-                          if (!isMobile) const SizedBox(width: 40),
-                          if (isMobile) const SizedBox(height: 24),
+                          const SizedBox(width: 40),
 
                           // COLUMNA DERECHA - Login
                           Expanded(
@@ -805,258 +895,6 @@ class _LoginWebScreenState extends State<LoginWebScreen> {
                                   ),
                                 ],
                               ),
-                            ),
-                          ),
-                          if (isMobile) Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(24),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              border: Border.all(color: Colors.grey[300]!),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: GestureDetector(
-                                        onTap: () => setState(() => _isLogin = true),
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(vertical: 12),
-                                          decoration: BoxDecoration(
-                                            border: Border(
-                                              bottom: BorderSide(
-                                                color: _isLogin ? const Color(0xFF4169E1) : Colors.transparent,
-                                                width: 2,
-                                              ),
-                                            ),
-                                          ),
-                                          child: Text(
-                                            'Login',
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w600,
-                                              color: _isLogin ? const Color(0xFF4169E1) : Colors.grey,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: GestureDetector(
-                                        onTap: () => setState(() => _isLogin = false),
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(vertical: 12),
-                                          decoration: BoxDecoration(
-                                            border: Border(
-                                              bottom: BorderSide(
-                                                color: !_isLogin ? const Color(0xFF4169E1) : Colors.transparent,
-                                                width: 2,
-                                              ),
-                                            ),
-                                          ),
-                                          child: Text(
-                                            'Create Account',
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w600,
-                                              color: !_isLogin ? const Color(0xFF4169E1) : Colors.grey,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 24),
-                                const Text(
-                                  'Login to Your Account',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF0B3254),
-                                  ),
-                                ),
-                                const SizedBox(height: 20),
-                                const Text(
-                                  'Email address *',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                TextField(
-                                  controller: _emailController,
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 12,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                const Text(
-                                  'Password *',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                TextField(
-                                  controller: _passwordController,
-                                  obscureText: true,
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 12,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                Row(
-                                  children: [
-                                    Checkbox(
-                                      value: _rememberMe,
-                                      onChanged: (value) => setState(() => _rememberMe = value ?? false),
-                                    ),
-                                    const Text('Remember me', style: TextStyle(fontSize: 14)),
-                                    const Spacer(),
-                                    TextButton(
-                                      onPressed: () {},
-                                      child: const Text(
-                                        'Forgot password?',
-                                        style: TextStyle(color: Color(0xFF4169E1), fontSize: 13),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 20),
-                                SizedBox(
-                                  width: double.infinity,
-                                  height: 48,
-                                  child: ElevatedButton(
-                                    onPressed: _isLoading ? null : () async {
-                                      if (_emailController.text.trim().isEmpty || _passwordController.text.isEmpty) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(
-                                            content: Text('Please enter email and password'),
-                                            backgroundColor: Colors.red,
-                                          ),
-                                        );
-                                        return;
-                                      }
-                                      setState(() => _isLoading = true);
-                                      try {
-                                        await AuthService.login(
-                                          _emailController.text.trim(),
-                                          _passwordController.text,
-                                        );
-                                        if (mounted) {
-                                          Navigator.pushReplacement(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => BookingDetailsScreen(
-                                                pickupAddress: widget.pickupAddress,
-                                                destinationAddress: widget.destinationAddress,
-                                                pickupLat: widget.pickupLat,
-                                                pickupLng: widget.pickupLng,
-                                                destinationLat: widget.destinationLat,
-                                                destinationLng: widget.destinationLng,
-                                                selectedDateTime: widget.selectedDateTime,
-                                                vehicleName: widget.vehicleName,
-                                                totalPrice: widget.totalPrice,
-                                                distanceMiles: widget.distanceMiles,
-                                                duration: widget.duration,
-                                                serviceType: widget.serviceType,
-                                              ),
-                                            ),
-                                          );
-                                        }
-                                      } catch (e) {
-                                        setState(() => _isLoading = false);
-                                        if (mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(
-                                              content: Text('Login failed: ${e.toString()}'),
-                                              backgroundColor: Colors.red,
-                                            ),
-                                          );
-                                        }
-                                      }
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF4169E1),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                    ),
-                                    child: _isLoading
-                                        ? const SizedBox(
-                                            height: 20,
-                                            width: 20,
-                                            child: CircularProgressIndicator(
-                                              color: Colors.white,
-                                              strokeWidth: 2,
-                                            ),
-                                          )
-                                        : const Text(
-                                            'LOGIN',
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                  ),
-                                ),
-                                const SizedBox(height: 20),
-                                const Row(
-                                  children: [
-                                    Expanded(child: Divider()),
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: 16),
-                                      child: Text('or', style: TextStyle(color: Colors.grey)),
-                                    ),
-                                    Expanded(child: Divider()),
-                                  ],
-                                ),
-                                const SizedBox(height: 20),
-                                OutlinedButton.icon(
-                                  onPressed: () {},
-                                  icon: const FaIcon(
-                                    FontAwesomeIcons.google,
-                                    color: Color(0xFFDB4437),
-                                    size: 18,
-                                  ),
-                                  label: const Text('Continue with Google'),
-                                  style: OutlinedButton.styleFrom(
-                                    minimumSize: const Size(double.infinity, 48),
-                                    side: BorderSide(color: Colors.grey[300]!),
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                OutlinedButton.icon(
-                                  onPressed: () {},
-                                  icon: const Icon(Icons.facebook, color: Color(0xFF1877F2)),
-                                  label: const Text('Continue with Facebook'),
-                                  style: OutlinedButton.styleFrom(
-                                    minimumSize: const Size(double.infinity, 48),
-                                    side: BorderSide(color: Colors.grey[300]!),
-                                  ),
-                                ),
-                              ],
                             ),
                           ),
                         ],
