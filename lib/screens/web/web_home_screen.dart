@@ -1628,7 +1628,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   }
 
   Widget _buildQuotePanel(bool isCompact) {
-    final double maxWidth = isCompact ? 560 : 520;
+    final double maxWidth = isCompact ? double.infinity : 520;
     final double desktopMaxHeight = isCompact ? double.infinity : 560;
     Widget content;
 
@@ -1705,7 +1705,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         maxHeight: desktopMaxHeight,
       ),
       child: Container(
-        padding: const EdgeInsets.all(28),
+        width: double.infinity,
+        padding: EdgeInsets.all(isCompact ? 20 : 28),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
