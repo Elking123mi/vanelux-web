@@ -1732,53 +1732,68 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       children: [
         Text(
           'Tu experiencia Vanelux',
-          style: const TextStyle(
-            fontSize: 20,
+          style: TextStyle(
+            fontSize: isCompact ? 18 : 20,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF0B3254),
+            color: const Color(0xFF0B3254),
           ),
         ),
         const SizedBox(height: 12),
         Text(
           '${quote.origin}\n→ ${quote.destination}',
-          style: TextStyle(fontSize: 16, color: Colors.grey[700], height: 1.4),
+          style: TextStyle(
+            fontSize: isCompact ? 14 : 16,
+            color: Colors.grey[700],
+            height: 1.4,
+          ),
         ),
         const SizedBox(height: 24),
         Container(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(isCompact ? 16 : 20),
           decoration: BoxDecoration(
             color: const Color(0xFFF4F6FB),
             borderRadius: BorderRadius.circular(14),
           ),
-          child: Wrap(
-            spacing: 16,
-            runSpacing: 12,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildInfoPill(
                 Icons.route,
                 'Distancia total',
                 quote.distanceText,
+                isCompact,
               ),
+              const SizedBox(height: 12),
               _buildInfoPill(
                 Icons.schedule,
                 'Duración estimada',
                 quote.durationText.isEmpty
                     ? 'Calculando...'
                     : quote.durationText,
+                isCompact,
               ),
+              const SizedBox(height: 12),
               _buildInfoPill(
                 Icons.calendar_today_outlined,
                 'Fecha',
                 _formatDateTime(quote.pickupDateTime),
+                isCompact,
               ),
-              if (quote.includesReturnTrip)
-                _buildInfoPill(Icons.repeat, 'Servicio', 'Viaje redondo'),
+              if (quote.includesReturnTrip) ...[
+                const SizedBox(height: 12),
+                _buildInfoPill(
+                  Icons.repeat,
+                  'Servicio',
+                  'Viaje redondo',
+                  isCompact,
+                ),
+              ],
             ],
           ),
         ),
         const SizedBox(height: 24),
         SizedBox(
-          height: isCompact ? 220 : 260,
+          height: isCompact ? 200 : 260,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
             child: Stack(
@@ -1794,12 +1809,13 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                   ),
                 ),
                 Positioned(
-                  top: 16,
-                  left: 16,
+                  top: 12,
+                  left: 12,
+                  right: 12,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isCompact ? 12 : 16,
+                      vertical: isCompact ? 8 : 10,
                     ),
                     decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.55),
@@ -1807,9 +1823,11 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                     ),
                     child: Text(
                       '${quote.distanceText} • ${quote.durationText.isEmpty ? 'Calculando...' : quote.durationText}',
-                      style: const TextStyle(
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,
+                        fontSize: isCompact ? 12 : 14,
                       ),
                     ),
                   ),
@@ -1821,30 +1839,34 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         const SizedBox(height: 28),
         Text(
           'Selecciona tu vehículo',
-          style: const TextStyle(
-            fontSize: 18,
+          style: TextStyle(
+            fontSize: isCompact ? 16 : 18,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF0B3254),
+            color: const Color(0xFF0B3254),
           ),
         ),
         const SizedBox(height: 16),
         ...quote.options.map(
-          (option) => _buildVehicleQuoteTile(option, quote.totalMiles),
+          (option) => _buildVehicleQuoteTile(option, quote.totalMiles, isCompact),
         ),
         const SizedBox(height: 12),
         Text(
           'Tarifas calculadas con base de \$${quote.baseRatePerMile.toStringAsFixed(2)} por milla.\nLos precios finales incluyen viaje redondo cuando aplica.',
-          style: TextStyle(color: Colors.grey[600], height: 1.5),
+          style: TextStyle(
+            color: Colors.grey[600],
+            height: 1.5,
+            fontSize: isCompact ? 12 : 14,
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildVehicleQuoteTile(_VehicleQuote option, double totalMiles) {
+  Widget _buildVehicleQuoteTile(_VehicleQuote option, double totalMiles, bool isCompact) {
     final vehicle = option.vehicle;
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(isCompact ? 16 : 20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
@@ -1857,196 +1879,180 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           ),
         ],
       ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final bool isNarrow = constraints.maxWidth < 420;
-          final Column detailsColumn = Column(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Imagen y precio arriba en móvil
+          Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                vehicle.name,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF0B3254),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  vehicle.imageUrl,
+                  width: isCompact ? 100 : 140,
+                  height: isCompact ? 70 : 90,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    width: isCompact ? 100 : 140,
+                    height: isCompact ? 70 : 90,
+                    color: Colors.grey[200],
+                    alignment: Alignment.center,
+                    child: const Icon(
+                      Icons.directions_car,
+                      color: Color(0xFF0B3254),
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                vehicle.description,
-                style: TextStyle(color: Colors.grey[600], height: 1.4),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      vehicle.name,
+                      style: TextStyle(
+                        fontSize: isCompact ? 16 : 18,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF0B3254),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      _formatCurrency(option.totalPrice),
+                      style: TextStyle(
+                        fontSize: isCompact ? 20 : 22,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFFD4AF37),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '\$${option.ratePerMile.toStringAsFixed(2)} / milla',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: isCompact ? 12 : 14,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 16,
-                runSpacing: 8,
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            vehicle.description,
+            style: TextStyle(
+              color: Colors.grey[600],
+              height: 1.4,
+              fontSize: isCompact ? 13 : 14,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: isCompact ? 12 : 16,
+            runSpacing: 8,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.person_outline,
-                        size: 18,
-                        color: Color(0xFFD4AF37),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        '${vehicle.passengers} pax',
-                        style: const TextStyle(color: Color(0xFF0B3254)),
-                      ),
-                    ],
+                  const Icon(
+                    Icons.person_outline,
+                    size: 18,
+                    color: Color(0xFFD4AF37),
                   ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.work_outline,
-                        size: 18,
-                        color: Color(0xFFD4AF37),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        '${vehicle.luggage} equipajes',
-                        style: const TextStyle(color: Color(0xFF0B3254)),
-                      ),
-                    ],
+                  const SizedBox(width: 6),
+                  Text(
+                    '${vehicle.passengers} pax',
+                    style: TextStyle(
+                      color: const Color(0xFF0B3254),
+                      fontSize: isCompact ? 13 : 14,
+                    ),
                   ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.straighten,
-                        size: 18,
-                        color: Color(0xFFD4AF37),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        _formatMiles(totalMiles),
-                        style: const TextStyle(color: Color(0xFF0B3254)),
-                      ),
-                    ],
+                ],
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.work_outline,
+                    size: 18,
+                    color: Color(0xFFD4AF37),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    '${vehicle.luggage} equipajes',
+                    style: TextStyle(
+                      color: const Color(0xFF0B3254),
+                      fontSize: isCompact ? 13 : 14,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.straighten,
+                    size: 18,
+                    color: Color(0xFFD4AF37),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    _formatMiles(totalMiles),
+                    style: TextStyle(
+                      color: const Color(0xFF0B3254),
+                      fontSize: isCompact ? 13 : 14,
+                    ),
                   ),
                 ],
               ),
             ],
-          );
-
-          final Widget pricing = Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                _formatCurrency(option.totalPrice),
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFFD4AF37),
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                '\$${option.ratePerMile.toStringAsFixed(2)} / milla',
-                style: TextStyle(color: Colors.grey[600], fontSize: 14),
-              ),
-            ],
-          );
-
-          return isNarrow
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.network(
-                            vehicle.imageUrl,
-                            width: 120,
-                            height: 80,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                Container(
-                                  width: 120,
-                                  height: 80,
-                                  color: Colors.grey[200],
-                                  alignment: Alignment.center,
-                                  child: const Icon(
-                                    Icons.directions_car,
-                                    color: Color(0xFF0B3254),
-                                  ),
-                                ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(child: pricing),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    detailsColumn,
-                  ],
-                )
-              : Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        vehicle.imageUrl,
-                        width: 140,
-                        height: 90,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          width: 140,
-                          height: 90,
-                          color: Colors.grey[200],
-                          alignment: Alignment.center,
-                          child: const Icon(
-                            Icons.directions_car,
-                            color: Color(0xFF0B3254),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 20),
-                    Expanded(child: detailsColumn),
-                    const SizedBox(width: 20),
-                    pricing,
-                  ],
-                );
-        },
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildInfoPill(IconData icon, String label, String value) {
+  Widget _buildInfoPill(IconData icon, String label, String value, bool isCompact) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: EdgeInsets.symmetric(
+        horizontal: isCompact ? 12 : 16,
+        vertical: isCompact ? 10 : 12,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey.shade200),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 18, color: const Color(0xFFD4AF37)),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF0B3254),
+          Icon(icon, size: 18, color: const Color(0xFFD4AF37)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: isCompact ? 12 : 14,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF0B3254),
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: isCompact ? 13 : 14,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 6),
-          Text(value, style: TextStyle(fontSize: 14, color: Colors.grey[600])),
         ],
       ),
     );
