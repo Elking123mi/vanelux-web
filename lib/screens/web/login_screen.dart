@@ -51,6 +51,9 @@ class _LoginWebScreenState extends State<LoginWebScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final double horizontalPadding = width < 800 ? 16 : 80;
+    
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
@@ -67,7 +70,7 @@ class _LoginWebScreenState extends State<LoginWebScreen> {
               child: Center(
                 child: Container(
                   constraints: const BoxConstraints(maxWidth: 1200),
-                  padding: const EdgeInsets.all(80),
+                  padding: EdgeInsets.all(horizontalPadding),
                   child: Column(
                     children: [
                       const Text(
@@ -651,9 +654,12 @@ class _LoginWebScreenState extends State<LoginWebScreen> {
   }
 
   Widget _buildTopNavBar() {
+    final width = MediaQuery.of(context).size.width;
+    final double horizontalPadding = width < 800 ? 16 : 80;
+    
     return Container(
       height: 70,
-      padding: const EdgeInsets.symmetric(horizontal: 80),
+      padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -732,8 +738,11 @@ class _LoginWebScreenState extends State<LoginWebScreen> {
   }
 
   Widget _buildStepIndicator() {
+    final width = MediaQuery.of(context).size.width;
+    final double horizontalPadding = width < 800 ? 16 : 80;
+    
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 80),
+      padding: EdgeInsets.symmetric(vertical: 32, horizontal: horizontalPadding),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
