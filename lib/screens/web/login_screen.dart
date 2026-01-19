@@ -386,7 +386,6 @@ class _LoginWebScreenState extends State<LoginWebScreen> {
                             ),
                             const SizedBox(height: 16),
                           ],
-                                      vertical: 12,
 
                           if (!isMobile) const SizedBox(width: 40),
                           if (isMobile) const SizedBox(height: 24),
