@@ -997,34 +997,4 @@ class _LoginWebScreenState extends State<LoginWebScreen> {
       color: isActive ? const Color(0xFF4CAF50) : Colors.grey[300],
     );
   }
-            child: Text(
-              '$number',
-              style: TextStyle(
-                color: isActive ? Colors.white : Colors.grey[600],
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: isActive ? const Color(0xFF0B3254) : Colors.grey[600],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStepLine(bool isActive) {
-    return Container(
-      width: 80,
-      height: 2,
-      margin: const EdgeInsets.only(bottom: 28),
-      color: isActive ? const Color(0xFF4CAF50) : Colors.grey[300],
-    );
-  }
 }
