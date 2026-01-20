@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../services/booking_service.dart';
 import '../../services/auth_service.dart';
+import '../../services/stripe_service.dart';
 import '../../models/types.dart';
 
 class PaymentScreen extends StatefulWidget {
@@ -117,6 +118,29 @@ class _PaymentScreenState extends State<PaymentScreen> {
     try {
       print('🔵 [PaymentScreen] Iniciando proceso de pago...');
       
+      // Validar campos de tarjeta
+      if (_cardNumberController.text.trim().isEmpty ||
+          _expiryController.text.trim().isEmpty ||
+          _cvvController.text.trim().isEmpty ||
+          _nameController.text.trim().isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Por favor complete todos los campos de pago'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      // Mostrar loading
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+      
       // Get current user (puede ser null si es guest)
       final user = await AuthService.getCurrentUser();
       print('🔵 [PaymentScreen] Usuario: ${user?.email ?? "GUEST"}');
@@ -142,14 +166,30 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
       print('🔵 [PaymentScreen] Tipo de vehículo: $vehicleType');
 
-      // Create booking payload matching Supabase structure
-      final bookingPayload = {
-        'user_id': userId,
-        'pickup_address': widget.pickupAddress,
-        'pickup_lat': widget.pickupLat,
-        'pickup_lng': widget.pickupLng,
-        'destination_address': widget.destinationAddress,
-        'destination_lat': widget.destinationLat,
+      // Primero crear la reserva
+      final result = await BookingService.createBooking(bookingPayload);
+      print('✅ [PaymentScreen] Reserva creada: $result');
+
+      final bookingId = result['id'] ?? result['booking']?['id'];
+      print('🔵 [PaymentScreen] Booking ID: $bookingId');
+
+      // Procesar el pago con Stripe
+      final paymentSuccess = await StripeService.processCardPayment(
+        cardNumber: _cardNumberController.text,
+        expiry: _expiryController.text,
+        cvv: _cvvController.text,
+        cardholderName: _nameController.text,
+        amount: widget.totalPrice,
+        bookingId: bookingId,
+        customerEmail: user?.email ?? 'guest@vanelux.com',
+      );
+
+      if (!mounted) return;
+      Navigator.of(context).pop(); // Cerrar loading
+
+      if (paymentSuccess) {
+        // Show success dialog
+          'destination_lat': widget.destinationLat,
         'destination_lng': widget.destinationLng,
         'pickup_time': (widget.selectedDateTime ?? DateTime.now()).toIso8601String(),
         'vehicle_name': widget.vehicleName,
@@ -173,11 +213,20 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
       // Show success dialog
       showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Payment Successful'),
-          content: const Text(
-            'Your booking has been confirmed! You will receive a confirmation email shortly.',
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Payment failed'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error creating booking: $e');
+      if (!mounted) return;
+      Navigator.of(context).pop(); // Cerrar loading si hay error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString()}eive a confirmation email shortly.',
           ),
           actions: [
             TextButton(

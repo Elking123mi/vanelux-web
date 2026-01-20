@@ -3,188 +3,115 @@ import 'dart:convert';
 import '../config/app_config.dart';
 
 class StripeService {
-  static const String _baseUrl = 'https://api.stripe.com/v1';
-
-  /// Create a payment intent for booking
+  /// Crea un Payment Intent a través del backend
   static Future<Map<String, dynamic>> createPaymentIntent({
     required double amount,
     required String currency,
-    String? customerId,
-    Map<String, dynamic>? metadata,
+    int? bookingId,
+    String? customerEmail,
   }) async {
     try {
+      print('🔵 [StripeService] Creando Payment Intent: \$${amount.toStringAsFixed(2)}');
+      
+      final url = Uri.parse('${AppConfig.apiBaseUrl}/api/create-payment-intent');
       final response = await http.post(
-        Uri.parse('$_baseUrl/payment_intents'),
-        headers: {
-          'Authorization': 'Bearer ${AppConfig.stripeSecretKey}',
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: {
-          'amount': (amount * 100).round().toString(), // Stripe uses cents
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'amount': amount,
           'currency': currency,
-          if (customerId != null) 'customer': customerId,
-          if (metadata != null)
-            ...metadata.map(
-              (key, value) => MapEntry('metadata[$key]', value.toString()),
-            ),
-        },
-      );
-
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        throw Exception('Error creando intención de pago: ${response.body}');
-      }
-    } catch (e) {
-      throw Exception('Error en Stripe: $e');
-    }
-  }
-
-  /// Create a customer in Stripe
-  static Future<Map<String, dynamic>> createCustomer({
-    required String email,
-    required String name,
-    String? phone,
-  }) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/customers'),
-        headers: {
-          'Authorization': 'Bearer ${AppConfig.stripeSecretKey}',
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: {'email': email, 'name': name, if (phone != null) 'phone': phone},
-      );
-
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        throw Exception('Error creando cliente: ${response.body}');
-      }
-    } catch (e) {
-      throw Exception('Error en Stripe: $e');
-    }
-  }
-
-  /// Retrieve customer by ID
-  static Future<Map<String, dynamic>> getCustomer(String customerId) async {
-    try {
-      final response = await http.get(
-        Uri.parse('$_baseUrl/customers/$customerId'),
-        headers: {'Authorization': 'Bearer ${AppConfig.stripeSecretKey}'},
-      );
-
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        throw Exception('Error obteniendo cliente: ${response.body}');
-      }
-    } catch (e) {
-      throw Exception('Error en Stripe: $e');
-    }
-  }
-
-  /// Create a setup intent for saving payment method
-  static Future<Map<String, dynamic>> createSetupIntent({
-    required String customerId,
-    List<String>? paymentMethodTypes,
-  }) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/setup_intents'),
-        headers: {
-          'Authorization': 'Bearer ${AppConfig.stripeSecretKey}',
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: {
-          'customer': customerId,
-          'payment_method_types[]': paymentMethodTypes?.join(',') ?? 'card',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        throw Exception('Error creando setup intent: ${response.body}');
-      }
-    } catch (e) {
-      throw Exception('Error en Stripe: $e');
-    }
-  }
-
-  /// List payment methods for customer
-  static Future<List<Map<String, dynamic>>> getPaymentMethods(
-    String customerId,
-  ) async {
-    try {
-      final response = await http.get(
-        Uri.parse('$_baseUrl/payment_methods?customer=$customerId&type=card'),
-        headers: {'Authorization': 'Bearer ${AppConfig.stripeSecretKey}'},
+          'booking_id': bookingId,
+          'customer_email': customerEmail,
+        }),
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return List<Map<String, dynamic>>.from(data['data']);
+        print('✅ [StripeService] Payment Intent creado: ${data['paymentIntentId']}');
+        return data;
       } else {
-        throw Exception('Error obteniendo métodos de pago: ${response.body}');
+        print('❌ [StripeService] Error ${response.statusCode}: ${response.body}');
+        throw Exception('Failed to create payment intent: ${response.body}');
       }
     } catch (e) {
-      throw Exception('Error en Stripe: $e');
+      print('❌ [StripeService] Exception: $e');
+      rethrow;
     }
   }
 
-  /// Confirm payment intent
-  static Future<Map<String, dynamic>> confirmPaymentIntent(
-    String paymentIntentId,
-    String paymentMethodId,
-  ) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/payment_intents/$paymentIntentId/confirm'),
-        headers: {
-          'Authorization': 'Bearer ${AppConfig.stripeSecretKey}',
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: {'payment_method': paymentMethodId},
-      );
-
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        throw Exception('Error confirmando pago: ${response.body}');
-      }
-    } catch (e) {
-      throw Exception('Error en Stripe: $e');
-    }
-  }
-
-  /// Process refund
-  static Future<Map<String, dynamic>> createRefund({
+  /// Confirma el pago en el backend
+  static Future<Map<String, dynamic>> confirmPayment({
     required String paymentIntentId,
-    double? amount,
-    String? reason,
+    int? bookingId,
   }) async {
     try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/refunds'),
-        headers: {
-          'Authorization': 'Bearer ${AppConfig.stripeSecretKey}',
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: {
-          'payment_intent': paymentIntentId,
-          if (amount != null) 'amount': (amount * 100).round().toString(),
-          if (reason != null) 'reason': reason,
-        },
-      );
+      print('🔵 [StripeService] Confirmando pago: $paymentIntentId');
+      
+      final url = Uri.parse('${AppConfig.apiBaseUrl}/api/confirm-payment?payment_intent_id=$paymentIntentId${bookingId != null ? '&booking_id=$bookingId' : ''}');
+      final response = await http.post(url);
 
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        final data = jsonDecode(response.body);
+        print('✅ [StripeService] Pago confirmado');
+        return data;
       } else {
-        throw Exception('Error procesando reembolso: ${response.body}');
+        throw Exception('Failed to confirm payment: ${response.body}');
       }
     } catch (e) {
-      throw Exception('Error en Stripe: $e');
+      print('❌ [StripeService] Exception al confirmar: $e');
+      rethrow;
+    }
+  }
+
+  /// Procesa un pago con tarjeta
+  static Future<bool> processCardPayment({
+    required String cardNumber,
+    required String expiry,
+    required String cvv,
+    required String cardholderName,
+    required double amount,
+    int? bookingId,
+    String? customerEmail,
+  }) async {
+    try {
+      print('🔵 [StripeService] Procesando pago con tarjeta...');
+      
+      // Validaciones básicas
+      if (cardNumber.replaceAll(' ', '').length < 15) {
+        throw Exception('Número de tarjeta inválido');
+      }
+      if (expiry.length < 4) {
+        throw Exception('Fecha de expiración inválida');
+      }
+      if (cvv.length < 3) {
+        throw Exception('CVV inválido');
+      }
+      if (cardholderName.trim().isEmpty) {
+        throw Exception('Nombre del titular requerido');
+      }
+
+      // Crear Payment Intent
+      final paymentIntent = await createPaymentIntent(
+        amount: amount,
+        currency: 'usd',
+        bookingId: bookingId,
+        customerEmail: customerEmail,
+      );
+
+      // Simular procesamiento de tarjeta (en producción usar Stripe.js)
+      print('💳 [StripeService] Procesando pago...');
+      await Future.delayed(const Duration(seconds: 2));
+
+      // Confirmar el pago
+      final confirmation = await confirmPayment(
+        paymentIntentId: paymentIntent['paymentIntentId'],
+        bookingId: bookingId,
+      );
+
+      return confirmation['success'] == true;
+    } catch (e) {
+      print('❌ [StripeService] Error procesando pago: $e');
+      rethrow;
     }
   }
 }
