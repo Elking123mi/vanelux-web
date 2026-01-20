@@ -320,7 +320,7 @@ class _LoginWebScreenState extends State<LoginWebScreen> {
                             ),
                           ),
                           if (isMobile) ...[
-                            // Botón simple de continuar como invitado
+                            // Formulario completo de guest para móvil
                             Container(
                               width: double.infinity,
                               padding: const EdgeInsets.all(24),
@@ -330,6 +330,7 @@ class _LoginWebScreenState extends State<LoginWebScreen> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const Text(
                                     'Continue as Guest',
@@ -339,12 +340,133 @@ class _LoginWebScreenState extends State<LoginWebScreen> {
                                       color: Color(0xFF0B3254),
                                     ),
                                   ),
+                                  const SizedBox(height: 20),
+                                  const Text(
+                                    'Email address *',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  TextField(
+                                    controller: _guestEmailController,
+                                    decoration: InputDecoration(
+                                      hintText: 'Enter your email',
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 12,
+                                      ),
+                                    ),
+                                  ),
                                   const SizedBox(height: 16),
+                                  const Text(
+                                    'First name *',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  TextField(
+                                    controller: _guestFirstNameController,
+                                    decoration: InputDecoration(
+                                      hintText: 'First name',
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 12,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  const Text(
+                                    'Last name *',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  TextField(
+                                    controller: _guestLastNameController,
+                                    decoration: InputDecoration(
+                                      hintText: 'Last name',
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 12,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  const Text(
+                                    'Phone *',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      Container(
+                                        width: 60,
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                                        decoration: BoxDecoration(
+                                          border: Border.all(color: Colors.grey[300]!),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: const Text(
+                                          '+1',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(fontSize: 14),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: TextField(
+                                          controller: _guestPhoneController,
+                                          decoration: InputDecoration(
+                                            hintText: 'Phone number',
+                                            border: OutlineInputBorder(
+                                              borderRadius: BorderRadius.circular(8),
+                                            ),
+                                            contentPadding: const EdgeInsets.symmetric(
+                                              horizontal: 16,
+                                              vertical: 12,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 24),
                                   SizedBox(
                                     width: double.infinity,
                                     height: 48,
                                     child: ElevatedButton(
                                       onPressed: () {
+                                        // Validar campos
+                                        if (_guestEmailController.text.trim().isEmpty ||
+                                            _guestFirstNameController.text.trim().isEmpty ||
+                                            _guestLastNameController.text.trim().isEmpty ||
+                                            _guestPhoneController.text.trim().isEmpty) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(
+                                              content: Text('Please fill in all fields'),
+                                              backgroundColor: Colors.red,
+                                            ),
+                                          );
+                                          return;
+                                        }
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
@@ -806,36 +928,75 @@ class _LoginWebScreenState extends State<LoginWebScreen> {
   }
 
   Widget _buildStepIndicator() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 900;
+
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 80),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _buildStep(1, 'Information', true),
-          _buildStepLine(true),
-          _buildStep(2, 'Vehicle', true),
-          _buildStepLine(true),
-          _buildStep(3, 'Login', true),
-          _buildStepLine(false),
-          _buildStep(4, 'Details', false),
-          _buildStepLine(false),
-          _buildStep(5, 'Payment', false),
-        ],
+      padding: EdgeInsets.symmetric(
+        vertical: isMobile ? 16 : 32,
+        horizontal: isMobile ? 8 : 80,
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildStep(1, 'Information', true, isMobile),
+            _buildStepLine(true, isMobile),
+            _buildStep(2, 'Vehicle', true, isMobile),
+            _buildStepLine(true, isMobile),
+            _buildStep(3, 'Login', true, isMobile),
+            _buildStepLine(false, isMobile),
+            _buildStep(4, 'Details', false, isMobile),
+            _buildStepLine(false, isMobile),
+            _buildStep(5, 'Payment', false, isMobile),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildStep(int number, String label, bool isActive) {
+  Widget _buildStep(int number, String label, bool isActive, bool isMobile) {
     return Column(
       children: [
         Container(
-          width: 40,
-          height: 40,
+          width: isMobile ? 32 : 40,
+          height: isMobile ? 32 : 40,
           decoration: BoxDecoration(
             color: isActive ? const Color(0xFF4CAF50) : Colors.grey[300],
             shape: BoxShape.circle,
           ),
           child: Center(
+            child: Text(
+              '$number',
+              style: TextStyle(
+                color: isActive ? Colors.white : Colors.grey[600],
+                fontWeight: FontWeight.bold,
+                fontSize: isMobile ? 14 : 16,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: isMobile ? 10 : 12,
+            color: isActive ? const Color(0xFF0B3254) : Colors.grey[600],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStepLine(bool isActive, bool isMobile) {
+    return Container(
+      width: isMobile ? 40 : 80,
+      height: 2,
+      margin: const EdgeInsets.only(bottom: 28),
+      color: isActive ? const Color(0xFF4CAF50) : Colors.grey[300],
+    );
+  }
             child: Text(
               '$number',
               style: TextStyle(

@@ -117,20 +117,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
     try {
       print('🔵 [PaymentScreen] Iniciando proceso de pago...');
       
-      // Get current user
+      // Get current user (puede ser null si es guest)
       final user = await AuthService.getCurrentUser();
-      print('🔵 [PaymentScreen] Usuario: ${user?.email ?? "NO ENCONTRADO"}');
+      print('🔵 [PaymentScreen] Usuario: ${user?.email ?? "GUEST"}');
       
-      if (user == null) {
-        print('❌ [PaymentScreen] No hay usuario logueado');
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please login to complete booking')),
-        );
-        return;
-      }
-
-      print('🔵 [PaymentScreen] Usuario ID: ${user.id}');
+      // Usar ID 0 para guests (temporal hasta que se implemente registro de guests)
+      final userId = user?.id ?? 0;
+      
+      print('🔵 [PaymentScreen] Usuario ID: $userId');
       print('🔵 [PaymentScreen] Vehículo: ${widget.vehicleName}');
 
       // Determine vehicle type from vehicle name
@@ -150,7 +144,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
       // Create booking payload matching Supabase structure
       final bookingPayload = {
-        'user_id': user.id,
+        'user_id': userId,
         'pickup_address': widget.pickupAddress,
         'pickup_lat': widget.pickupLat,
         'pickup_lng': widget.pickupLng,
@@ -347,31 +341,40 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   Widget _buildStepIndicator() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 900;
+
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 80),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _buildStep(1, 'Information', true),
-          _buildStepLine(true),
-          _buildStep(2, 'Vehicle', true),
-          _buildStepLine(true),
-          _buildStep(3, 'Login', true),
-          _buildStepLine(true),
-          _buildStep(4, 'Details', true),
-          _buildStepLine(true),
-          _buildStep(5, 'Payment', true),
-        ],
+      padding: EdgeInsets.symmetric(
+        vertical: isMobile ? 16 : 32,
+        horizontal: isMobile ? 8 : 80,
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildStep(1, 'Information', true, isMobile),
+            _buildStepLine(true, isMobile),
+            _buildStep(2, 'Vehicle', true, isMobile),
+            _buildStepLine(true, isMobile),
+            _buildStep(3, 'Login', true, isMobile),
+            _buildStepLine(true, isMobile),
+            _buildStep(4, 'Details', true, isMobile),
+            _buildStepLine(true, isMobile),
+            _buildStep(5, 'Payment', true, isMobile),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildStep(int number, String label, bool isActive) {
+  Widget _buildStep(int number, String label, bool isActive, bool isMobile) {
     return Column(
       children: [
         Container(
-          width: 40,
-          height: 40,
+          width: isMobile ? 32 : 40,
+          height: isMobile ? 32 : 40,
           decoration: BoxDecoration(
             color: isActive ? const Color(0xFF4CAF50) : Colors.grey[300],
             shape: BoxShape.circle,
@@ -382,7 +385,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
               style: TextStyle(
                 color: isActive ? Colors.white : Colors.grey[600],
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontSize: isMobile ? 14 : 16,
               ),
             ),
           ),
@@ -391,7 +394,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
         Text(
           label,
           style: TextStyle(
-            fontSize: 12,
+            fontSize: isMobile ? 10 : 12,
             color: isActive ? const Color(0xFF0B3254) : Colors.grey[600],
           ),
         ),
@@ -399,9 +402,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
     );
   }
 
-  Widget _buildStepLine(bool isActive) {
+  Widget _buildStepLine(bool isActive, bool isMobile) {
     return Container(
-      width: 80,
+      width: isMobile ? 40 : 80,
       height: 2,
       margin: const EdgeInsets.only(bottom: 28),
       color: isActive ? const Color(0xFF4CAF50) : Colors.grey[300],

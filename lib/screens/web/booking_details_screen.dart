@@ -503,31 +503,40 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
   }
 
   Widget _buildStepIndicator() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 900;
+
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 80),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _buildStep(1, 'Information', true),
-          _buildStepLine(true),
-          _buildStep(2, 'Vehicle', true),
-          _buildStepLine(true),
-          _buildStep(3, 'Login', true),
-          _buildStepLine(true),
-          _buildStep(4, 'Details', true),
-          _buildStepLine(false),
-          _buildStep(5, 'Payment', false),
-        ],
+      padding: EdgeInsets.symmetric(
+        vertical: isMobile ? 16 : 32,
+        horizontal: isMobile ? 8 : 80,
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildStep(1, 'Information', true, isMobile),
+            _buildStepLine(true, isMobile),
+            _buildStep(2, 'Vehicle', true, isMobile),
+            _buildStepLine(true, isMobile),
+            _buildStep(3, 'Login', true, isMobile),
+            _buildStepLine(true, isMobile),
+            _buildStep(4, 'Details', true, isMobile),
+            _buildStepLine(false, isMobile),
+            _buildStep(5, 'Payment', false, isMobile),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildStep(int number, String label, bool isActive) {
+  Widget _buildStep(int number, String label, bool isActive, bool isMobile) {
     return Column(
       children: [
         Container(
-          width: 40,
-          height: 40,
+          width: isMobile ? 32 : 40,
+          height: isMobile ? 32 : 40,
           decoration: BoxDecoration(
             color: isActive ? const Color(0xFF4CAF50) : Colors.grey[300],
             shape: BoxShape.circle,
@@ -538,7 +547,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
               style: TextStyle(
                 color: isActive ? Colors.white : Colors.grey[600],
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontSize: isMobile ? 14 : 16,
               ),
             ),
           ),
@@ -547,7 +556,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
         Text(
           label,
           style: TextStyle(
-            fontSize: 12,
+            fontSize: isMobile ? 10 : 12,
             color: isActive ? const Color(0xFF0B3254) : Colors.grey[600],
           ),
         ),
@@ -555,9 +564,9 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
     );
   }
 
-  Widget _buildStepLine(bool isActive) {
+  Widget _buildStepLine(bool isActive, bool isMobile) {
     return Container(
-      width: 80,
+      width: isMobile ? 40 : 80,
       height: 2,
       margin: const EdgeInsets.only(bottom: 28),
       color: isActive ? const Color(0xFF4CAF50) : Colors.grey[300],
