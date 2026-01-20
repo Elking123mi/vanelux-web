@@ -206,36 +206,39 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 900;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          _buildTopNavBar(),
+          if (!isMobile) _buildTopNavBar(),
           _buildStepIndicator(),
           Expanded(
             child: SingleChildScrollView(
               child: Container(
                 constraints: const BoxConstraints(maxWidth: 1400),
-                padding: const EdgeInsets.all(80),
+                padding: EdgeInsets.all(isMobile ? 20 : 80),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'STEP 5 OF 5',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: isMobile ? 12 : 14,
                         fontWeight: FontWeight.w600,
                         color: Colors.grey,
                         letterSpacing: 1.5,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
+                    Text(
                       'Payment',
                       style: TextStyle(
-                        fontSize: 36,
+                        fontSize: isMobile ? 24 : 36,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF0B3254),
+                        color: const Color(0xFF0B3254),
                       ),
                     ),
                     const SizedBox(height: 32),
@@ -248,23 +251,34 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
                     const SizedBox(height: 40),
 
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          flex: 3,
-                          child: Column(
-                            children: [
-                              _buildRouteMap(),
-                              const SizedBox(height: 24),
-                              _buildBookingSummary(),
-                            ],
-                          ),
+                    isMobile
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildRouteMap(),
+                            const SizedBox(height: 24),
+                            _buildBookingSummary(),
+                            const SizedBox(height: 24),
+                            _buildPaymentForm(),
+                          ],
+                        )
+                      : Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: Column(
+                                children: [
+                                  _buildRouteMap(),
+                                  const SizedBox(height: 24),
+                                  _buildBookingSummary(),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 40),
+                            Expanded(flex: 2, child: _buildPaymentForm()),
+                          ],
                         ),
-                        const SizedBox(width: 40),
-                        Expanded(flex: 2, child: _buildPaymentForm()),
-                      ],
-                    ),
                   ],
                 ),
               ),
@@ -455,6 +469,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   Widget _buildTripInfo() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 900;
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -462,65 +479,124 @@ class _PaymentScreenState extends State<PaymentScreen> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey[200]!),
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Pickup',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  widget.pickupAddress,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Destination',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  widget.destinationAddress,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Column(
+      child: isMobile
+        ? Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Date & Time',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Pickup',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    widget.pickupAddress,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 4),
-              Text(
-                _formatDateTime(widget.selectedDateTime),
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
+              const SizedBox(height: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Destination',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    widget.destinationAddress,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Date & Time',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _formatDateTime(widget.selectedDateTime),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          )
+        : Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Pickup',
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      widget.pickupAddress,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Destination',
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      widget.destinationAddress,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Date & Time',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _formatDateTime(widget.selectedDateTime),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ),
     );
   }
 
