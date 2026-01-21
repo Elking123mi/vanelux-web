@@ -630,13 +630,76 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
     );
   }
 
+  void _selectVehicle(_VehicleOption vehicle) {
+    setState(() {
+      _selectedVehicleName = vehicle.name;
+    });
+    
+    // Calcular precio total
+    final totalPrice = _calculateTotalPrice(vehicle);
+    
+    // Determinar tipo de servicio para validación de número de vuelo
+    String serviceType = 'point-to-point';
+    if (widget.serviceType == 'To Airport') {
+      serviceType = 'to-airport';
+    } else if (widget.serviceType == 'From Airport') {
+      serviceType = 'from-airport';
+    }
+    
+    // Si el usuario YA está autenticado, ir directamente a BookingDetailsScreen
+    if (_currentUser != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => BookingDetailsScreen(
+            pickupAddress: widget.pickupAddress,
+            destinationAddress: widget.destinationAddress,
+            pickupLat: widget.pickupLat,
+            pickupLng: widget.pickupLng,
+            destinationLat: widget.destinationLat,
+            destinationLng: widget.destinationLng,
+            selectedDateTime: widget.selectedDateTime,
+            vehicleName: vehicle.name,
+            totalPrice: totalPrice,
+            distanceMiles: _distanceMiles ?? 0,
+            duration: _duration ?? '',
+            serviceType: serviceType,
+          ),
+        ),
+      );
+    } else {
+      // Si NO está autenticado, ir a LoginWebScreen (paso 3)
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => LoginWebScreen(
+            pickupAddress: widget.pickupAddress,
+            destinationAddress: widget.destinationAddress,
+            pickupLat: widget.pickupLat,
+            pickupLng: widget.pickupLng,
+            destinationLat: widget.destinationLat,
+            destinationLng: widget.destinationLng,
+            selectedDateTime: widget.selectedDateTime,
+            vehicleName: vehicle.name,
+            totalPrice: totalPrice,
+            distanceMiles: _distanceMiles ?? 0,
+            duration: _duration ?? '',
+            serviceType: serviceType,
+          ),
+        ),
+      );
+    }
+  }
+
   Widget _buildVehicleCard(_VehicleOption vehicle) {
     final totalPrice = _calculateTotalPrice(vehicle);
     final isSelected = _selectedVehicleName == vehicle.name;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 900;
     
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(isMobile ? 16 : 24),
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border.all(
@@ -652,36 +715,35 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
           ),
         ],
       ),
-      child: Row(
-        children: [
-          // IMAGEN DEL VEHÍCULO
-          Container(
-            width: 200,
-            height: 150,
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Image.network(
-              vehicle.imageUrl,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return const Icon(Icons.directions_car, size: 64, color: Colors.grey);
-              },
-            ),
-          ),
-          
-          const SizedBox(width: 32),
-          
-          // INFORMACIÓN DEL VEHÍCULO
-          Expanded(
-            child: Column(
+      child: isMobile
+          ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // IMAGEN DEL VEHÍCULO EN MÓVIL
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(
+                    vehicle.imageUrl,
+                    width: double.infinity,
+                    height: 180,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        width: double.infinity,
+                        height: 180,
+                        color: Colors.grey[100],
+                        child: const Icon(Icons.directions_car, size: 64, color: Colors.grey),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 16),
+                
+                // NOMBRE Y DESCRIPCIÓN
                 Text(
                   vehicle.name,
                   style: const TextStyle(
-                    fontSize: 22,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF0B3254),
                   ),
@@ -690,44 +752,165 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
                 Text(
                   vehicle.description,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 13,
                     color: Colors.grey[700],
                   ),
                 ),
                 const SizedBox(height: 16),
+                
+                // CARACTERÍSTICAS EN 2 COLUMNAS
                 Row(
                   children: [
-                    _buildFeature(Icons.person, '${vehicle.passengers} passengers'),
-                    const SizedBox(width: 24),
-                    _buildFeature(Icons.luggage, '${vehicle.luggage} luggage'),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildFeature(Icons.person, '${vehicle.passengers} pax'),
+                          const SizedBox(height: 8),
+                          _buildFeature(Icons.wifi, 'WiFi'),
+                          const SizedBox(height: 8),
+                          _buildFeature(Icons.lock, 'Secure'),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildFeature(Icons.luggage, '${vehicle.luggage} bags'),
+                          const SizedBox(height: 8),
+                          _buildFeature(Icons.access_time, '90 min wait'),
+                          const SizedBox(height: 8),
+                          _buildFeature(Icons.check_circle, 'Free cancel'),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
+                
+                // PRECIO Y BOTÓN
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildFeature(Icons.wifi, 'Free WiFi'),
-                    const SizedBox(width: 24),
-                    _buildFeature(Icons.access_time, '90 min wait time'),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    _buildFeature(Icons.lock, 'Secure payment'),
-                    const SizedBox(width: 24),
-                    _buildFeature(Icons.check_circle, 'Free cancellation'),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '\$${totalPrice.toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF4CAF50),
+                          ),
+                        ),
+                        const Text(
+                          'Total',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                    ElevatedButton(
+                      onPressed: () => _selectVehicle(vehicle),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: isSelected ? const Color(0xFF4CAF50) : const Color(0xFF0B3254),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        isSelected ? 'Selected' : 'Select',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ],
-            ),
-          ),
-          
-          const SizedBox(width: 32),
-          
-          // PRECIO Y BOTÓN
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
+            )
+          : Row(
+              children: [
+                // IMAGEN DEL VEHÍCULO
+                Container(
+                  width: 200,
+                  height: 150,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Image.network(
+                    vehicle.imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(Icons.directions_car, size: 64, color: Colors.grey);
+                    },
+                  ),
+                ),
+                
+                const SizedBox(width: 32),
+                
+                // INFORMACIÓN DEL VEHÍCULO
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        vehicle.name,
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF0B3254),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        vehicle.description,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          _buildFeature(Icons.person, '${vehicle.passengers} passengers'),
+                          const SizedBox(width: 24),
+                          _buildFeature(Icons.luggage, '${vehicle.luggage} luggage'),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          _buildFeature(Icons.wifi, 'Free WiFi'),
+                          const SizedBox(width: 24),
+                          _buildFeature(Icons.access_time, '90 min wait time'),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          _buildFeature(Icons.lock, 'Secure payment'),
+                          const SizedBox(width: 24),
+                          _buildFeature(Icons.check_circle, 'Free cancellation'),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(width: 32),
+                
+                // PRECIO Y BOTÓN
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
               const Text(
                 'Total price',
                 style: TextStyle(
@@ -774,75 +957,16 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
                 width: 200,
                 height: 48,
                 child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _selectedVehicleName = vehicle.name;
-                    });
-                    
-                    // Calcular precio total
-                    final totalPrice = _calculateTotalPrice(vehicle);
-                    
-                    // Determinar tipo de servicio para validación de número de vuelo
-                    String serviceType = 'point-to-point';
-                    if (widget.serviceType == 'To Airport') {
-                      serviceType = 'to-airport';
-                    } else if (widget.serviceType == 'From Airport') {
-                      serviceType = 'from-airport';
-                    }
-                    
-                    // Si el usuario YA está autenticado, ir directamente a BookingDetailsScreen
-                    if (_currentUser != null) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => BookingDetailsScreen(
-                            pickupAddress: widget.pickupAddress,
-                            destinationAddress: widget.destinationAddress,
-                            pickupLat: widget.pickupLat,
-                            pickupLng: widget.pickupLng,
-                            destinationLat: widget.destinationLat,
-                            destinationLng: widget.destinationLng,
-                            selectedDateTime: widget.selectedDateTime,
-                            vehicleName: vehicle.name,
-                            totalPrice: totalPrice,
-                            distanceMiles: _distanceMiles ?? 0,
-                            duration: _duration ?? '',
-                            serviceType: serviceType,
-                          ),
-                        ),
-                      );
-                    } else {
-                      // Si NO está autenticado, ir a LoginWebScreen (paso 3)
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => LoginWebScreen(
-                            pickupAddress: widget.pickupAddress,
-                            destinationAddress: widget.destinationAddress,
-                            pickupLat: widget.pickupLat,
-                            pickupLng: widget.pickupLng,
-                            destinationLat: widget.destinationLat,
-                            destinationLng: widget.destinationLng,
-                            selectedDateTime: widget.selectedDateTime,
-                            vehicleName: vehicle.name,
-                            totalPrice: totalPrice,
-                            distanceMiles: _distanceMiles ?? 0,
-                            duration: _duration ?? '',
-                            serviceType: serviceType,
-                          ),
-                        ),
-                      );
-                    }
-                  },
+                  onPressed: () => _selectVehicle(vehicle),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF4169E1),
+                    backgroundColor: isSelected ? const Color(0xFF4CAF50) : const Color(0xFF4169E1),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: const Text(
-                    'Select Vehicle',
-                    style: TextStyle(
+                  child: Text(
+                    isSelected ? 'Selected' : 'Select Vehicle',
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: Colors.white,
