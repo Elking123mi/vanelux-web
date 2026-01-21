@@ -173,7 +173,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   Timer? _carouselTimer;
 
   // Mobile menu state
-  bool _isMobileMenuOpen = false;
+  final bool _isMobileMenuOpen = false;
 
   // Booking form state
   String? selectedServiceType;
@@ -3207,33 +3207,39 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         'title': 'Point to Point',
         'description': 'Direct transportation from pickup to destination',
         'icon': Icons.location_on,
+        'image': 'assets/images/point to point.jpg',
       },
       {
         'title': 'Hourly Service',
         'description': 'Hourly chauffeur service',
         'icon': Icons.access_time,
+        'image': 'assets/images/hourly service.jpg',
       },
       {
         'title': 'Airport Transfer',
         'description': 'Airport pickup and drop-off service',
         'icon': Icons.flight,
+        'image': 'assets/images/all airports.jpg',
       },
       {
         'title': 'Weddings',
         'description':
             'Exclusive service for the most important day of your life',
         'icon': Icons.favorite,
+        'image': 'assets/images/weeding.jpg',
       },
       {
         'title': 'Proms',
         'description': 'Arrive in style to your prom or special event',
         'icon': Icons.celebration,
+        'image': 'assets/images/corporate service.jpg',
       },
       {
         'title': 'Tours',
         'description':
             'Explore the city in style with a chauffeur who knows every corner',
         'icon': Icons.tour,
+        'image': 'assets/images/city tours.png',
       },
     ];
 
@@ -3268,6 +3274,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                     services[i]['title'] as String,
                     services[i]['description'] as String,
                     services[i]['icon'] as IconData,
+                    services[i]['image'] as String?,
                   ),
                   if (i != services.length - 1) const SizedBox(height: 24),
                 ],
@@ -3292,6 +3299,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
               services[i]['title'] as String,
               services[i]['description'] as String,
               services[i]['icon'] as IconData,
+              services[i]['image'] as String?,
             ),
           ),
           if (i != services.length - 1) const SizedBox(width: 30),
@@ -3300,7 +3308,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     );
   }
 
-  Widget _buildServiceCard(String title, String description, IconData icon) {
+  Widget _buildServiceCard(String title, String description, IconData icon, String? imagePath) {
     // Mapear títulos a los tipos de servicio para navegación
     String getServiceType(String title) {
       switch (title) {
@@ -3336,15 +3344,38 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       ),
       child: Column(
         children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: const BoxDecoration(
-              color: Color(0xFF0B3254),
-              shape: BoxShape.circle,
+          // Mostrar imagen si existe, de lo contrario mostrar icono
+          if (imagePath != null)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset(
+                imagePath,
+                width: 120,
+                height: 120,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    width: 80,
+                    height: 80,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF0B3254),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(icon, color: const Color(0xFFD4AF37), size: 40),
+                  );
+                },
+              ),
+            )
+          else
+            Container(
+              width: 80,
+              height: 80,
+              decoration: const BoxDecoration(
+                color: Color(0xFF0B3254),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: const Color(0xFFD4AF37), size: 40),
             ),
-            child: Icon(icon, color: const Color(0xFFD4AF37), size: 40),
-          ),
           const SizedBox(height: 24),
           Text(
             title,
