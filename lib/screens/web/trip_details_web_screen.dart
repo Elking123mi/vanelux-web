@@ -236,53 +236,71 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
                   const SizedBox(height: 40),
                   
                   // TÍTULO "Select Your Vehicle"
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 80),
-                    child: const Text(
-                      'Select Your Vehicle',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF0B3254),
-                      ),
-                    ),
+                  Builder(
+                    builder: (context) {
+                      final screenWidth = MediaQuery.of(context).size.width;
+                      final isMobile = screenWidth < 900;
+                      return Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 80),
+                        child: Text(
+                          'Select Your Vehicle',
+                          style: TextStyle(
+                            fontSize: isMobile ? 24 : 32,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF0B3254),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                   
                   const SizedBox(height: 8),
                   
                   // INFO DE RUTA
                   if (_distanceMiles != null && _duration != null)
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 80),
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.green[50],
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          'Route: ${_distanceMiles!.toStringAsFixed(0)} mi • $_duration',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.green,
-                            fontWeight: FontWeight.w500,
+                    Builder(
+                      builder: (context) {
+                        final screenWidth = MediaQuery.of(context).size.width;
+                        final isMobile = screenWidth < 900;
+                        return Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 80),
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.green[50],
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              'Route: ${_distanceMiles!.toStringAsFixed(0)} mi • $_duration',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.green,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
                   
                   const SizedBox(height: 32),
                   
                   // LISTA DE VEHÍCULOS
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 80),
-                    child: Column(
-                      children: _vehicles.map((vehicle) => 
-                        _buildVehicleCard(vehicle)
-                      ).toList(),
-                    ),
+                  Builder(
+                    builder: (context) {
+                      final screenWidth = MediaQuery.of(context).size.width;
+                      final isMobile = screenWidth < 900;
+                      return Container(
+                        padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 80),
+                        child: Column(
+                          children: _vehicles.map((vehicle) => 
+                            _buildVehicleCard(vehicle)
+                          ).toList(),
+                        ),
+                      );
+                    },
                   ),
                   
                   const SizedBox(height: 60),
@@ -529,75 +547,169 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
   }
 
   Widget _buildTripInfo() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 900;
+    
     return Container(
-      padding: const EdgeInsets.all(24),
-      margin: const EdgeInsets.symmetric(horizontal: 80),
+      padding: EdgeInsets.all(isMobile ? 16 : 24),
+      margin: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 80),
       decoration: BoxDecoration(
         color: Colors.grey[50],
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Row(
-        children: [
-          const Icon(Icons.location_on_outlined, color: Color(0xFF0B3254)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
+      child: isMobile
+          ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Pickup Location',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                // PICKUP EN MÓVIL
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.location_on_outlined, color: Color(0xFF0B3254), size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Pickup Location',
+                            style: TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.w500),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            widget.pickupAddress,
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                Text(
-                  widget.pickupAddress,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                const SizedBox(height: 12),
+                
+                // DESTINATION EN MÓVIL
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.location_on, color: Color(0xFF0B3254), size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Destination',
+                            style: TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.w500),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            widget.destinationAddress,
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                
+                // DATE & TIME EN MÓVIL
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.calendar_today, color: Color(0xFF0B3254), size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Date & Time',
+                            style: TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.w500),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            _formatDateTime(widget.selectedDateTime),
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            )
+          : Row(
+              children: [
+                const Icon(Icons.location_on_outlined, color: Color(0xFF0B3254)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Pickup Location',
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                      Text(
+                        widget.pickupAddress,
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 32),
+                const Icon(Icons.location_on, color: Color(0xFF0B3254)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Destination',
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                      Text(
+                        widget.destinationAddress,
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 32),
+                const Icon(Icons.calendar_today, color: Color(0xFF0B3254)),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Date & Time',
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                    Text(
+                      _formatDateTime(widget.selectedDateTime),
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ),
-          const SizedBox(width: 32),
-          const Icon(Icons.location_on, color: Color(0xFF0B3254)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Destination',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-                Text(
-                  widget.destinationAddress,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 32),
-          const Icon(Icons.calendar_today, color: Color(0xFF0B3254)),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Date & Time',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-              Text(
-                _formatDateTime(widget.selectedDateTime),
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 
   Widget _buildMapSection() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 900;
+    
     return Container(
-      height: 400,
-      margin: const EdgeInsets.symmetric(horizontal: 80, vertical: 32),
+      height: isMobile ? 250 : 400,
+      margin: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 80, vertical: isMobile ? 16 : 32),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
