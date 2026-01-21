@@ -166,6 +166,29 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
       print('🔵 [PaymentScreen] Tipo de vehículo: $vehicleType');
 
+      // Create booking payload matching Supabase structure
+      final bookingPayload = {
+        'user_id': userId,
+        'pickup_address': widget.pickupAddress,
+        'pickup_lat': widget.pickupLat,
+        'pickup_lng': widget.pickupLng,
+        'destination_address': widget.destinationAddress,
+        'destination_lat': widget.destinationLat,
+        'destination_lng': widget.destinationLng,
+        'pickup_time': (widget.selectedDateTime ?? DateTime.now()).toIso8601String(),
+        'vehicle_name': widget.vehicleName,
+        'passengers': 1,
+        'price': widget.totalPrice,
+        'distance_miles': widget.distanceMiles,
+        'distance_text': '${widget.distanceMiles.toStringAsFixed(1)} mi',
+        'duration_text': widget.duration,
+        'service_type': vehicleType.toString().split('.').last,
+        'is_scheduled': widget.selectedDateTime != null ? 1 : 0,
+        'status': 'pending',
+      };
+
+      print('🔵 [PaymentScreen] Payload para backend: $bookingPayload');
+
       // Primero crear la reserva
       final result = await BookingService.createBooking(bookingPayload);
       print('✅ [PaymentScreen] Reserva creada: $result');
@@ -189,30 +212,23 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
       if (paymentSuccess) {
         // Show success dialog
-          'destination_lat': widget.destinationLat,
-        'destination_lng': widget.destinationLng,
-        'pickup_time': (widget.selectedDateTime ?? DateTime.now()).toIso8601String(),
-        'vehicle_name': widget.vehicleName,
-        'passengers': 1, // Default value, could be made configurable
-        'price': widget.totalPrice,
-        'distance_miles': widget.distanceMiles,
-        'distance_text': '${widget.distanceMiles.toStringAsFixed(1)} mi',
-        'duration_text': widget.duration,
-        'service_type': vehicleType.toString().split('.').last,
-        'is_scheduled': widget.selectedDateTime != null ? 1 : 0,
-        'status': 'pending',
-      };
-
-      print('🔵 [PaymentScreen] Payload para backend: $bookingPayload');
-
-      // Save booking
-      final result = await BookingService.createBooking(bookingPayload);
-      print('✅ [PaymentScreen] Reserva creada: $result');
-
-      if (!mounted) return;
-
-      // Show success dialog
-      showDialog(
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Payment Successful'),
+            content: const Text(
+              'Your booking has been confirmed! You will receive a confirmation email shortly.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -226,23 +242,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       if (!mounted) return;
       Navigator.of(context).pop(); // Cerrar loading si hay error
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}eive a confirmation email shortly.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).popUntil((route) => route.isFirst);
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
-    } catch (e) {
-      print('Error creating booking: $e');
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error creating booking: $e')),
+        SnackBar(content: Text('Error: ${e.toString()}')),
       );
     }
   }
