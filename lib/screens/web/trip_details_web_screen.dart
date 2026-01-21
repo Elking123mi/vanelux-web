@@ -53,9 +53,11 @@ class _VehicleOption {
 }
 
 class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
+  GoogleMapController? _mapController;
   Set<Marker> _markers = {};
   Set<Polyline> _polylines = {};
   bool _isLoadingRoute = true;
+  String? _errorMessage;
   User? _currentUser;
   
   double? _distanceMiles;
@@ -69,8 +71,8 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
       passengers: 4,
       luggage: 3,
       imageUrl: 'https://images.unsplash.com/photo-1617450365226-a9994d16ff2a?auto=format&fit=crop&w=400&q=80',
-      basePrice: 3908.54,
-      perMileRate: 3.5,
+      basePrice: 1.00,
+      perMileRate: 0.01,
     ),
     _VehicleOption(
       name: 'Cadillac Escalade ESV',
@@ -175,6 +177,7 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
       print('❌ ERROR in _loadRouteData: $e');
       print('Stack trace: $stackTrace');
       setState(() {
+        _errorMessage = 'Error loading trip data: $e';
         _isLoadingRoute = false;
       });
     }
@@ -209,22 +212,18 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final bool isMobile = width < 800;
-    final double horizontalPadding = isMobile ? 16 : 80;
-    
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
         children: [
           // BARRA DE NAVEGACIÓN SUPERIOR
-          _buildTopNavBar(isMobile, horizontalPadding),
+          _buildTopNavBar(),
           
           // INDICADOR DE PASOS
-          _buildStepIndicator(isMobile, horizontalPadding),
+          _buildStepIndicator(),
           
           // INFORMACIÓN DE UBICACIONES Y FECHA
-          _buildTripInfo(isMobile, horizontalPadding),
+          _buildTripInfo(),
           
           // CONTENIDO PRINCIPAL
           Expanded(
@@ -232,20 +231,20 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
               child: Column(
                 children: [
                   // MAPA
-                  _buildMapSection(isMobile, horizontalPadding),
+                  _buildMapSection(),
                   
                   const SizedBox(height: 40),
                   
                   // TÍTULO "Select Your Vehicle"
                   Container(
                     width: double.infinity,
-                    padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-                    child: Text(
+                    padding: const EdgeInsets.symmetric(horizontal: 80),
+                    child: const Text(
                       'Select Your Vehicle',
                       style: TextStyle(
-                        fontSize: isMobile ? 24 : 32,
+                        fontSize: 32,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF0B3254),
+                        color: Color(0xFF0B3254),
                       ),
                     ),
                   ),
@@ -256,7 +255,7 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
                   if (_distanceMiles != null && _duration != null)
                     Container(
                       width: double.infinity,
-                      padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                      padding: const EdgeInsets.symmetric(horizontal: 80),
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
@@ -265,8 +264,8 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
                         ),
                         child: Text(
                           'Route: ${_distanceMiles!.toStringAsFixed(0)} mi • $_duration',
-                          style: TextStyle(
-                            fontSize: isMobile ? 12 : 14,
+                          style: const TextStyle(
+                            fontSize: 14,
                             color: Colors.green,
                             fontWeight: FontWeight.w500,
                           ),
@@ -278,10 +277,10 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
                   
                   // LISTA DE VEHÍCULOS
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                    padding: const EdgeInsets.symmetric(horizontal: 80),
                     child: Column(
                       children: _vehicles.map((vehicle) => 
-                        _buildVehicleCard(vehicle, isMobile)
+                        _buildVehicleCard(vehicle)
                       ).toList(),
                     ),
                   ),
@@ -296,87 +295,10 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
     );
   }
 
-  Widget _buildTopNavBar(bool isMobile, double horizontalPadding) {
-    if (isMobile) {
-      return Container(
-        height: 70,
-        padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            const Text(
-              'VANELUX',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF0B3254),
-              ),
-            ),
-            const Spacer(),
-            if (_currentUser == null)
-              TextButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please login to continue')),
-                  );
-                },
-                child: const Text('LOGIN', style: TextStyle(color: Color(0xFF0B3254), fontSize: 14)),
-              )
-            else
-              PopupMenuButton<String>(
-                child: CircleAvatar(
-                  backgroundColor: const Color(0xFFD4AF37),
-                  radius: 18,
-                  child: Text(
-                    _currentUser!.name.isNotEmpty 
-                      ? _currentUser!.name[0].toUpperCase() 
-                      : 'U',
-                    style: const TextStyle(color: Colors.white, fontSize: 14),
-                  ),
-                ),
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: 'logout',
-                    child: const Row(
-                      children: [
-                        Icon(Icons.logout, size: 20, color: Colors.red),
-                        SizedBox(width: 8),
-                        Text('Logout', style: TextStyle(color: Colors.red)),
-                      ],
-                    ),
-                  ),
-                ],
-                onSelected: (value) async {
-                  if (value == 'logout') {
-                    await AuthService.logout();
-                    setState(() {
-                      _currentUser = null;
-                    });
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Logged out successfully')),
-                      );
-                    }
-                  }
-                },
-              ),
-          ],
-        ),
-      );
-    }
-    
+  Widget _buildTopNavBar() {
     return Container(
       height: 70,
-      padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+      padding: const EdgeInsets.symmetric(horizontal: 80),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -537,48 +459,32 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
     );
   }
 
-  Widget _buildStepIndicator(bool isMobile, double horizontalPadding) {
-    if (isMobile) {
-      return Container(
-        padding: EdgeInsets.symmetric(vertical: 24, horizontal: horizontalPadding),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildStep(1, 'Information', true, isMobile),
-            _buildStepLine(true, isMobile),
-            _buildStep(2, 'Vehicle', true, isMobile),
-            _buildStepLine(false, isMobile),
-            _buildStep(3, 'Login', false, isMobile),
-          ],
-        ),
-      );
-    }
-    
+  Widget _buildStepIndicator() {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 32, horizontal: horizontalPadding),
+      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 80),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _buildStep(1, 'Information', true, isMobile),
-          _buildStepLine(true, isMobile),
-          _buildStep(2, 'Vehicle', true, isMobile),
-          _buildStepLine(false, isMobile),
-          _buildStep(3, 'Login', false, isMobile),
-          _buildStepLine(false, isMobile),
-          _buildStep(4, 'Details', false, isMobile),
-          _buildStepLine(false, isMobile),
-          _buildStep(5, 'Payment', false, isMobile),
+          _buildStep(1, 'Information', true),
+          _buildStepLine(true),
+          _buildStep(2, 'Vehicle', true),
+          _buildStepLine(false),
+          _buildStep(3, 'Login', false),
+          _buildStepLine(false),
+          _buildStep(4, 'Details', false),
+          _buildStepLine(false),
+          _buildStep(5, 'Payment', false),
         ],
       ),
     );
   }
 
-  Widget _buildStep(int number, String label, bool isActive, bool isMobile) {
+  Widget _buildStep(int number, String label, bool isActive) {
     return Column(
       children: [
         Container(
-          width: isMobile ? 32 : 40,
-          height: isMobile ? 32 : 40,
+          width: 40,
+          height: 40,
           decoration: BoxDecoration(
             color: isActive ? const Color(0xFF4CAF50) : Colors.grey[300],
             shape: BoxShape.circle,
@@ -589,7 +495,7 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
               style: TextStyle(
                 color: isActive ? Colors.white : Colors.grey[600],
                 fontWeight: FontWeight.bold,
-                fontSize: isMobile ? 14 : 16,
+                fontSize: 16,
               ),
             ),
           ),
@@ -598,7 +504,7 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
         Text(
           label,
           style: TextStyle(
-            fontSize: isMobile ? 10 : 12,
+            fontSize: 12,
             color: isActive ? const Color(0xFF0B3254) : Colors.grey[600],
           ),
         ),
@@ -606,102 +512,19 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
     );
   }
 
-  Widget _buildStepLine(bool isActive, bool isMobile) {
+  Widget _buildStepLine(bool isActive) {
     return Container(
-      width: isMobile ? 40 : 80,
+      width: 80,
       height: 2,
-      margin: EdgeInsets.only(bottom: isMobile ? 24 : 28),
+      margin: const EdgeInsets.only(bottom: 28),
       color: isActive ? const Color(0xFF4CAF50) : Colors.grey[300],
     );
   }
 
-  Widget _buildTripInfo(bool isMobile, double horizontalPadding) {
-    if (isMobile) {
-      return Container(
-        padding: const EdgeInsets.all(16),
-        margin: EdgeInsets.symmetric(horizontal: horizontalPadding),
-        decoration: BoxDecoration(
-          color: Colors.grey[50],
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.location_on_outlined, color: Color(0xFF0B3254), size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Pickup',
-                        style: TextStyle(fontSize: 11, color: Colors.grey),
-                      ),
-                      Text(
-                        widget.pickupAddress,
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                const Icon(Icons.location_on, color: Color(0xFF0B3254), size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Destination',
-                        style: TextStyle(fontSize: 11, color: Colors.grey),
-                      ),
-                      Text(
-                        widget.destinationAddress,
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                const Icon(Icons.calendar_today, color: Color(0xFF0B3254), size: 20),
-                const SizedBox(width: 8),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Date & Time',
-                      style: TextStyle(fontSize: 11, color: Colors.grey),
-                    ),
-                    Text(
-                      _formatDateTime(widget.selectedDateTime),
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-      );
-    }
-    
+  Widget _buildTripInfo() {
     return Container(
       padding: const EdgeInsets.all(24),
-      margin: EdgeInsets.symmetric(horizontal: horizontalPadding),
+      margin: const EdgeInsets.symmetric(horizontal: 80),
       decoration: BoxDecoration(
         color: Colors.grey[50],
         borderRadius: BorderRadius.circular(8),
@@ -764,10 +587,10 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
     );
   }
 
-  Widget _buildMapSection(bool isMobile, double horizontalPadding) {
+  Widget _buildMapSection() {
     return Container(
-      height: isMobile ? 250 : 400,
-      margin: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: isMobile ? 16 : 32),
+      height: 400,
+      margin: const EdgeInsets.symmetric(horizontal: 80, vertical: 32),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
@@ -793,225 +616,16 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
                 markers: _markers,
                 polylines: _polylines,
                 onMapCreated: (controller) {
-                  // Map controller created
+                  _mapController = controller;
                 },
               ),
       ),
     );
   }
 
-  Widget _buildVehicleCard(_VehicleOption vehicle, bool isMobile) {
+  Widget _buildVehicleCard(_VehicleOption vehicle) {
     final totalPrice = _calculateTotalPrice(vehicle);
     final isSelected = _selectedVehicleName == vehicle.name;
-    
-    if (isMobile) {
-      return Container(
-        margin: const EdgeInsets.only(bottom: 20),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(
-            color: isSelected ? const Color(0xFF4CAF50) : Colors.grey[300]!,
-            width: isSelected ? 2 : 1,
-          ),
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // IMAGEN DEL VEHÍCULO
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                vehicle.imageUrl,
-                width: double.infinity,
-                height: 180,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    width: double.infinity,
-                    height: 180,
-                    color: Colors.grey[100],
-                    child: const Icon(Icons.directions_car, size: 64, color: Colors.grey),
-                  );
-                },
-              ),
-            ),
-            
-            const SizedBox(height: 16),
-            
-            // NOMBRE Y DESCRIPCIÓN
-            Text(
-              vehicle.name,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF0B3254),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              vehicle.description,
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.grey[700],
-                height: 1.4,
-              ),
-            ),
-            
-            const SizedBox(height: 16),
-            
-            // CARACTERÍSTICAS
-            Wrap(
-              spacing: 16,
-              runSpacing: 12,
-              children: [
-                _buildFeature(Icons.person, '${vehicle.passengers} pax'),
-                _buildFeature(Icons.luggage, '${vehicle.luggage} bags'),
-                _buildFeature(Icons.wifi, 'WiFi'),
-                _buildFeature(Icons.access_time, '90 min wait'),
-              ],
-            ),
-            
-            const SizedBox(height: 20),
-            
-            // PRECIO
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.grey[50],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Total Price',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      Text(
-                        '\$${totalPrice.toStringAsFixed(2)}',
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF0B3254),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Base: \$${vehicle.basePrice.toStringAsFixed(2)} • ${_distanceMiles?.toStringAsFixed(0) ?? "0"} mi',
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                  Text(
-                    'Fees & taxes included',
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                ],
-              ),
-            ),
-            
-            const SizedBox(height: 16),
-            
-            // BOTÓN
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _selectedVehicleName = vehicle.name;
-                  });
-                  
-                  // Calcular precio total
-                  final totalPrice = _calculateTotalPrice(vehicle);
-                  
-                  // Determinar tipo de servicio
-                  String serviceType = 'point-to-point';
-                  if (widget.serviceType == 'To Airport') {
-                    serviceType = 'to-airport';
-                  } else if (widget.serviceType == 'From Airport') {
-                    serviceType = 'from-airport';
-                  }
-                  
-                  // Si el usuario YA está autenticado, ir directamente a BookingDetailsScreen
-                  if (_currentUser != null) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => BookingDetailsScreen(
-                          pickupAddress: widget.pickupAddress,
-                          destinationAddress: widget.destinationAddress,
-                          pickupLat: widget.pickupLat,
-                          pickupLng: widget.pickupLng,
-                          destinationLat: widget.destinationLat,
-                          destinationLng: widget.destinationLng,
-                          selectedDateTime: widget.selectedDateTime,
-                          vehicleName: vehicle.name,
-                          totalPrice: totalPrice,
-                          distanceMiles: _distanceMiles ?? 0,
-                          duration: _duration ?? '',
-                          serviceType: serviceType,
-                        ),
-                      ),
-                    );
-                  } else {
-                    // Si NO está autenticado, ir a LoginWebScreen (paso 3)
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => LoginWebScreen(
-                          pickupAddress: widget.pickupAddress,
-                          destinationAddress: widget.destinationAddress,
-                          pickupLat: widget.pickupLat,
-                          pickupLng: widget.pickupLng,
-                          destinationLat: widget.destinationLat,
-                          destinationLng: widget.destinationLng,
-                          selectedDateTime: widget.selectedDateTime,
-                          vehicleName: vehicle.name,
-                          totalPrice: totalPrice,
-                          distanceMiles: _distanceMiles ?? 0,
-                          duration: _duration ?? '',
-                          serviceType: serviceType,
-                        ),
-                      ),
-                    );
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0B3254),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: const Text(
-                  'Select Vehicle',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
     
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
