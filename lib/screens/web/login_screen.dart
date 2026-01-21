@@ -914,7 +914,14 @@ class _LoginWebScreenState extends State<LoginWebScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: TextButton(
-        onPressed: () {},
+        onPressed: () {
+          // Navigate to main screen and scroll to section
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/',
+            (route) => false,
+          );
+        },
         child: Text(
           text,
           style: const TextStyle(
