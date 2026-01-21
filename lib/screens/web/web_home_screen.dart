@@ -3330,6 +3330,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     }
 
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -3343,6 +3344,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           // Mostrar imagen si existe, de lo contrario mostrar icono
           if (imagePath != null)
@@ -3379,6 +3381,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           const SizedBox(height: 24),
           Text(
             title,
+            textAlign: TextAlign.center,
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
