@@ -1005,139 +1005,258 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     
     final detailedInfo = info['detailedInfo'] as List;
     
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 80),
-      color: Colors.white,
-      child: Column(
-        children: [
-          Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 900;
+        
+        return Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: isMobile ? 20 : 100,
+            vertical: isMobile ? 40 : 80,
+          ),
+          color: Colors.white,
+          child: Column(
             children: [
-              Container(
-                padding: const EdgeInsets.all(15),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF0B3254),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  info['icon'],
-                  color: const Color(0xFFFFD700),
-                  size: 32,
-                ),
-              ),
-              const SizedBox(width: 20),
-              Expanded(
-                child: Text(
-                  '${info['title']} - Premium Service',
-                  style: const TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF0B3254),
-                  ),
-                ),
-              ),
+              // Título con icono
+              isMobile
+                  ? Column(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(15),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF0B3254),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            info['icon'],
+                            color: const Color(0xFFFFD700),
+                            size: 32,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          '${info['title']} - Premium Service',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF0B3254),
+                          ),
+                        ),
+                      ],
+                    )
+                  : Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(15),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF0B3254),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            info['icon'],
+                            color: const Color(0xFFFFD700),
+                            size: 32,
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        Expanded(
+                          child: Text(
+                            '${info['title']} - Premium Service',
+                            style: const TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF0B3254),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+              SizedBox(height: isMobile ? 24 : 40),
+              
+              // Imagen y descripción
+              isMobile
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Imagen
+                        if (info['image'] != null)
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(15),
+                            child: Image.asset(
+                              info['image'],
+                              width: double.infinity,
+                              height: 200,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        const SizedBox(height: 24),
+                        // Descripción
+                        Text(
+                          info['subtitle'] ?? '',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF0B3254),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          info['description'],
+                          style: const TextStyle(
+                            fontSize: 15,
+                            height: 1.6,
+                            color: Color(0xFF666666),
+                          ),
+                        ),
+                      ],
+                    )
+                  : Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Imagen
+                        if (info['image'] != null)
+                          Expanded(
+                            flex: 2,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(15),
+                              child: Image.asset(
+                                info['image'],
+                                height: 300,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                        const SizedBox(width: 40),
+                        // Descripción
+                        Expanded(
+                          flex: 3,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                info['subtitle'] ?? '',
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF0B3254),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              Text(
+                                info['description'],
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  height: 1.8,
+                                  color: Color(0xFF666666),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+              SizedBox(height: isMobile ? 32 : 50),
+              
+              // Características detalladas
+              isMobile
+                  ? Column(
+                      children: detailedInfo.map<Widget>((item) {
+                        return Container(
+                          width: double.infinity,
+                          margin: const EdgeInsets.only(bottom: 16),
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF0B3254),
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: Column(
+                            children: [
+                              Icon(
+                                item['icon'],
+                                color: const Color(0xFFFFD700),
+                                size: 36,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                item['title'],
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                item['description'],
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.white70,
+                                  height: 1.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    )
+                  : Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: detailedInfo.map((item) {
+                        return Expanded(
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 10),
+                            padding: const EdgeInsets.all(25),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF0B3254),
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: Column(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(15),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.1),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    item['icon'],
+                                    size: 40,
+                                    color: const Color(0xFFFFD700),
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+                                Text(
+                                  item['title'],
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  item['description'],
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white.withOpacity(0.8),
+                                    height: 1.5,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
             ],
           ),
-          const SizedBox(height: 40),
-          // Imagen y descripción lado a lado
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Imagen
-              if (info['image'] != null)
-                Expanded(
-                  flex: 2,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(15),
-                    child: Image.asset(
-                      info['image'],
-                      height: 300,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              const SizedBox(width: 40),
-              // Descripción
-              Expanded(
-                flex: 3,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      info['subtitle'] ?? '',
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF0B3254),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      info['description'],
-                      style: const TextStyle(
-                        fontSize: 16,
-                        height: 1.8,
-                        color: Color(0xFF666666),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 50),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: detailedInfo.map((item) {
-              return Expanded(
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 10),
-                  padding: const EdgeInsets.all(25),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF0B3254),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(15),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          item['icon'],
-                          size: 40,
-                          color: const Color(0xFFFFD700),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        item['title'],
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        item['description'],
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white.withOpacity(0.8),
-                          height: 1.5,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -1146,32 +1265,136 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     
     final packages = info['packages'] as List;
     
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 80),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFFF8F9FA),
-            Colors.white,
-          ],
-        ),
-      ),
-      child: Column(
-        children: [
-          const Text(
-            'Our Hourly Service Packages',
-            style: TextStyle(
-              fontSize: 36,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF0B3254),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 900;
+        
+        return Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: isMobile ? 20 : 100,
+            vertical: isMobile ? 40 : 80,
+          ),
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFFF8F9FA),
+                Colors.white,
+              ],
             ),
           ),
-          const SizedBox(height: 60),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: packages.map((package) {
+          child: Column(
+            children: [
+              Text(
+                'Our Hourly Service Packages',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: isMobile ? 28 : 36,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF0B3254),
+                ),
+              ),
+              SizedBox(height: isMobile ? 32 : 60),
+              isMobile
+                  ? Column(
+                      children: packages.map<Widget>((package) {
+                        final hasBadge = package.containsKey('badge');
+                        return Container(
+                          width: double.infinity,
+                          margin: const EdgeInsets.only(bottom: 20),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            border: hasBadge
+                                ? Border.all(color: const Color(0xFFFFD700), width: 3)
+                                : Border.all(color: Colors.grey.shade200, width: 1),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.08),
+                                blurRadius: 30,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            children: [
+                              if (hasBadge)
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFFFFD700),
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(20),
+                                      topRight: Radius.circular(20),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    package['badge'],
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF0B3254),
+                                      letterSpacing: 1.5,
+                                    ),
+                                  ),
+                                ),
+                              Padding(
+                                padding: const EdgeInsets.all(24),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      package['name'],
+                                      style: const TextStyle(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF0B3254),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      package['description'],
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: Color(0xFF666666),
+                                        height: 1.5,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 20),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          package['duration'],
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            color: Color(0xFF999999),
+                                          ),
+                                        ),
+                                        Text(
+                                          package['price'],
+                                          style: const TextStyle(
+                                            fontSize: 28,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFF0B3254),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    )
+                  : Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: packages.map((package) {
               final hasBadge = package.containsKey('badge');
               return Expanded(
                 child: Container(
@@ -1505,54 +1728,63 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     final features = info['features'] as List;
     if (features.isEmpty) return const SizedBox.shrink();
 
-    return Container(
-      color: const Color(0xFFF8F9FA),
-      padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 80),
-      child: Column(
-        children: [
-          const Text(
-            'Service Features',
-            style: TextStyle(
-              fontSize: 36,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF0B3254),
-            ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 900;
+        
+        return Container(
+          color: const Color(0xFFF8F9FA),
+          padding: EdgeInsets.symmetric(
+            horizontal: isMobile ? 20 : 100,
+            vertical: isMobile ? 40 : 80,
           ),
-          const SizedBox(height: 50),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 40,
-              mainAxisSpacing: 40,
-              childAspectRatio: 3,
-            ),
-            itemCount: features.length,
-            itemBuilder: (context, index) {
-              return Row(
-                children: [
-                  const Icon(
-                    Icons.check_circle,
-                    color: Color(0xFF28A745),
-                    size: 24,
-                  ),
-                  const SizedBox(width: 15),
-                  Expanded(
-                    child: Text(
-                      features[index],
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Color(0xFF333333),
+          child: Column(
+            children: [
+              Text(
+                'Service Features',
+                style: TextStyle(
+                  fontSize: isMobile ? 28 : 36,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF0B3254),
+                ),
+              ),
+              SizedBox(height: isMobile ? 32 : 50),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: isMobile ? 1 : 3,
+                  crossAxisSpacing: isMobile ? 0 : 40,
+                  mainAxisSpacing: isMobile ? 16 : 40,
+                  childAspectRatio: isMobile ? 8 : 3,
+                ),
+                itemCount: features.length,
+                itemBuilder: (context, index) {
+                  return Row(
+                    children: [
+                      const Icon(
+                        Icons.check_circle,
+                        color: Color(0xFF28A745),
+                        size: 24,
                       ),
-                    ),
-                  ),
-                ],
-              );
-            },
+                      const SizedBox(width: 15),
+                      Expanded(
+                        child: Text(
+                          features[index],
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Color(0xFF333333),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
