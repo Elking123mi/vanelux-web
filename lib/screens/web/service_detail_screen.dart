@@ -1395,19 +1395,19 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                   : Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: packages.map((package) {
-              final hasBadge = package.containsKey('badge');
-              return Expanded(
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 15),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: hasBadge
-                        ? Border.all(color: const Color(0xFFFFD700), width: 3)
-                        : Border.all(color: Colors.grey.shade200, width: 1),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
+                        final hasBadge = package.containsKey('badge');
+                        return Expanded(
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 15),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              border: hasBadge
+                                  ? Border.all(color: const Color(0xFFFFD700), width: 3)
+                                  : Border.all(color: Colors.grey.shade200, width: 1),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.08),
                         blurRadius: 30,
                         offset: const Offset(0, 10),
                       ),
@@ -1513,61 +1513,12 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                   ),
                 ),
               );
-            }).toList(),
-          ),
-          const SizedBox(height: 60),
-          Container(
-            padding: const EdgeInsets.all(40),
-            decoration: BoxDecoration(
-              color: const Color(0xFF0B3254),
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Column(
-              children: [
-                const Text(
-                  'Custom Hourly Services',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 15),
-                const Text(
-                  'Need a custom duration? We can accommodate any timeframe for your specific needs.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white70,
-                  ),
-                ),
-                const SizedBox(height: 25),
-                ElevatedButton(
-                  onPressed: () {
-                    // Regresar a la página principal
-                    Navigator.of(context).pop();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFFD700),
-                    padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 18),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+                      }).toList(),
                     ),
-                  ),
-                  child: const Text(
-                    'Request Custom Quote',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF0B3254),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
