@@ -2422,18 +2422,6 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       },
     );
   }
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[500],
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildBookNowSection(Map<String, dynamic> info) {
     return Container(
