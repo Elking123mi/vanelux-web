@@ -1523,155 +1523,225 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   }
 
   Widget _buildWorldCupSection() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 100, vertical: 60),
-      padding: const EdgeInsets.all(60),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF1a4d7a),
-            Color(0xFF0B3254),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 30,
-            offset: const Offset(0, 10),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 900;
+        
+        return Container(
+          margin: EdgeInsets.symmetric(
+            horizontal: isMobile ? 20 : 100,
+            vertical: isMobile ? 40 : 60,
           ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(15),
+          padding: EdgeInsets.all(isMobile ? 30 : 60),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF1a4d7a),
+                Color(0xFF0B3254),
+              ],
             ),
-            child: Image.network(
-              'https://upload.wikimedia.org/wikipedia/en/thumb/e/e3/2026_FIFA_World_Cup.svg/1200px-2026_FIFA_World_Cup.svg.png',
-              height: 120,
-              errorBuilder: (context, error, stackTrace) {
-                return const Icon(
-                  Icons.sports_soccer,
-                  size: 80,
-                  color: Color(0xFFFFD700),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 30),
-          const Text(
-            'WORLD CUP 2026',
-            style: TextStyle(
-              fontSize: 48,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFFFFD700),
-              letterSpacing: 2,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Container(
-            height: 4,
-            width: 300,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [
-                  Color(0xFFFFD700),
-                  Colors.orange,
-                ],
-              ),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(height: 20),
-          const Text(
-            'USA • CANADA • MEXICO',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-              letterSpacing: 4,
-            ),
-          ),
-          const SizedBox(height: 40),
-          const Text(
-            '🏆 Official Transportation Partner 🏆',
-            style: TextStyle(
-              fontSize: 20,
-              color: Colors.white,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 20),
-          const Text(
-            'Book your luxury transportation for all World Cup 2026 matches!\nExclusive packages available for fans traveling to stadiums.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.white70,
-              height: 1.6,
-            ),
-          ),
-          const SizedBox(height: 35),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton.icon(
-                onPressed: () {
-                  // Regresar a la página principal
-                  Navigator.of(context).pop();
-                },
-                icon: const Icon(Icons.event, size: 24),
-                label: const Text(
-                  'VIEW WORLD CUP PACKAGES',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFFD700),
-                  foregroundColor: const Color(0xFF0B3254),
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  elevation: 10,
-                ),
-              ),
-              const SizedBox(width: 20),
-              OutlinedButton.icon(
-                onPressed: () {
-                  // Abrir el teléfono (en web no hace nada, pero en móvil funcionaría)
-                },
-                icon: const Icon(Icons.phone, size: 24),
-                label: const Text(
-                  'CALL: +1 917 599-5522',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1,
-                  ),
-                ),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  side: const BorderSide(color: Colors.white, width: 2),
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                ),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 30,
+                offset: const Offset(0, 10),
               ),
             ],
           ),
-        ],
-      ),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Image.network(
+                  'https://upload.wikimedia.org/wikipedia/en/thumb/e/e3/2026_FIFA_World_Cup.svg/1200px-2026_FIFA_World_Cup.svg.png',
+                  height: isMobile ? 80 : 120,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(
+                      Icons.sports_soccer,
+                      size: isMobile ? 60 : 80,
+                      color: const Color(0xFFFFD700),
+                    );
+                  },
+                ),
+              ),
+              SizedBox(height: isMobile ? 20 : 30),
+              Text(
+                'WORLD CUP 2026',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: isMobile ? 28 : 48,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFFFFD700),
+                  letterSpacing: 2,
+                ),
+              ),
+              SizedBox(height: isMobile ? 8 : 10),
+              Container(
+                height: 4,
+                width: isMobile ? 200 : 300,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFFFFD700),
+                      Colors.orange,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              SizedBox(height: isMobile ? 15 : 20),
+              Text(
+                'USA • CANADA • MEXICO',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: isMobile ? 16 : 24,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                  letterSpacing: 4,
+                ),
+              ),
+              SizedBox(height: isMobile ? 25 : 40),
+              Text(
+                '🏆 Official Transportation Partner 🏆',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: isMobile ? 16 : 20,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              SizedBox(height: isMobile ? 15 : 20),
+              Text(
+                'Book your luxury transportation for all World Cup 2026 matches!\nExclusive packages available for fans traveling to stadiums.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: isMobile ? 14 : 16,
+                  color: Colors.white70,
+                  height: 1.6,
+                ),
+              ),
+              SizedBox(height: isMobile ? 25 : 35),
+              isMobile 
+                ? Column(
+                    children: [
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            // Regresar a la página principal
+                            Navigator.of(context).pop();
+                          },
+                          icon: const Icon(Icons.event, size: 24),
+                          label: const Text(
+                            'VIEW WORLD CUP PACKAGES',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFFD700),
+                            foregroundColor: const Color(0xFF0B3254),
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            elevation: 10,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            // Abrir el teléfono (en web no hace nada, pero en móvil funcionaría)
+                          },
+                          icon: const Icon(Icons.phone, size: 24),
+                          label: const Text(
+                            'CALL: +1 917 599-5522',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            side: const BorderSide(color: Colors.white, width: 2),
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          // Regresar a la página principal
+                          Navigator.of(context).pop();
+                        },
+                        icon: const Icon(Icons.event, size: 24),
+                        label: const Text(
+                          'VIEW WORLD CUP PACKAGES',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFFFD700),
+                          foregroundColor: const Color(0xFF0B3254),
+                          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          elevation: 10,
+                        ),
+                      ),
+                      const SizedBox(width: 20),
+                      OutlinedButton.icon(
+                        onPressed: () {
+                          // Abrir el teléfono (en web no hace nada, pero en móvil funcionaría)
+                        },
+                        icon: const Icon(Icons.phone, size: 24),
+                        label: const Text(
+                          'CALL: +1 917 599-5522',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side: const BorderSide(color: Colors.white, width: 2),
+                          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -1743,187 +1813,346 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     final offers = info['offers'] as List;
     if (offers.isEmpty) return const SizedBox.shrink();
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 100),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            const Color(0xFF0B3254).withOpacity(0.03),
-            const Color(0xFFFFD700).withOpacity(0.05),
-          ],
-        ),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(15),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFD700),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFFFFD700).withOpacity(0.3),
-                      blurRadius: 20,
-                      spreadRadius: 5,
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.local_fire_department,
-                  color: Color(0xFF0B3254),
-                  size: 32,
-                ),
-              ),
-              const SizedBox(width: 20),
-              const Text(
-                'Special Offers & Promotions',
-                style: TextStyle(
-                  fontSize: 42,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF0B3254),
-                ),
-              ),
-            ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 900;
+        
+        return Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: isMobile ? 20 : 100,
+            vertical: isMobile ? 40 : 100,
           ),
-          const SizedBox(height: 15),
-          const Text(
-            'Save more with our exclusive deals',
-            style: TextStyle(
-              fontSize: 20,
-              color: Color(0xFF666666),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                const Color(0xFF0B3254).withOpacity(0.03),
+                const Color(0xFFFFD700).withOpacity(0.05),
+              ],
             ),
           ),
-          const SizedBox(height: 60),
-          Row(
-            children: offers.map((offer) {
-              return Expanded(
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 15),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: const Color(0xFFFFD700),
-                      width: 2,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFFFFD700).withOpacity(0.2),
-                        blurRadius: 30,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      // Badge de descuento
-                      Container(
-                        padding: const EdgeInsets.symmetric(vertical: 30),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [
-                              Color(0xFFFFD700),
-                              Color(0xFFFFA500),
+          child: Column(
+            children: [
+              // Título con icono
+              isMobile
+                  ? Column(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(15),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFD700),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFFFD700).withOpacity(0.3),
+                                blurRadius: 20,
+                                spreadRadius: 5,
+                              ),
                             ],
                           ),
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(18),
-                            topRight: Radius.circular(18),
+                          child: const Icon(
+                            Icons.local_fire_department,
+                            color: Color(0xFF0B3254),
+                            size: 32,
                           ),
                         ),
-                        child: Center(
-                          child: Text(
-                            offer['discount'],
-                            style: const TextStyle(
-                              fontSize: 40,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF0B3254),
-                              shadows: [
-                                Shadow(
-                                  color: Colors.black12,
-                                  offset: Offset(2, 2),
-                                  blurRadius: 4,
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Special Offers & Promotions',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF0B3254),
+                          ),
+                        ),
+                      ],
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(15),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFD700),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFFFD700).withOpacity(0.3),
+                                blurRadius: 20,
+                                spreadRadius: 5,
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.local_fire_department,
+                            color: Color(0xFF0B3254),
+                            size: 32,
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        const Text(
+                          'Special Offers & Promotions',
+                          style: TextStyle(
+                            fontSize: 42,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF0B3254),
+                          ),
+                        ),
+                      ],
+                    ),
+              SizedBox(height: isMobile ? 8 : 15),
+              Text(
+                'Save more with our exclusive deals',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: isMobile ? 16 : 20,
+                  color: const Color(0xFF666666),
+                ),
+              ),
+              SizedBox(height: isMobile ? 32 : 60),
+              
+              // Tarjetas de ofertas
+              isMobile
+                  ? Column(
+                      children: offers.map<Widget>((offer) {
+                        return Container(
+                          width: double.infinity,
+                          margin: const EdgeInsets.only(bottom: 20),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: const Color(0xFFFFD700),
+                              width: 2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFFFD700).withOpacity(0.2),
+                                blurRadius: 30,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(vertical: 24),
+                                decoration: const BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Color(0xFFFFD700),
+                                      Color(0xFFFFA500),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(18),
+                                    topRight: Radius.circular(18),
+                                  ),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    offer['discount'],
+                                    style: const TextStyle(
+                                      fontSize: 32,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF0B3254),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(24),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      offer['title'],
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF0B3254),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      offer['description'],
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey[600],
+                                        height: 1.5,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 10,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF0B3254).withOpacity(0.05),
+                                        borderRadius: BorderRadius.circular(10),
+                                        border: Border.all(
+                                          color: const Color(0xFF0B3254).withOpacity(0.2),
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(
+                                            Icons.confirmation_number,
+                                            color: Color(0xFF0B3254),
+                                            size: 18,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            'Code: ${offer['code']}',
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: Color(0xFF0B3254),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    )
+                  : Row(
+                      children: offers.map((offer) {
+                        return Expanded(
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 15),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: const Color(0xFFFFD700),
+                                width: 2,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFFFFD700).withOpacity(0.2),
+                                  blurRadius: 30,
+                                  offset: const Offset(0, 10),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                // Badge de descuento
+                                Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 30),
+                                  decoration: const BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Color(0xFFFFD700),
+                                        Color(0xFFFFA500),
+                                      ],
+                                    ),
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(18),
+                                      topRight: Radius.circular(18),
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      offer['discount'],
+                                      style: const TextStyle(
+                                        fontSize: 40,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF0B3254),
+                                        shadows: [
+                                          Shadow(
+                                            color: Colors.black12,
+                                            offset: Offset(2, 2),
+                                            blurRadius: 4,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                // Contenido
+                                Padding(
+                                  padding: const EdgeInsets.all(30),
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        offer['title'],
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF0B3254),
+                                          height: 1.3,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 15),
+                                      Text(
+                                        offer['description'],
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.grey[600],
+                                          height: 1.5,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 25),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 20,
+                                          vertical: 12,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF0B3254).withOpacity(0.05),
+                                          borderRadius: BorderRadius.circular(10),
+                                          border: Border.all(
+                                            color: const Color(0xFF0B3254).withOpacity(0.2),
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(
+                                              Icons.confirmation_number,
+                                              color: Color(0xFF0B3254),
+                                              size: 20,
+                                            ),
+                                            const SizedBox(width: 10),
+                                            Text(
+                                              'Code: ${offer['code']}',
+                                              style: const TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xFF0B3254),
+                                                letterSpacing: 1,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),
                           ),
-                        ),
-                      ),
-                      // Contenido
-                      Padding(
-                        padding: const EdgeInsets.all(30),
-                        child: Column(
-                          children: [
-                            Text(
-                              offer['title'],
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF0B3254),
-                                height: 1.3,
-                              ),
-                            ),
-                            const SizedBox(height: 15),
-                            Text(
-                              offer['description'],
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey[600],
-                                height: 1.5,
-                              ),
-                            ),
-                            const SizedBox(height: 25),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 12,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF0B3254).withOpacity(0.05),
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color: const Color(0xFF0B3254).withOpacity(0.2),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.confirmation_number,
-                                    color: Color(0xFF0B3254),
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Text(
-                                    'Code: ${offer['code']}',
-                                    style: const TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF0B3254),
-                                      letterSpacing: 1,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }).toList(),
+                        );
+                      }).toList(),
+                    ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -1934,191 +2163,265 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     // Mostrar vehículos si existen
     final hasVehicles = info.containsKey('vehicles');
 
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 100),
-      child: Column(
-        children: [
-          const Text(
-            'Transparent Pricing',
-            style: TextStyle(
-              fontSize: 42,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF0B3254),
-            ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 900;
+        
+        return Container(
+          color: Colors.white,
+          padding: EdgeInsets.symmetric(
+            horizontal: isMobile ? 20 : 100,
+            vertical: isMobile ? 50 : 100,
           ),
-          const SizedBox(height: 15),
-          Text(
-            'No hidden fees, just premium service',
-            style: TextStyle(
-              fontSize: 18,
-              color: Colors.grey[600],
-            ),
-          ),
-          const SizedBox(height: 60),
-          
-          // Mostrar vehículos con imágenes si existen
-          if (hasVehicles) ...[
-            const Text(
-              'Our Fleet',
-              style: TextStyle(
-                fontSize: 36,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF0B3254),
-              ),
-            ),
-            const SizedBox(height: 40),
-            Wrap(
-              spacing: 30,
-              runSpacing: 30,
-              alignment: WrapAlignment.center,
-              children: (info['vehicles'] as List).map((vehicle) {
-                return Container(
-                  width: 280,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: const Color(0xFF0B3254).withOpacity(0.1),
-                      width: 2,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF0B3254).withOpacity(0.08),
-                        blurRadius: 30,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      ClipRRect(
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(20),
-                          topRight: Radius.circular(20),
-                        ),
-                        child: Image.asset(
-                          vehicle['image'],
-                          height: 180,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              height: 180,
-                              color: Colors.grey[200],
-                              child: const Icon(
-                                Icons.directions_car,
-                                size: 80,
-                                color: Colors.grey,
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Text(
-                          vehicle['name'],
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF0B3254),
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 80),
-          ],
-          
-          // Tabla de precios
-          Container(
-            padding: const EdgeInsets.all(50),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(25),
-              border: Border.all(
-                color: const Color(0xFF0B3254).withOpacity(0.1),
-                width: 2,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF0B3254).withOpacity(0.08),
-                  blurRadius: 40,
-                  offset: const Offset(0, 15),
+          child: Column(
+            children: [
+              Text(
+                'Transparent Pricing',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: isMobile ? 28 : 42,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF0B3254),
                 ),
-              ],
-            ),
-            child: Column(
-              children: pricing.entries.map((entry) {
-                return Container(
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(
-                        color: Colors.grey[200]!,
-                        width: 1,
-                      ),
-                    ),
+              ),
+              SizedBox(height: isMobile ? 10 : 15),
+              Text(
+                'No hidden fees, just premium service',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: isMobile ? 16 : 18,
+                  color: Colors.grey[600],
+                ),
+              ),
+              SizedBox(height: isMobile ? 40 : 60),
+              
+              // Mostrar vehículos con imágenes si existen
+              if (hasVehicles) ...[
+                Text(
+                  'Our Fleet',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: isMobile ? 28 : 36,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF0B3254),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
+                ),
+                SizedBox(height: isMobile ? 25 : 40),
+                Wrap(
+                  spacing: isMobile ? 20 : 30,
+                  runSpacing: isMobile ? 20 : 30,
+                  alignment: WrapAlignment.center,
+                  children: (info['vehicles'] as List).map((vehicle) {
+                    return Container(
+                      width: isMobile ? double.infinity : 280,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: const Color(0xFF0B3254).withOpacity(0.1),
+                          width: 2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF0B3254).withOpacity(0.08),
+                            blurRadius: 30,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: Column(
                         children: [
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFFD700).withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(10),
+                          ClipRRect(
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(20),
+                              topRight: Radius.circular(20),
                             ),
-                            child: const Icon(
-                              Icons.check_circle,
-                              color: Color(0xFFFFD700),
-                              size: 24,
+                            child: Image.asset(
+                              vehicle['image'],
+                              height: isMobile ? 150 : 180,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  height: isMobile ? 150 : 180,
+                                  color: Colors.grey[200],
+                                  child: Icon(
+                                    Icons.directions_car,
+                                    size: isMobile ? 60 : 80,
+                                    color: Colors.grey,
+                                  ),
+                                );
+                              },
                             ),
                           ),
-                          const SizedBox(width: 20),
-                          Text(
-                            entry.key,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              color: Color(0xFF333333),
-                              fontWeight: FontWeight.w500,
+                          Padding(
+                            padding: const EdgeInsets.all(20),
+                            child: Text(
+                              vehicle['name'],
+                              style: TextStyle(
+                                fontSize: isMobile ? 16 : 18,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF0B3254),
+                              ),
+                              textAlign: TextAlign.center,
                             ),
                           ),
                         ],
                       ),
-                      Text(
-                        entry.value,
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF0B3254),
+                    );
+                  }).toList(),
+                ),
+                SizedBox(height: isMobile ? 50 : 80),
+              ],
+              
+              // Tabla de precios
+              Container(
+                padding: EdgeInsets.all(isMobile ? 25 : 50),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(25),
+                  border: Border.all(
+                    color: const Color(0xFF0B3254).withOpacity(0.1),
+                    width: 2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF0B3254).withOpacity(0.08),
+                      blurRadius: 40,
+                      offset: const Offset(0, 15),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: pricing.entries.map((entry) {
+                    return Container(
+                      padding: EdgeInsets.symmetric(
+                        vertical: isMobile ? 15 : 20,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                            color: Colors.grey[200]!,
+                            width: 1,
+                          ),
                         ),
                       ),
-                    ],
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-          const SizedBox(height: 40),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.info_outline,
-                size: 18,
-                color: Colors.grey[500],
+                      child: isMobile 
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFFFD700).withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: const Icon(
+                                      Icons.check_circle,
+                                      color: Color(0xFFFFD700),
+                                      size: 20,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      entry.key,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        color: Color(0xFF333333),
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 44),
+                                child: Text(
+                                  entry.value,
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF0B3254),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFFFD700).withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: const Icon(
+                                      Icons.check_circle,
+                                      color: Color(0xFFFFD700),
+                                      size: 24,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 20),
+                                  Text(
+                                    entry.key,
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      color: Color(0xFF333333),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Text(
+                                entry.value,
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF0B3254),
+                                ),
+                              ),
+                            ],
+                          ),
+                    );
+                  }).toList(),
+                ),
               ),
-              const SizedBox(width: 8),
-              Text(
-                'Prices may vary based on distance, time, and vehicle availability',
+              SizedBox(height: isMobile ? 25 : 40),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    size: isMobile ? 16 : 18,
+                    color: Colors.grey[500],
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Prices may vary based on distance, time, and vehicle availability',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: isMobile ? 12 : 14,
+                        color: Colors.grey[500],
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey[500],
