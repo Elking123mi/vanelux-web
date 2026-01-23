@@ -13,7 +13,7 @@ class StripeService {
     try {
       print('🔵 [StripeService] Creando Payment Intent: \$${amount.toStringAsFixed(2)}');
       
-      final url = Uri.parse('${AppConfig.apiBaseUrl}/api/create-payment-intent');
+      final url = Uri.parse('${AppConfig.centralApiBaseUrl}/create-payment-intent');
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
@@ -47,7 +47,7 @@ class StripeService {
     try {
       print('🔵 [StripeService] Confirmando pago: $paymentIntentId');
       
-      final url = Uri.parse('${AppConfig.apiBaseUrl}/api/confirm-payment?payment_intent_id=$paymentIntentId${bookingId != null ? '&booking_id=$bookingId' : ''}');
+      final url = Uri.parse('${AppConfig.centralApiBaseUrl}/confirm-payment?payment_intent_id=$paymentIntentId${bookingId != null ? '&booking_id=$bookingId' : ''}');
       final response = await http.post(url);
 
       if (response.statusCode == 200) {
