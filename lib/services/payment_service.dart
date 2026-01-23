@@ -129,9 +129,13 @@ class PaymentService {
   /// Calcular el total pagado de una reserva
   Future<double> getTotalPaid(int bookingId) async {
     final payments = await getBookingPayments(bookingId);
-    return payments
-        .where((p) => p.status == 'completed')
-        .fold(0.0, (sum, payment) => sum + payment.amount);
+    double total = 0.0;
+    for (final payment in payments) {
+      if (payment.status == 'completed') {
+        total += payment.amount;
+      }
+    }
+    return total;
   }
 
   /// Verificar si una reserva está pagada completamente
