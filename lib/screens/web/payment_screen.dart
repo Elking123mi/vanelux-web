@@ -1,10 +1,61 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../services/booking_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/payment_service.dart';
 import '../../models/payment.dart';
 import '../../models/types.dart';
+
+// Formatter para número de tarjeta (xxxx xxxx xxxx xxxx)
+class CardNumberFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final text = newValue.text.replaceAll(' ', '');
+    final buffer = StringBuffer();
+    
+    for (int i = 0; i < text.length; i++) {
+      buffer.write(text[i]);
+      if ((i + 1) % 4 == 0 && i + 1 != text.length) {
+        buffer.write(' ');
+      }
+    }
+    
+    final formatted = buffer.toString();
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+}
+
+// Formatter para fecha de expiración (MM/YY)
+class ExpiryDateFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final text = newValue.text.replaceAll('/', '');
+    final buffer = StringBuffer();
+    
+    for (int i = 0; i < text.length && i < 4; i++) {
+      buffer.write(text[i]);
+      if (i == 1 && text.length > 2) {
+        buffer.write('/');
+      }
+    }
+    
+    final formatted = buffer.toString();
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+}
 
 class PaymentScreen extends StatefulWidget {
   final String pickupAddress;
@@ -900,6 +951,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
           const SizedBox(height: 8),
           TextField(
             controller: _cardNumberController,
+            keyboardType: TextInputType.number,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(16),
+              CardNumberFormatter(),
+            ],
             decoration: InputDecoration(
               hintText: 'Card number',
               border: OutlineInputBorder(
@@ -935,6 +992,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
               Expanded(
                 child: TextField(
                   controller: _expiryController,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(4),
+                    ExpiryDateFormatter(),
+                  ],
                   decoration: InputDecoration(
                     hintText: 'MM/YY',
                     border: OutlineInputBorder(
@@ -951,6 +1014,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
               Expanded(
                 child: TextField(
                   controller: _cvvController,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(4),
+                  ],
                   decoration: InputDecoration(
                     hintText: 'CVV',
                     border: OutlineInputBorder(

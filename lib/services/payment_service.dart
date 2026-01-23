@@ -21,19 +21,21 @@ class PaymentService {
     String? notes,
   }) async {
     final token = await _getToken();
-    if (token == null) {
-      throw Exception('No hay sesión activa. Por favor inicia sesión.');
-    }
 
     final url = Uri.parse('${AppConfig.centralApiBaseUrl}/vlx/payments');
     print('🔵 [PaymentService] Creando pago: $url');
+    print('🔵 [PaymentService] Token: ${token != null ? "Presente" : "Guest"}');
+    
+    final headers = {
+      'Content-Type': 'application/json',
+    };
+    if (token != null) {
+      headers['Authorization'] = 'Bearer $token';
+    }
     
     final response = await http.post(
       url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
+      headers: headers,
       body: jsonEncode({
         'booking_id': bookingId,
         'amount': amount,
