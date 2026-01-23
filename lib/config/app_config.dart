@@ -6,7 +6,8 @@ class AppConfig {
     static String get apiBaseUrl {
       // Backend compartido con Conexaship en Railway
       // Base de datos PostgreSQL en Supabase (siempre sincronizado)
-      return const String.fromEnvironment('API_BASE_URL', defaultValue: 'https://web-production-700fe.up.railway.app');
+      // TEMPORALMENTE usando localhost para testing
+      return const String.fromEnvironment('API_BASE_URL', defaultValue: 'http://localhost:3000');
     }
     
     static const String apiVersionPath = '/api/v1';

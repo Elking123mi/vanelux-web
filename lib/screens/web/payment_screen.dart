@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../services/booking_service.dart';
 import '../../services/auth_service.dart';
-import '../../services/stripe_service.dart';
+import '../../services/payment_service.dart';
+import '../../models/payment.dart';
 import '../../models/types.dart';
 
 class PaymentScreen extends StatefulWidget {
@@ -196,53 +197,51 @@ class _PaymentScreenState extends State<PaymentScreen> {
       final bookingId = result['id'] ?? result['booking']?['id'];
       print('🔵 [PaymentScreen] Booking ID: $bookingId');
 
-      // Procesar el pago con Stripe
-      final paymentSuccess = await StripeService.processCardPayment(
-        cardNumber: _cardNumberController.text,
-        expiry: _expiryController.text,
-        cvv: _cvvController.text,
-        cardholderName: _nameController.text,
-        amount: widget.totalPrice,
+      // Obtener últimos 4 dígitos de la tarjeta
+      final cardNumber = _cardNumberController.text.replaceAll(' ', '');
+      final cardLast4 = cardNumber.length >= 4 ? cardNumber.substring(cardNumber.length - 4) : cardNumber;
+
+      // Procesar el pago con el sistema del backend
+      final payment = await PaymentService().createPayment(
         bookingId: bookingId,
-        customerEmail: user?.email ?? 'guest@vanelux.com',
+        amount: widget.totalPrice,
+        paymentMethod: 'card',
+        cardLast4: cardLast4,
+        notes: 'Pago desde web - ${widget.vehicleName}',
       );
+
+      print('✅ [PaymentScreen] Pago procesado: ${payment.id}');
 
       if (!mounted) return;
       Navigator.of(context).pop(); // Cerrar loading
 
-      if (paymentSuccess) {
-        // Show success dialog
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Payment Successful'),
-            content: const Text(
-              'Your booking has been confirmed! You will receive a confirmation email shortly.',
+      // Show success dialog
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Payment Successful'),
+          content: Text(
+            'Your booking has been confirmed!\n\nBooking ID: $bookingId\nPayment: ${payment.displayAmount}\nStatus: ${payment.statusDisplay}',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              },
+              child: const Text('OK'),
             ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
-                },
-                child: const Text('OK'),
-              ),
-            ],
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Payment failed'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+          ],
+        ),
+      );
     } catch (e) {
       print('Error creating booking: $e');
       if (!mounted) return;
       Navigator.of(context).pop(); // Cerrar loading si hay error
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}')),
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
