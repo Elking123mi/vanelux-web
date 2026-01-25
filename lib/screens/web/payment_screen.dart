@@ -235,6 +235,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
         'service_type': vehicleType.toString().split('.').last,
         'is_scheduled': widget.selectedDateTime != null ? 1 : 0,
         'status': 'pending',
+        'customer_email': user?.email,
+        'customer_name': _nameController.text.trim().isNotEmpty ? _nameController.text.trim() : user?.fullName,
       };
 
       print('🔵 [PaymentScreen] Payload para backend: $bookingPayload');
