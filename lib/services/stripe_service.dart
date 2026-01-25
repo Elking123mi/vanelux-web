@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -8,32 +9,19 @@ class StripeService {
   static const String baseUrl = 'https://web-production-700fe.up.railway.app/api/v1';
   final storage = const FlutterSecureStorage();
   
-  String? _publishableKey;
   bool _initialized = false;
 
-  // Inicializar Stripe
+  // Inicializar Stripe con la clave pública
   Future<void> init() async {
     if (_initialized) return;
 
     try {
-      final token = await storage.read(key: 'access_token');
-      
-      final response = await http.get(
-        Uri.parse('$baseUrl/vlx/payments/stripe/config'),
-        headers: {'Authorization': 'Bearer $token'},
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        _publishableKey = data['publishable_key'];
-        
-        if (_publishableKey != null && _publishableKey!.isNotEmpty) {
-          Stripe.publishableKey = _publishableKey!;
-          _initialized = true;
-        }
-      }
+      // Usar la clave pública directamente desde AppConfig
+      Stripe.publishableKey = AppConfig.stripePublishableKey;
+      _initialized = true;
+      print('✅ Stripe inicializado correctamente');
     } catch (e) {
-      print('Error inicializando Stripe: $e');
+      print('❌ Error inicializando Stripe: $e');
       rethrow;
     }
   }
@@ -43,74 +31,96 @@ class StripeService {
     required int bookingId,
     required double amount,
     String? description,
+    String? customerEmail,
   }) async {
     try {
       await init();
       
       final token = await storage.read(key: 'access_token');
+      print('🔐 Token: ${token != null ? "presente" : "ausente"}');
 
-      // 1. Crear Payment Intent
+      // 1. Crear Payment Intent en el backend
+      print('📤 Creando Payment Intent: \$${amount.toStringAsFixed(2)}');
       final intentResponse = await http.post(
-        Uri.parse('$baseUrl/vlx/payments/stripe/create-intent'),
+        Uri.parse('$baseUrl/create-payment-intent'),
         headers: {
-          'Authorization': 'Bearer $token',
+          if (token != null) 'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
           'booking_id': bookingId,
           'amount': amount,
           'currency': 'usd',
-          'description': description,
+          'customer_email': customerEmail,
         }),
       );
 
+      print('📥 Response status: ${intentResponse.statusCode}');
+      print('📥 Response body: ${intentResponse.body}');
+
       if (intentResponse.statusCode != 200) {
-        throw Exception('Error al crear intento de pago');
+        throw Exception('Error al crear intento de pago: ${intentResponse.body}');
       }
 
       final intentData = jsonDecode(intentResponse.body);
-      final clientSecret = intentData['client_secret'] as String;
-      final paymentIntentId = intentData['payment_intent_id'] as String;
+      final clientSecret = intentData['clientSecret'] as String;
+      final paymentIntentId = intentData['paymentIntentId'] as String;
+
+      print('✅ Payment Intent creado: $paymentIntentId');
 
       // 2. Mostrar Payment Sheet de Stripe
+      print('🎨 Inicializando Payment Sheet...');
       await Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
           paymentIntentClientSecret: clientSecret,
-          merchantDisplayName: 'VaneLux',
+          merchantDisplayName: 'VaneLux Luxury Transportation',
           style: ThemeMode.system,
+          appearance: const PaymentSheetAppearance(
+            colors: PaymentSheetAppearanceColors(
+              primary: Color(0xFF1E3A8A),
+            ),
+          ),
         ),
       );
 
+      print('📱 Presentando Payment Sheet...');
       await Stripe.instance.presentPaymentSheet();
 
+      print('✅ Pago completado en Stripe');
+
       // 3. Confirmar pago en el backend
+      print('📤 Confirmando pago en backend...');
       final confirmResponse = await http.post(
-        Uri.parse('$baseUrl/vlx/payments/stripe/confirm'),
+        Uri.parse('$baseUrl/confirm-payment?payment_intent_id=$paymentIntentId&booking_id=$bookingId'),
         headers: {
-          'Authorization': 'Bearer $token',
+          if (token != null) 'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'booking_id': bookingId,
-          'payment_intent_id': paymentIntentId,
-          'amount': amount,
-        }),
       );
 
-      if (confirmResponse.statusCode == 201) {
+      print('📥 Confirm status: ${confirmResponse.statusCode}');
+      print('📥 Confirm body: ${confirmResponse.body}');
+
+      if (confirmResponse.statusCode == 200) {
+        final confirmData = jsonDecode(confirmResponse.body);
         return {
           'success': true,
-          'payment': jsonDecode(confirmResponse.body)['payment'],
+          'message': confirmData['message'],
+          'payment_intent_id': paymentIntentId,
         };
       } else {
-        throw Exception('Error al confirmar el pago');
+        throw Exception('Error al confirmar el pago: ${confirmResponse.body}');
       }
 
     } on StripeException catch (e) {
+      print('❌ StripeException: ${e.error.code} - ${e.error.message}');
       if (e.error.code == FailureCode.Canceled) {
-        throw Exception('Pago cancelado');
+        throw Exception('Pago cancelado por el usuario');
       }
       throw Exception('Error de Stripe: ${e.error.message}');
+    } catch (e) {
+      print('❌ Error general: $e');
+      rethrow;
     }
   }
 }
