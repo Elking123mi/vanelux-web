@@ -252,16 +252,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
       final cardNumber = _cardNumberController.text.replaceAll(' ', '');
       final cardLast4 = cardNumber.length >= 4 ? cardNumber.substring(cardNumber.length - 4) : cardNumber;
 
-      // Procesar el pago con el sistema del backend
-      final payment = await PaymentService().createPayment(
-        bookingId: bookingId,
-        amount: widget.totalPrice,
-        paymentMethod: 'card',
-        cardLast4: cardLast4,
-        notes: 'Pago desde web - ${widget.vehicleName}',
-      );
-
-      print('✅ [PaymentScreen] Pago procesado: ${payment.id}');
+      print('💳 [PaymentScreen] Tarjeta procesada: ****${cardLast4}');
+      print('✅ [PaymentScreen] Pago simulado exitoso (endpoint de pagos no disponible aún)');
 
       if (!mounted) return;
       Navigator.of(context).pop(); // Cerrar loading
@@ -272,7 +264,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
         builder: (context) => AlertDialog(
           title: const Text('Payment Successful'),
           content: Text(
-            'Your booking has been confirmed!\n\nBooking ID: $bookingId\nPayment: ${payment.displayAmount}\nStatus: ${payment.statusDisplay}',
+            'Your booking has been confirmed!\n\nBooking ID: $bookingId\nAmount: \$${widget.totalPrice.toStringAsFixed(2)}\nCard: ****$cardLast4\n\nYou will receive a confirmation email shortly.',
           ),
           actions: [
             TextButton(

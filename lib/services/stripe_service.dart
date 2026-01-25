@@ -1,135 +1,116 @@
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../config/app_config.dart';
 
 class StripeService {
-  /// Obtener token de autenticación
-  static Future<String?> _getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('access_token');
-  }
+  static const String baseUrl = 'https://web-production-700fe.up.railway.app/api/v1';
+  final storage = const FlutterSecureStorage();
+  
+  String? _publishableKey;
+  bool _initialized = false;
 
-  /// Crea un pago usando el sistema de pagos de Railway (/api/v1/vlx/payments)
-  static Future<Map<String, dynamic>> createPayment({
-    required int bookingId,
-    required double amount,
-    required String paymentMethod,
-    String? cardLast4,
-    String? transactionId,
-    String? notes,
-  }) async {
+  // Inicializar Stripe
+  Future<void> init() async {
+    if (_initialized) return;
+
     try {
-      print('🔵 [PaymentService] Creando pago: \$${amount.toStringAsFixed(2)}');
+      final token = await storage.read(key: 'access_token');
       
-      final token = await _getToken();
-      if (token == null) {
-        throw Exception('No hay sesión activa. Por favor inicia sesión.');
-      }
-
-      final url = Uri.parse('${AppConfig.centralApiBaseUrl}/vlx/payments');
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({
-          'booking_id': bookingId,
-          'amount': amount,
-          'payment_method': paymentMethod,
-          if (cardLast4 != null) 'card_last_4': cardLast4,
-          if (transactionId != null) 'transaction_id': transactionId,
-          if (notes != null) 'notes': notes,
-        }),
-      );
-
-      if (response.statusCode == 201) {
-        final data = jsonDecode(response.body);
-        print('✅ [PaymentService] Pago creado exitosamente');
-        return data;
-      } else {
-        final error = jsonDecode(response.body);
-        print('❌ [PaymentService] Error ${response.statusCode}: ${response.body}');
-        throw Exception(error['detail'] ?? 'Failed to create payment: ${response.body}');
-      }
-    } catch (e) {
-      print('❌ [PaymentService] Exception: $e');
-      rethrow;
-    }
-  }
-
-  /// Obtener pagos de una reserva
-  static Future<List<dynamic>> getBookingPayments(int bookingId) async {
-    try {
-      final token = await _getToken();
-      if (token == null) {
-        throw Exception('No hay sesión activa');
-      }
-
-      final url = Uri.parse('${AppConfig.centralApiBaseUrl}/vlx/bookings/$bookingId/payments');
       final response = await http.get(
-        url,
+        Uri.parse('$baseUrl/vlx/payments/stripe/config'),
         headers: {'Authorization': 'Bearer $token'},
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return data['payments'] ?? [];
-      } else {
-        return [];
+        _publishableKey = data['publishable_key'];
+        
+        if (_publishableKey != null && _publishableKey!.isNotEmpty) {
+          Stripe.publishableKey = _publishableKey!;
+          _initialized = true;
+        }
       }
     } catch (e) {
-      print('❌ [PaymentService] Error obteniendo pagos: $e');
-      return [];
+      print('Error inicializando Stripe: $e');
+      rethrow;
     }
   }
 
-  /// Procesa un pago con tarjeta usando el sistema real de Railway
-  static Future<bool> processCardPayment({
-    required String cardNumber,
-    required String expiry,
-    required String cvv,
-    required String cardholderName,
-    required double amount,
+  // Procesar pago
+  Future<Map<String, dynamic>> processPayment({
     required int bookingId,
-    String? customerEmail,
+    required double amount,
+    String? description,
   }) async {
     try {
-      print('🔵 [PaymentService] Procesando pago con tarjeta...');
+      await init();
       
-      // Validaciones básicas
-      if (cardNumber.replaceAll(' ', '').length < 15) {
-        throw Exception('Número de tarjeta inválido');
-      }
-      if (expiry.length < 4) {
-        throw Exception('Fecha de expiración inválida');
-      }
-      if (cvv.length < 3) {
-        throw Exception('CVV inválido');
-      }
-      if (cardholderName.trim().isEmpty) {
-        throw Exception('Nombre del titular requerido');
-      }
+      final token = await storage.read(key: 'access_token');
 
-      // Extraer últimos 4 dígitos de la tarjeta
-      final last4 = cardNumber.replaceAll(' ', '').substring(
-        cardNumber.replaceAll(' ', '').length - 4
+      // 1. Crear Payment Intent
+      final intentResponse = await http.post(
+        Uri.parse('$baseUrl/vlx/payments/stripe/create-intent'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'booking_id': bookingId,
+          'amount': amount,
+          'currency': 'usd',
+          'description': description,
+        }),
       );
 
-      // Crear pago usando el endpoint real de Railway
-      final payment = await createPayment(
-        bookingId: bookingId,
-        amount: amount,
-        paymentMethod: 'card',
-        cardLast4: last4,
-        notes: 'Payment from $cardholderName',
+      if (intentResponse.statusCode != 200) {
+        throw Exception('Error al crear intento de pago');
+      }
+
+      final intentData = jsonDecode(intentResponse.body);
+      final clientSecret = intentData['client_secret'] as String;
+      final paymentIntentId = intentData['payment_intent_id'] as String;
+
+      // 2. Mostrar Payment Sheet de Stripe
+      await Stripe.instance.initPaymentSheet(
+        paymentSheetParameters: SetupPaymentSheetParameters(
+          paymentIntentClientSecret: clientSecret,
+          merchantDisplayName: 'VaneLux',
+          style: ThemeMode.system,
+        ),
       );
 
-      return payment['success'] == true || payment['payment'] != null;
-    } catch (e) {
-      print('❌ [PaymentService] Error procesando pago: $e');
-      rethrow;
+      await Stripe.instance.presentPaymentSheet();
+
+      // 3. Confirmar pago en el backend
+      final confirmResponse = await http.post(
+        Uri.parse('$baseUrl/vlx/payments/stripe/confirm'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'booking_id': bookingId,
+          'payment_intent_id': paymentIntentId,
+          'amount': amount,
+        }),
+      );
+
+      if (confirmResponse.statusCode == 201) {
+        return {
+          'success': true,
+          'payment': jsonDecode(confirmResponse.body)['payment'],
+        };
+      } else {
+        throw Exception('Error al confirmar el pago');
+      }
+
+    } on StripeException catch (e) {
+      if (e.error.code == FailureCode.Canceled) {
+        throw Exception('Pago cancelado');
+      }
+      throw Exception('Error de Stripe: ${e.error.message}');
     }
   }
 }
