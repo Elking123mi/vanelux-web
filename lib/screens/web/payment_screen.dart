@@ -3,8 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../services/booking_service.dart';
 import '../../services/auth_service.dart';
-import '../../services/payment_service.dart';
-import '../../models/payment.dart';
+import '../../services/stripe_service.dart';
 import '../../models/types.dart';
 
 // Formatter para número de tarjeta (xxxx xxxx xxxx xxxx)
@@ -170,14 +169,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
     try {
       print('🔵 [PaymentScreen] Iniciando proceso de pago...');
       
-      // Validar campos de tarjeta
-      if (_cardNumberController.text.trim().isEmpty ||
-          _expiryController.text.trim().isEmpty ||
-          _cvvController.text.trim().isEmpty ||
-          _nameController.text.trim().isEmpty) {
+      // Validar solo el nombre
+      if (_nameController.text.trim().isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Por favor complete todos los campos de pago'),
+            content: Text('Por favor ingrese su nombre completo'),
             backgroundColor: Colors.red,
           ),
         );
@@ -248,12 +244,21 @@ class _PaymentScreenState extends State<PaymentScreen> {
       final bookingId = result['id'] ?? result['booking']?['id'];
       print('🔵 [PaymentScreen] Booking ID: $bookingId');
 
-      // Obtener últimos 4 dígitos de la tarjeta
-      final cardNumber = _cardNumberController.text.replaceAll(' ', '');
-      final cardLast4 = cardNumber.length >= 4 ? cardNumber.substring(cardNumber.length - 4) : cardNumber;
+      if (bookingId == null) {
+        throw Exception('No se recibió ID de reserva');
+      }
 
-      print('💳 [PaymentScreen] Tarjeta procesada: ****${cardLast4}');
-      print('✅ [PaymentScreen] Pago simulado exitoso (endpoint de pagos no disponible aún)');
+      // Procesar pago con Stripe
+      print('💳 [PaymentScreen] Iniciando pago con Stripe...');
+      final stripeService = StripeService();
+      
+      final paymentResult = await stripeService.processPayment(
+        bookingId: bookingId,
+        amount: widget.totalPrice,
+        customerEmail: user?.email,
+      );
+
+      print('✅ [PaymentScreen] Pago procesado: $paymentResult');
 
       if (!mounted) return;
       Navigator.of(context).pop(); // Cerrar loading
