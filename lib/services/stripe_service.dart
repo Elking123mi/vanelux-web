@@ -16,10 +16,21 @@ class StripeService {
     if (_initialized) return;
 
     try {
-      // Usar la clave pública directamente desde AppConfig
-      Stripe.publishableKey = AppConfig.stripePublishableKey;
-      _initialized = true;
-      print('✅ Stripe inicializado correctamente');
+      // Obtener clave pública desde el backend
+      final response = await http.get(
+        Uri.parse('$baseUrl/vlx/payments/stripe/config'),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final publishableKey = data['publishable_key'] as String;
+        
+        Stripe.publishableKey = publishableKey;
+        _initialized = true;
+        print('✅ Stripe inicializado correctamente');
+      } else {
+        throw Exception('Error al obtener config de Stripe: ${response.statusCode}');
+      }
     } catch (e) {
       print('❌ Error inicializando Stripe: $e');
       rethrow;
@@ -42,7 +53,7 @@ class StripeService {
       // 1. Crear Payment Intent en el backend
       print('📤 Creando Payment Intent: \$${amount.toStringAsFixed(2)}');
       final intentResponse = await http.post(
-        Uri.parse('$baseUrl/create-payment-intent'),
+        Uri.parse('$baseUrl/vlx/payments/stripe/create-intent'),
         headers: {
           if (token != null) 'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -91,11 +102,15 @@ class StripeService {
       // 3. Confirmar pago en el backend
       print('📤 Confirmando pago en backend...');
       final confirmResponse = await http.post(
-        Uri.parse('$baseUrl/confirm-payment?payment_intent_id=$paymentIntentId&booking_id=$bookingId'),
+        Uri.parse('$baseUrl/vlx/payments/stripe/confirm'),
         headers: {
           if (token != null) 'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
+        body: jsonEncode({
+          'payment_intent_id': paymentIntentId,
+          'booking_id': bookingId,
+        }),
       );
 
       print('📥 Confirm status: ${confirmResponse.statusCode}');
