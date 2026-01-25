@@ -262,7 +262,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
       final intentResponse = await http.post(
         Uri.parse('https://web-production-700fe.up.railway.app/api/v1/vlx/payments/stripe/create-intent'),
         headers: {
-          if (token != null) 'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
@@ -289,7 +288,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
       final confirmResponse = await http.post(
         Uri.parse('https://web-production-700fe.up.railway.app/api/v1/vlx/payments/stripe/confirm'),
         headers: {
-          if (token != null) 'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
