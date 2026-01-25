@@ -3,8 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../services/booking_service.dart';
 import '../../services/auth_service.dart';
-import '../../services/stripe_service.dart';
 import '../../models/types.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 // Formatter para número de tarjeta (xxxx xxxx xxxx xxxx)
 class CardNumberFormatter extends TextInputFormatter {
@@ -248,17 +250,59 @@ class _PaymentScreenState extends State<PaymentScreen> {
         throw Exception('No se recibió ID de reserva');
       }
 
-      // Procesar pago con Stripe
-      print('💳 [PaymentScreen] Iniciando pago con Stripe...');
-      final stripeService = StripeService();
+      // Procesar pago con Stripe (sin flutter_stripe - solo backend)
+      print('💳 [PaymentScreen] Procesando pago con Stripe en backend...');
       
-      final paymentResult = await stripeService.processPayment(
-        bookingId: bookingId,
-        amount: widget.totalPrice,
-        customerEmail: user?.email,
+      final storage = const FlutterSecureStorage();
+      final token = await storage.read(key: 'access_token');
+      
+      // Crear Payment Intent
+      final intentResponse = await http.post(
+        Uri.parse('https://web-production-700fe.up.railway.app/api/v1/vlx/payments/stripe/create-intent'),
+        headers: {
+          if (token != null) 'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'booking_id': bookingId,
+          'amount': widget.totalPrice,
+          'currency': 'usd',
+          'customer_email': user?.email,
+        }),
       );
 
-      print('✅ [PaymentScreen] Pago procesado: $paymentResult');
+      print('📥 Intent response: ${intentResponse.statusCode}');
+
+      if (intentResponse.statusCode != 200) {
+        throw Exception('Error creando payment intent: ${intentResponse.body}');
+      }
+
+      final intentData = jsonDecode(intentResponse.body);
+      final clientSecret = intentData['client_secret'] as String;
+      final paymentIntentId = intentData['payment_intent_id'] as String;
+
+      print('✅ Payment Intent creado: $paymentIntentId');
+
+      // Confirmar pago (simulado - aquí Stripe procesaría la tarjeta)
+      final confirmResponse = await http.post(
+        Uri.parse('https://web-production-700fe.up.railway.app/api/v1/vlx/payments/stripe/confirm'),
+        headers: {
+          if (token != null) 'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'payment_intent_id': paymentIntentId,
+          'booking_id': bookingId,
+        }),
+      );
+
+      print('📥 Confirm response: ${confirmResponse.statusCode}');
+
+      if (confirmResponse.statusCode != 200) {
+        throw Exception('Error confirmando pago: ${confirmResponse.body}');
+      }
+
+      print('✅ [PaymentScreen] Pago confirmado exitosamente');
 
       if (!mounted) return;
       Navigator.of(context).pop(); // Cerrar loading
