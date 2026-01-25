@@ -269,7 +269,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
         builder: (context) => AlertDialog(
           title: const Text('Payment Successful'),
           content: Text(
-            'Your booking has been confirmed!\n\nBooking ID: $bookingId\nAmount: \$${widget.totalPrice.toStringAsFixed(2)}\nCard: ****$cardLast4\n\nYou will receive a confirmation email shortly.',
+            'Your booking has been confirmed!\n\nBooking ID: $bookingId\nAmount: \$${widget.totalPrice.toStringAsFixed(2)}\n\nYou will receive a confirmation email shortly.',
           ),
           actions: [
             TextButton(
