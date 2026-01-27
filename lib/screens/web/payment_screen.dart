@@ -323,17 +323,18 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   Future<void> _processPayment() async {
-    if (_clientSecret == null || _paymentIntentId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Primero debe crear la reserva'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
-
     try {
+      // Validar nombre
+      if (_nameController.text.trim().isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Por favor ingrese su nombre completo'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
       // Mostrar loading
       showDialog(
         context: context,
@@ -342,20 +343,88 @@ class _PaymentScreenState extends State<PaymentScreen> {
           child: CircularProgressIndicator(),
         ),
       );
+      
+      final user = await AuthService.getCurrentUser();
+      final userId = user?.id;
+
+      // Determine vehicle type
+      VehicleType vehicleType = VehicleType.sedan;
+      if (widget.vehicleName.toLowerCase().contains('suv')) {
+        vehicleType = VehicleType.suv;
+      } else if (widget.vehicleName.toLowerCase().contains('van')) {
+        vehicleType = VehicleType.van;
+      } else if (widget.vehicleName.toLowerCase().contains('luxury') ||
+          widget.vehicleName.toLowerCase().contains('executive') ||
+          widget.vehicleName.toLowerCase().contains('escalade') ||
+          widget.vehicleName.toLowerCase().contains('cadillac')) {
+        vehicleType = VehicleType.luxury;
+      }
+
+      // Crear booking
+      final bookingPayload = {
+        'user_id': userId,
+        'pickup_address': widget.pickupAddress,
+        'pickup_lat': widget.pickupLat,
+        'pickup_lng': widget.pickupLng,
+        'destination_address': widget.destinationAddress,
+        'destination_lat': widget.destinationLat,
+        'destination_lng': widget.destinationLng,
+        'pickup_time': (widget.selectedDateTime ?? DateTime.now()).toIso8601String(),
+        'vehicle_name': widget.vehicleName,
+        'passengers': 1,
+        'price': widget.totalPrice,
+        'distance_miles': widget.distanceMiles,
+        'distance_text': '${widget.distanceMiles.toStringAsFixed(1)} mi',
+        'duration_text': widget.duration,
+        'service_type': vehicleType.toString().split('.').last,
+        'is_scheduled': widget.selectedDateTime != null ? 1 : 0,
+        'status': 'pending',
+        'customer_email': widget.guestEmail ?? user?.email,
+        'customer_name': widget.guestName ?? user?.name ?? _nameController.text.trim(),
+      };
+
+      final result = await BookingService.createBooking(bookingPayload);
+      final bookingId = result['id'] ?? result['booking']?['id'];
+
+      if (bookingId == null) {
+        throw Exception('No se recibió ID de reserva');
+      }
+      
+      // Crear Payment Intent
+      final intentResponse = await http.post(
+        Uri.parse('https://web-production-700fe.up.railway.app/api/v1/vlx/payments/stripe/create-intent'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'booking_id': bookingId,
+          'amount': widget.totalPrice,
+          'currency': 'usd',
+          'customer_email': widget.guestEmail ?? user?.email,
+        }),
+      );
+
+      if (intentResponse.statusCode != 200) {
+        throw Exception('Error creando payment intent: ${intentResponse.body}');
+      }
+
+      final intentData = jsonDecode(intentResponse.body);
+      final clientSecret = intentData['client_secret'] as String;
+      final paymentIntentId = intentData['payment_intent_id'] as String;
+
+      print('✅ Payment Intent creado: $paymentIntentId');
 
       // Confirmar pago con Stripe (procesa la tarjeta REAL)
       final resultPromise = js.callMethod(
         html.window,
         'confirmStripePayment',
-        [_clientSecret]
+        [clientSecret]
       );
 
       // Convertir Promise a Future
-      final result = await js.promiseToFuture(resultPromise);
-      final success = js.getProperty(result, 'success') as bool;
+      final paymentResult = await js.promiseToFuture(resultPromise);
+      final success = js.getProperty(paymentResult, 'success') as bool;
 
       if (!success) {
-        final error = js.getProperty(result, 'error') as String;
+        final error = js.getProperty(paymentResult, 'error') as String;
         throw Exception(error);
       }
 
@@ -366,8 +435,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
         Uri.parse('https://web-production-700fe.up.railway.app/api/v1/vlx/payments/stripe/confirm'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'payment_intent_id': _paymentIntentId,
-          'booking_id': _bookingId,
+          'payment_intent_id': paymentIntentId,
+          'booking_id': bookingId,
         }),
       );
 
@@ -384,7 +453,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
         builder: (context) => AlertDialog(
           title: const Text('✅ Pago Exitoso'),
           content: Text(
-            'Tu reserva ha sido confirmada!\n\nBooking ID: $_bookingId\nMonto: \$${widget.totalPrice.toStringAsFixed(2)}\n\nRecibirás un email de confirmación.',
+            'Tu reserva ha sido confirmada!\n\nBooking ID: $bookingId\nMonto: \$${widget.totalPrice.toStringAsFixed(2)}\n\nRecibirás un email de confirmación.',
           ),
           actions: [
             TextButton(
@@ -1078,96 +1147,50 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
           const SizedBox(height: 24),
 
-          // Stripe Card Element (embebido)
-          if (!_isStripeInitialized || _clientSecret == null) ...[
-            const Text(
-              'Click "Create Booking" to prepare payment',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey),
+          // Mensaje simple - el pago usa Stripe directamente
+          const Text(
+            'Card details',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.grey[50],
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey[200]!),
             ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: _createBookingAndIntent,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4169E1),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+            child: const Row(
+              children: [
+                Icon(Icons.credit_card, size: 20, color: Colors.grey),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Payment will be processed securely through Stripe',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                 ),
-                child: const Text(
-                  'Create Booking',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 32),
+
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton(
+              onPressed: _processPayment,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF4169E1),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
-            ),
-          ] else ...[
-            const Text(
-              'Card details',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            
-            // Mensaje informativo - el Stripe Card Element se monta en el DOM
-            Container(
-              height: 50,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey[300]!),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Center(
-                child: Text(
-                  'Stripe payment form will appear here',
-                  style: TextStyle(color: Colors.grey, fontSize: 12),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey[50],
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey[200]!),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.credit_card, size: 20, color: Colors.grey),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'We accept all major credit and debit cards',
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 32),
-
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: _processPayment,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4169E1),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: Text(
-                  'Pay \$${widget.totalPrice.toStringAsFixed(2)}',
-                  style: const TextStyle(
+              child: Text(
+                'Pay \$${widget.totalPrice.toStringAsFixed(2)}',
+                style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,

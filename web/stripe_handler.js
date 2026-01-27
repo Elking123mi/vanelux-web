@@ -67,23 +67,20 @@ function createStripeCardElement(containerId) {
   }
 }
 
-// Confirm payment with client secret
+// Confirm payment with client secret (abre el prompt de Stripe para pagar)
 async function confirmStripePayment(clientSecret) {
-  if (!stripe || !cardElement) {
+  if (!stripe) {
     return {
       success: false,
-      error: 'Stripe not initialized or card element not mounted'
+      error: 'Stripe not initialized'
     };
   }
   
   try {
-    console.log('💳 Procesando pago con Stripe...');
+    console.log('💳 Abriendo formulario de pago de Stripe...');
     
-    const result = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: {
-        card: cardElement
-      }
-    });
+    // confirmCardPayment abre automáticamente el formulario de Stripe si es necesario
+    const result = await stripe.confirmCardPayment(clientSecret);
     
     if (result.error) {
       console.error('❌ Stripe error:', result.error.message);
