@@ -47,21 +47,18 @@ class StripeService {
     try {
       await init();
       
-      final token = await storage.read(key: 'access_token');
-      print('🔐 Token: ${token != null ? "presente" : "ausente"}');
-
-      // 1. Crear Payment Intent en el backend
+      // 1. Crear Payment Intent en el backend (SIN autenticación - guest checkout)
       print('📤 Creando Payment Intent: \$${amount.toStringAsFixed(2)}');
       final intentResponse = await http.post(
         Uri.parse('$baseUrl/vlx/payments/stripe/create-intent'),
         headers: {
-          if (token != null) 'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
           'booking_id': bookingId,
           'amount': amount,
           'currency': 'usd',
+          'description': description ?? 'Pago de reserva',
           'customer_email': customerEmail,
         }),
       );
@@ -99,12 +96,11 @@ class StripeService {
 
       print('✅ Pago completado en Stripe');
 
-      // 3. Confirmar pago en el backend
+      // 3. Confirmar pago en el backend (SIN autenticación)
       print('📤 Confirmando pago en backend...');
       final confirmResponse = await http.post(
         Uri.parse('$baseUrl/vlx/payments/stripe/confirm'),
         headers: {
-          if (token != null) 'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
