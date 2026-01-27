@@ -72,6 +72,9 @@ class PaymentScreen extends StatefulWidget {
   final String duration;
   final String? flightNumber;
   final Map<String, bool> extraServices;
+  final String? guestEmail;
+  final String? guestName;
+  final String? guestPhone;
 
   const PaymentScreen({
     super.key,
@@ -88,6 +91,9 @@ class PaymentScreen extends StatefulWidget {
     required this.duration,
     this.flightNumber,
     required this.extraServices,
+    this.guestEmail,
+    this.guestName,
+    this.guestPhone,
   });
 
   @override
@@ -235,8 +241,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
         'service_type': vehicleType.toString().split('.').last,
         'is_scheduled': widget.selectedDateTime != null ? 1 : 0,
         'status': 'pending',
-        'customer_email': user?.email,
-        'customer_name': _nameController.text.trim().isNotEmpty ? _nameController.text.trim() : user?.name,
+        'customer_email': widget.guestEmail ?? user?.email,
+        'customer_name': widget.guestName ?? user?.name ?? _nameController.text.trim(),
       };
 
       print('🔵 [PaymentScreen] Payload para backend: $bookingPayload');

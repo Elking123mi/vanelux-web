@@ -142,6 +142,9 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
             'childSafetySeat': _childSafetySeat,
             'extraStop': _extraStop,
           },
+          guestEmail: widget.guestEmail,
+          guestName: widget.guestName,
+          guestPhone: widget.guestPhone,
         ),
       ),
     );
