@@ -23,16 +23,21 @@ function createStripeCardElement(containerId) {
   }
   
   try {
-    // Crear un div para el card element si no existe
-    let container = document.getElementById(containerId);
+    const container = document.getElementById(containerId);
     if (!container) {
-      // Crear el contenedor dinámicamente
-      container = document.createElement('div');
-      container.id = containerId;
-      container.style.width = '100%';
-      container.style.padding = '12px';
-      document.body.appendChild(container);
+      console.error('❌ Container not found:', containerId);
+      return false;
     }
+
+    // Hacer visible el contenedor
+    container.style.position = 'relative';
+    container.style.top = 'auto';
+    container.style.left = 'auto';
+    container.style.width = '100%';
+    container.style.height = 'auto';
+    container.style.padding = '12px';
+    container.style.border = '1px solid #ccc';
+    container.style.borderRadius = '8px';
 
     elements = stripe.elements();
     cardElement = elements.create('card', {

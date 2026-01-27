@@ -1113,7 +1113,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
             ),
             const SizedBox(height: 8),
             
-            // Contenedor para el Stripe Card Element
+            // Mensaje informativo - el Stripe Card Element se monta en el DOM
             Container(
               height: 50,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
@@ -1121,11 +1121,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 border: Border.all(color: Colors.grey[300]!),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: html.HtmlElementView(
-                viewType: 'card-element',
-                onPlatformViewCreated: (int viewId) {
-                  // El elemento ya se montó en _createBookingAndIntent
-                },
+              child: const Center(
+                child: Text(
+                  'Stripe payment form will appear here',
+                  style: TextStyle(color: Colors.grey, fontSize: 12),
+                ),
               ),
             ),
 
