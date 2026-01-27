@@ -17,6 +17,9 @@ class BookingDetailsScreen extends StatefulWidget {
   final double distanceMiles;
   final String duration;
   final String serviceType; // "to-airport", "from-airport", etc.
+  final String? guestEmail;
+  final String? guestName;
+  final String? guestPhone;
 
   const BookingDetailsScreen({
     super.key,
@@ -32,6 +35,9 @@ class BookingDetailsScreen extends StatefulWidget {
     required this.distanceMiles,
     required this.duration,
     this.serviceType = 'point-to-point',
+    this.guestEmail,
+    this.guestName,
+    this.guestPhone,
   });
 
   @override

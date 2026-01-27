@@ -49,6 +49,58 @@ class _LoginWebScreenState extends State<LoginWebScreen> {
   bool _isLogin = true;
   bool _isLoading = false;
 
+  void _handleGuestContinue() {
+    // Validar que todos los campos estén llenos
+    if (_guestEmailController.text.trim().isEmpty ||
+        _guestFirstNameController.text.trim().isEmpty ||
+        _guestLastNameController.text.trim().isEmpty ||
+        _guestPhoneController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('❌ Please fill in all guest fields to continue'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Validar formato de email
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(_guestEmailController.text.trim())) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('❌ Please enter a valid email address'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Navegar al paso 4 (Details)
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BookingDetailsScreen(
+          pickupAddress: widget.pickupAddress,
+          destinationAddress: widget.destinationAddress,
+          pickupLat: widget.pickupLat,
+          pickupLng: widget.pickupLng,
+          destinationLat: widget.destinationLat,
+          destinationLng: widget.destinationLng,
+          selectedDateTime: widget.selectedDateTime,
+          vehicleName: widget.vehicleName,
+          totalPrice: widget.totalPrice,
+          distanceMiles: widget.distanceMiles,
+          duration: widget.duration,
+          serviceType: widget.serviceType,
+          guestEmail: _guestEmailController.text.trim(),
+          guestName: '${_guestFirstNameController.text.trim()} ${_guestLastNameController.text.trim()}',
+          guestPhone: _guestPhoneController.text.trim(),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
@@ -264,37 +316,7 @@ class _LoginWebScreenState extends State<LoginWebScreen> {
                                     width: double.infinity,
                                     height: 48,
                                     child: ElevatedButton(
-                                      onPressed: () {
-                                        // Navegar al paso 4 (Details)
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                BookingDetailsScreen(
-                                                  pickupAddress:
-                                                      widget.pickupAddress,
-                                                  destinationAddress:
-                                                      widget.destinationAddress,
-                                                  pickupLat: widget.pickupLat,
-                                                  pickupLng: widget.pickupLng,
-                                                  destinationLat:
-                                                      widget.destinationLat,
-                                                  destinationLng:
-                                                      widget.destinationLng,
-                                                  selectedDateTime:
-                                                      widget.selectedDateTime,
-                                                  vehicleName:
-                                                      widget.vehicleName,
-                                                  totalPrice: widget.totalPrice,
-                                                  distanceMiles:
-                                                      widget.distanceMiles,
-                                                  duration: widget.duration,
-                                                  serviceType:
-                                                      widget.serviceType,
-                                                ),
-                                          ),
-                                        );
-                                      },
+                                      onPressed: _handleGuestContinue,
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: const Color(
                                           0xFF0B3254,
@@ -453,40 +475,7 @@ class _LoginWebScreenState extends State<LoginWebScreen> {
                                     width: double.infinity,
                                     height: 48,
                                     child: ElevatedButton(
-                                      onPressed: () {
-                                        // Validar campos
-                                        if (_guestEmailController.text.trim().isEmpty ||
-                                            _guestFirstNameController.text.trim().isEmpty ||
-                                            _guestLastNameController.text.trim().isEmpty ||
-                                            _guestPhoneController.text.trim().isEmpty) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(
-                                              content: Text('Please fill in all fields'),
-                                              backgroundColor: Colors.red,
-                                            ),
-                                          );
-                                          return;
-                                        }
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => BookingDetailsScreen(
-                                              pickupAddress: widget.pickupAddress,
-                                              destinationAddress: widget.destinationAddress,
-                                              pickupLat: widget.pickupLat,
-                                              pickupLng: widget.pickupLng,
-                                              destinationLat: widget.destinationLat,
-                                              destinationLng: widget.destinationLng,
-                                              selectedDateTime: widget.selectedDateTime,
-                                              vehicleName: widget.vehicleName,
-                                              totalPrice: widget.totalPrice,
-                                              distanceMiles: widget.distanceMiles,
-                                              duration: widget.duration,
-                                              serviceType: widget.serviceType,
-                                            ),
-                                          ),
-                                        );
-                                      },
+                                      onPressed: _handleGuestContinue,
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: const Color(0xFF0B3254),
                                         shape: RoundedRectangleBorder(
