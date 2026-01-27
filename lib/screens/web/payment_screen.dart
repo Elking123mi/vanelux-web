@@ -7,6 +7,8 @@ import '../../models/types.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'dart:html' as html;
+import 'dart:js_util' as js;
 
 // Formatter para número de tarjeta (xxxx xxxx xxxx xxxx)
 class CardNumberFormatter extends TextInputFormatter {
@@ -101,20 +103,45 @@ class PaymentScreen extends StatefulWidget {
 }
 
 class _PaymentScreenState extends State<PaymentScreen> {
-  final _cardNumberController = TextEditingController();
-  final _expiryController = TextEditingController();
-  final _cvvController = TextEditingController();
   final _nameController = TextEditingController();
 
   Set<Marker> _markers = {};
   Set<Polyline> _polylines = {};
   bool _isLoadingRoute = true;
   List<LatLng> _routePoints = [];
+  
+  bool _isStripeInitialized = false;
+  String? _clientSecret;
+  String? _paymentIntentId;
+  int? _bookingId;
 
   @override
   void initState() {
     super.initState();
     _loadDetailedRoute();
+    _initializeStripe();
+  }
+
+  Future<void> _initializeStripe() async {
+    try {
+      // Inicializar Stripe con tu publishable key
+      // IMPORTANTE: Cambia esta key por tu LIVE key (pk_live_...) para procesar pagos reales
+      final publishableKey = 'pk_test_51QqwG3LcVFDlHSTpDNWObIZEeD5jlWlz0s5vW8i8h42h8YNUzVSuUWNHl9MvRdOy9zJPFPL7WiNnDQSjNuiWKe8L00WgO0JWKQ';
+      
+      final result = js.callMethod(
+        html.window, 
+        'initStripe', 
+        [publishableKey]
+      );
+      
+      setState(() {
+        _isStripeInitialized = result as bool;
+      });
+      
+      print('✅ Stripe inicializado: $_isStripeInitialized');
+    } catch (e) {
+      print('❌ Error inicializando Stripe: $e');
+    }
   }
 
   Future<void> _loadDetailedRoute() async {
@@ -173,11 +200,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
     }
   }
 
-  Future<void> _processPayment() async {
+  Future<void> _createBookingAndIntent() async {
     try {
-      print('🔵 [PaymentScreen] Iniciando proceso de pago...');
-      
-      // Validar solo el nombre
+      // Validar nombre
       if (_nameController.text.trim().isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -197,17 +222,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
         ),
       );
       
-      // Get current user (puede ser null si es guest)
       final user = await AuthService.getCurrentUser();
-      print('🔵 [PaymentScreen] Usuario: ${user?.email ?? "GUEST"}');
-      
-      // Usar ID 0 para guests (temporal hasta que se implemente registro de guests)
-      final userId = user?.id ?? 0;
-      
-      print('🔵 [PaymentScreen] Usuario ID: $userId');
-      print('🔵 [PaymentScreen] Vehículo: ${widget.vehicleName}');
+      final userId = user?.id;
 
-      // Determine vehicle type from vehicle name
+      // Determine vehicle type
       VehicleType vehicleType = VehicleType.sedan;
       if (widget.vehicleName.toLowerCase().contains('suv')) {
         vehicleType = VehicleType.suv;
@@ -220,9 +238,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
         vehicleType = VehicleType.luxury;
       }
 
-      print('🔵 [PaymentScreen] Tipo de vehículo: $vehicleType');
-
-      // Create booking payload matching Supabase structure
+      // Create booking
       final bookingPayload = {
         'user_id': userId,
         'pickup_address': widget.pickupAddress,
@@ -245,81 +261,131 @@ class _PaymentScreenState extends State<PaymentScreen> {
         'customer_name': widget.guestName ?? user?.name ?? _nameController.text.trim(),
       };
 
-      print('🔵 [PaymentScreen] Payload para backend: $bookingPayload');
-
-      // Primero crear la reserva
       final result = await BookingService.createBooking(bookingPayload);
-      print('✅ [PaymentScreen] Reserva creada: $result');
-
       final bookingId = result['id'] ?? result['booking']?['id'];
-      print('🔵 [PaymentScreen] Booking ID: $bookingId');
 
       if (bookingId == null) {
         throw Exception('No se recibió ID de reserva');
       }
 
-      // Procesar pago con Stripe (sin flutter_stripe - solo backend)
-      print('💳 [PaymentScreen] Procesando pago con Stripe en backend...');
-      
-      final storage = const FlutterSecureStorage();
-      final token = await storage.read(key: 'access_token');
+      setState(() {
+        _bookingId = bookingId;
+      });
       
       // Crear Payment Intent
       final intentResponse = await http.post(
         Uri.parse('https://web-production-700fe.up.railway.app/api/v1/vlx/payments/stripe/create-intent'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'booking_id': bookingId,
           'amount': widget.totalPrice,
           'currency': 'usd',
-          'customer_email': user?.email,
+          'customer_email': widget.guestEmail ?? user?.email,
         }),
       );
-
-      print('📥 Intent response: ${intentResponse.statusCode}');
 
       if (intentResponse.statusCode != 200) {
         throw Exception('Error creando payment intent: ${intentResponse.body}');
       }
 
       final intentData = jsonDecode(intentResponse.body);
-      final clientSecret = intentData['client_secret'] as String;
-      final paymentIntentId = intentData['payment_intent_id'] as String;
+      
+      setState(() {
+        _clientSecret = intentData['client_secret'] as String;
+        _paymentIntentId = intentData['payment_intent_id'] as String;
+      });
 
-      print('✅ Payment Intent creado: $paymentIntentId');
+      print('✅ Payment Intent creado: $_paymentIntentId');
+      print('✅ Client Secret: $_clientSecret');
 
-      // Confirmar pago (simulado - aquí Stripe procesaría la tarjeta)
-      final confirmResponse = await http.post(
-        Uri.parse('https://web-production-700fe.up.railway.app/api/v1/vlx/payments/stripe/confirm'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'payment_intent_id': paymentIntentId,
-          'booking_id': bookingId,
-        }),
-      );
-
-      print('📥 Confirm response: ${confirmResponse.statusCode}');
-
-      if (confirmResponse.statusCode != 200) {
-        throw Exception('Error confirmando pago: ${confirmResponse.body}');
-      }
-
-      print('✅ [PaymentScreen] Pago confirmado exitosamente');
+      // Montar el Stripe Card Element
+      js.callMethod(html.window, 'createStripeCardElement', ['card-element']);
 
       if (!mounted) return;
       Navigator.of(context).pop(); // Cerrar loading
 
-      // Show success dialog
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('✅ Listo para pagar. Ingrese los datos de su tarjeta.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      print('❌ Error: $e');
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _processPayment() async {
+    if (_clientSecret == null || _paymentIntentId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Primero debe crear la reserva'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    try {
+      // Mostrar loading
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
+      // Confirmar pago con Stripe (procesa la tarjeta REAL)
+      final resultPromise = js.callMethod(
+        html.window,
+        'confirmStripePayment',
+        [_clientSecret]
+      );
+
+      // Convertir Promise a Future
+      final result = await js.promiseToFuture(resultPromise);
+      final success = js.getProperty(result, 'success') as bool;
+
+      if (!success) {
+        final error = js.getProperty(result, 'error') as String;
+        throw Exception(error);
+      }
+
+      print('✅ Pago procesado exitosamente');
+
+      // Confirmar en backend
+      final confirmResponse = await http.post(
+        Uri.parse('https://web-production-700fe.up.railway.app/api/v1/vlx/payments/stripe/confirm'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'payment_intent_id': _paymentIntentId,
+          'booking_id': _bookingId,
+        }),
+      );
+
+      if (confirmResponse.statusCode != 200) {
+        throw Exception('Error confirmando pago en backend');
+      }
+
+      if (!mounted) return;
+      Navigator.of(context).pop(); // Cerrar loading
+
+      // Mostrar éxito
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Payment Successful'),
+          title: const Text('✅ Pago Exitoso'),
           content: Text(
-            'Your booking has been confirmed!\n\nBooking ID: $bookingId\nAmount: \$${widget.totalPrice.toStringAsFixed(2)}\n\nYou will receive a confirmation email shortly.',
+            'Tu reserva ha sido confirmada!\n\nBooking ID: $_bookingId\nMonto: \$${widget.totalPrice.toStringAsFixed(2)}\n\nRecibirás un email de confirmación.',
           ),
           actions: [
             TextButton(
@@ -332,9 +398,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
         ),
       );
     } catch (e) {
-      print('Error creating booking: $e');
+      print('❌ Error procesando pago: $e');
       if (!mounted) return;
-      Navigator.of(context).pop(); // Cerrar loading si hay error
+      Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error: ${e.toString()}'),
@@ -991,101 +1057,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
           ),
           const SizedBox(height: 24),
 
+          // Nombre del titular
           const Text(
-            'Card details',
+            'Cardholder name',
             style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           TextField(
-            controller: _cardNumberController,
-            keyboardType: TextInputType.number,
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(16),
-              CardNumberFormatter(),
-            ],
-            decoration: InputDecoration(
-              hintText: 'Card number',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
-              ),
-              suffixIcon: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Image.asset(
-                    'assets/visa.png',
-                    height: 24,
-                    errorBuilder: (_, __, ___) => const SizedBox(),
-                  ),
-                  const SizedBox(width: 4),
-                  Image.asset(
-                    'assets/mastercard.png',
-                    height: 24,
-                    errorBuilder: (_, __, ___) => const SizedBox(),
-                  ),
-                  const SizedBox(width: 8),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _expiryController,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                    LengthLimitingTextInputFormatter(4),
-                    ExpiryDateFormatter(),
-                  ],
-                  decoration: InputDecoration(
-                    hintText: 'MM/YY',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: TextField(
-                  controller: _cvvController,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                    LengthLimitingTextInputFormatter(4),
-                  ],
-                  decoration: InputDecoration(
-                    hintText: 'CVV',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-
-          TextField(
             controller: _nameController,
             decoration: InputDecoration(
-              hintText: 'Cardholder name',
+              hintText: 'Full name on card',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -1098,50 +1079,104 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
           const SizedBox(height: 24),
 
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.grey[50],
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey[200]!),
+          // Stripe Card Element (embebido)
+          if (!_isStripeInitialized || _clientSecret == null) ...[
+            const Text(
+              'Click "Create Booking" to prepare payment',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey),
             ),
-            child: const Row(
-              children: [
-                Icon(Icons.credit_card, size: 20, color: Colors.grey),
-                SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'We accept all major credit and debit cards',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: _createBookingAndIntent,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF4169E1),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 32),
-
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton(
-              onPressed: _processPayment,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF4169E1),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: Text(
-                'Pay \$${widget.totalPrice.toStringAsFixed(2)}',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                child: const Text(
+                  'Create Booking',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
-          ),
+          ] else ...[
+            const Text(
+              'Card details',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            
+            // Contenedor para el Stripe Card Element
+            Container(
+              height: 50,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey[300]!),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: html.HtmlElementView(
+                viewType: 'card-element',
+                onPlatformViewCreated: (int viewId) {
+                  // El elemento ya se montó en _createBookingAndIntent
+                },
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey[200]!),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.credit_card, size: 20, color: Colors.grey),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'We accept all major credit and debit cards',
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 32),
+
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: _processPayment,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF4169E1),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: Text(
+                  'Pay \$${widget.totalPrice.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
 
           const SizedBox(height: 16),
 
