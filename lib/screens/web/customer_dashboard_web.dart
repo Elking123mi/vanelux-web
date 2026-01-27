@@ -46,9 +46,6 @@ class _CustomerDashboardWebState extends State<CustomerDashboardWeb> {
     });
 
     try {
-      // Limpiar caché local antes de cargar para evitar mezcla de datos viejos
-      await BookingService.clearLocalCache();
-      
       final bookingsList = await BookingService.fetchBookings();
       print('🔵 [Dashboard] Bookings raw: $bookingsList');
       
