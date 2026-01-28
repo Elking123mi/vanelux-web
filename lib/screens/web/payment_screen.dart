@@ -1191,13 +1191,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
               child: Text(
                 'Pay \$${widget.totalPrice.toStringAsFixed(2)}',
                 style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
             ),
+          ),
           ],
 
           const SizedBox(height: 16),
