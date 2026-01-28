@@ -382,16 +382,23 @@ class _PaymentScreenState extends State<PaymentScreen> {
         'customer_name': widget.guestName ?? user?.name ?? _nameController.text.trim(),
       };
 
+      print('📤 Creando booking con payload: ${jsonEncode(bookingPayload)}');
+      
       final result = await BookingService.createBooking(bookingPayload);
+      
+      print('📥 Resultado del booking: $result');
+      
       final bookingId = result['id'] ?? result['booking']?['id'];
 
       if (bookingId == null) {
-        throw Exception('No se recibió ID de reserva');
+        throw Exception('No se recibió ID de reserva del servidor');
       }
       
-      print('✅ Booking creado: $bookingId');
+      print('✅ Booking creado exitosamente: $bookingId');
       
       // Crear Checkout Session de Stripe
+      print('📤 Creando Stripe Checkout Session...');
+      
       final checkoutResponse = await http.post(
         Uri.parse('https://web-production-700fe.up.railway.app/api/v1/vlx/payments/stripe/create-checkout-session'),
         headers: {'Content-Type': 'application/json'},
@@ -405,8 +412,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
         }),
       );
 
+      print('📥 Checkout Response Status: ${checkoutResponse.statusCode}');
+      print('📥 Checkout Response Body: ${checkoutResponse.body}');
+
       if (checkoutResponse.statusCode != 200) {
-        throw Exception('Error creando checkout: ${checkoutResponse.body}');
+        throw Exception('Error creando checkout (${checkoutResponse.statusCode}): ${checkoutResponse.body}');
       }
 
       final checkoutData = jsonDecode(checkoutResponse.body);
