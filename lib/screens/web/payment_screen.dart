@@ -390,47 +390,34 @@ class _PaymentScreenState extends State<PaymentScreen> {
         throw Exception('No se recibió ID de reserva');
       }
       
-      // Crear Payment Intent
+      // Crear Checkout Session de Stripe
       final checkoutResponse = await http.post(
         Uri.parse('https://web-production-700fe.up.railway.app/api/v1/vlx/payments/stripe/create-checkout-session'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
+          'booking_id': bookingId,
           'amount': widget.totalPrice,
           'currency': 'usd',
-          'description': 'VaneLux - ${widget.pickupAddress} to ${widget.destinationAddress}',
+          'customer_email': widget.guestEmail ?? user?.email,
+          'success_url': 'https://vane-lux.com/?payment=success&booking_id=$bookingId',
+          'cancel_url': 'https://vane-lux.com/?payment=cancelled',
         }),
       );
 
       if (checkoutResponse.statusCode != 200) {
-        throw Exception('Error creando payment: ${checkoutResponse.body}');
+        throw Exception('Error creando checkout: ${checkoutResponse.body}');
       }
 
       final checkoutData = jsonDecode(checkoutResponse.body);
-      final paymentIntentId = checkoutData['payment_intent_id'] as String;
+      final checkoutUrl = checkoutData['url'] as String;
 
-      print('✅ Payment Intent creado: $paymentIntentId');
+      print('✅ Checkout URL: $checkoutUrl');
 
       if (!mounted) return;
       Navigator.of(context).pop(); // Cerrar loading
 
-      // Mostrar diálogo temporal - el pago se simulará por ahora
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('⚠️ Pago Simulado'),
-          content: Text(
-            'Tu reserva ha sido creada!\n\nBooking ID: $bookingId\nMonto: \$${widget.totalPrice.toStringAsFixed(2)}\n\n🚧 La integración de pago real con Stripe está en proceso.\n\nPor ahora, la reserva se guardó correctamente.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).popUntil((route) => route.isFirst);
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
+      // Redirigir a Stripe Checkout
+      html.window.location.href = checkoutUrl;
     } catch (e) {
       print('❌ Error procesando pago: $e');
       if (!mounted) return;
