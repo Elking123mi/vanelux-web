@@ -13,8 +13,8 @@ function initStripe(publishableKey) {
   }
 }
 
-// Redirect to Stripe Checkout
-async function redirectToCheckout(sessionId) {
+// Confirm payment with client secret
+async function confirmStripePayment(clientSecret) {
   if (!stripe) {
     return {
       success: false,
@@ -23,22 +23,33 @@ async function redirectToCheckout(sessionId) {
   }
   
   try {
-    console.log('🔄 Redirecting to Stripe Checkout...');
-    const result = await stripe.redirectToCheckout({ sessionId: sessionId });
+    console.log('💳 Procesando pago con Stripe...');
+    
+    // confirmCardPayment redirige automáticamente a la página de pago de Stripe
+    const result = await stripe.confirmCardPayment(clientSecret);
     
     if (result.error) {
-      console.error('❌ Checkout error:', result.error.message);
+      console.error('❌ Stripe error:', result.error.message);
       return {
         success: false,
         error: result.error.message
       };
     }
     
+    if (result.paymentIntent.status === 'succeeded') {
+      console.log('✅ Pago exitoso:', result.paymentIntent.id);
+      return {
+        success: true,
+        paymentIntentId: result.paymentIntent.id
+      };
+    }
+    
     return {
-      success: true
+      success: false,
+      error: 'Payment not completed. Status: ' + result.paymentIntent.status
     };
   } catch (error) {
-    console.error('❌ Exception in redirectToCheckout:', error);
+    console.error('❌ Exception in confirmStripePayment:', error);
     return {
       success: false,
       error: error.message
