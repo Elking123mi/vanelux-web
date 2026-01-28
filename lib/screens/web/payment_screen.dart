@@ -125,7 +125,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Future<void> _initializeStripe() async {
     try {
       // Inicializar Stripe con tu publishable key de PRODUCCIÓN (dinero real)
-      final publishableKey = 'pk_live_51RCrUBLcVFD1HSTpysEgLwQMCogkSyky9pVxXeSV7J7xzmUQ0hDxEEhT7ASbkPRILYSBbXBPuh3ij8Sw9SPBUMKE0BK8IOIvZd';
+      final publishableKey = 'pk_live_51RCrU0LcVFDlHSTpysEqLwQMCoqkSyky9pVxXeSV7J7xzmUQ0hDxEEhT74SbkrRiLY58bXBPUh3iJ85w95P8UHME00K8iOIvZd';
       
       final result = js.callMethod(
         html.window, 
