@@ -390,81 +390,41 @@ class _PaymentScreenState extends State<PaymentScreen> {
         throw Exception('No se recibió ID de reserva');
       }
       
-      // Crear Payment Intent
-      final intentResponse = await http.post(
-        Uri.parse('https://web-production-700fe.up.railway.app/api/v1/vlx/payments/stripe/create-intent'),
+      // Crear Stripe Checkout Session en el backend
+      final checkoutResponse = await http.post(
+        Uri.parse('https://web-production-700fe.up.railway.app/api/v1/vlx/payments/stripe/create-checkout-session'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'booking_id': bookingId,
           'amount': widget.totalPrice,
           'currency': 'usd',
           'customer_email': widget.guestEmail ?? user?.email,
+          'success_url': 'https://vane-lux.com/?payment=success&booking_id=$bookingId',
+          'cancel_url': 'https://vane-lux.com/?payment=cancelled',
         }),
       );
 
-      if (intentResponse.statusCode != 200) {
-        throw Exception('Error creando payment intent: ${intentResponse.body}');
+      if (checkoutResponse.statusCode != 200) {
+        throw Exception('Error creando checkout session: ${checkoutResponse.body}');
       }
 
-      final intentData = jsonDecode(intentResponse.body);
-      final clientSecret = intentData['client_secret'] as String;
-      final paymentIntentId = intentData['payment_intent_id'] as String;
+      final checkoutData = jsonDecode(checkoutResponse.body);
+      final sessionId = checkoutData['session_id'] as String;
 
-      print('✅ Payment Intent creado: $paymentIntentId');
-
-      // Confirmar pago con Stripe (procesa la tarjeta REAL)
-      final resultPromise = js.callMethod(
-        html.window,
-        'confirmStripePayment',
-        [clientSecret]
-      );
-
-      // Convertir Promise a Future
-      final paymentResult = await js.promiseToFuture(resultPromise);
-      final success = js.getProperty(paymentResult, 'success') as bool;
-
-      if (!success) {
-        final error = js.getProperty(paymentResult, 'error') as String;
-        throw Exception(error);
-      }
-
-      print('✅ Pago procesado exitosamente');
-
-      // Confirmar en backend
-      final confirmResponse = await http.post(
-        Uri.parse('https://web-production-700fe.up.railway.app/api/v1/vlx/payments/stripe/confirm'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'payment_intent_id': paymentIntentId,
-          'booking_id': bookingId,
-        }),
-      );
-
-      if (confirmResponse.statusCode != 200) {
-        throw Exception('Error confirmando pago en backend');
-      }
-
+      print('✅ Checkout Session creado: $sessionId');
+      
       if (!mounted) return;
-      Navigator.of(context).pop(); // Cerrar loading
+      Navigator.of(context).pop(); // Cerrar loading antes de redirigir
 
-      // Mostrar éxito
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('✅ Pago Exitoso'),
-          content: Text(
-            'Tu reserva ha sido confirmada!\n\nBooking ID: $bookingId\nMonto: \$${widget.totalPrice.toStringAsFixed(2)}\n\nRecibirás un email de confirmación.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).popUntil((route) => route.isFirst);
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        ),
+      // Redirigir a Stripe Checkout (el usuario saldrá de la página)
+      js.callMethod(
+        html.window,
+        'redirectToCheckout',
+        [sessionId]
       );
+      
+      // La página se redirigirá a Stripe Checkout
+      // Cuando el pago se complete, Stripe redirigirá de vuelta a success_url o cancel_url
     } catch (e) {
       print('❌ Error procesando pago: $e');
       if (!mounted) return;
