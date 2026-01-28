@@ -389,41 +389,65 @@ class _PaymentScreenState extends State<PaymentScreen> {
         throw Exception('No se recibió ID de reserva');
       }
       
-      // Crear Checkout Session de Stripe
-      final checkoutResponse = await http.post(
-        Uri.parse('https://web-production-700fe.up.railway.app/api/v1/vlx/payments/stripe/create-checkout-session'),
+      print('✅ Booking creado: $bookingId');
+      
+      // Crear Payment Intent de Stripe
+      final intentResponse = await http.post(
+        Uri.parse('https://web-production-700fe.up.railway.app/api/v1/vlx/payments/stripe/create-intent'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'booking_id': bookingId,
           'amount': widget.totalPrice,
           'currency': 'usd',
+          'description': 'Reserva VaneLux #$bookingId',
           'customer_email': widget.guestEmail ?? user?.email,
-          'success_url': 'https://vane-lux.com/?payment=success&booking_id=$bookingId',
-          'cancel_url': 'https://vane-lux.com/?payment=cancelled',
         }),
       );
 
-      if (checkoutResponse.statusCode != 200) {
-        throw Exception('Error creando checkout: ${checkoutResponse.body}');
+      if (intentResponse.statusCode != 200) {
+        throw Exception('Error creando payment intent: ${intentResponse.body}');
       }
 
-      final checkoutData = jsonDecode(checkoutResponse.body);
+      final intentData = jsonDecode(intentResponse.body);
+      final clientSecret = intentData['client_secret'] as String;
+      final paymentIntentId = intentData['payment_intent_id'] as String;
       
-      // Por ahora, mostrar mensaje de éxito ya que el pago real requiere actualización del backend
+      print('✅ Payment Intent creado: $paymentIntentId');
+
       if (!mounted) return;
       Navigator.of(context).pop(); // Cerrar loading
-
+      
+      // Mostrar diálogo de éxito y explicar que debe completar el pago
       showDialog(
         context: context,
+        barrierDismissible: false,
         builder: (context) => AlertDialog(
-          title: const Text('✅ Reserva Creada'),
-          content: Text(
-            'Tu reserva ha sido creada exitosamente!\n\nBooking ID: $bookingId\nMonto: \$${widget.totalPrice.toStringAsFixed(2)}\n\n📧 Recibirás un email de confirmación.\n\n💳 El proceso de pago se completará próximamente.',
+          title: const Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.green, size: 30),
+              SizedBox(width: 10),
+              Text('Reserva Creada'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Tu reserva ha sido creada exitosamente!'),
+              const SizedBox(height: 10),
+              Text('Booking ID: $bookingId', style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text('Monto: \$${widget.totalPrice.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 10),
+              const Text('⚠️ NOTA: Esta es una versión de prueba. En producción, aquí se abriría Stripe Checkout para procesar el pago real.'),
+              const SizedBox(height: 10),
+              const Text('ℹ️ Recibirás un email de confirmación próximamente.'),
+            ],
           ),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).popUntil((route) => route.isFirst);
+                Navigator.of(context).pop(); // Cerrar diálogo
+                Navigator.of(context).pushReplacementNamed('/'); // Ir a home
               },
               child: const Text('OK'),
             ),
