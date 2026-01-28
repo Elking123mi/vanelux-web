@@ -406,53 +406,20 @@ class _PaymentScreenState extends State<PaymentScreen> {
       }
 
       final checkoutData = jsonDecode(checkoutResponse.body);
-      final clientSecret = checkoutData['client_secret'] as String;
       final paymentIntentId = checkoutData['payment_intent_id'] as String;
 
       print('✅ Payment Intent creado: $paymentIntentId');
 
-      // Confirmar pago con Stripe
-      final resultPromise = js.callMethod(
-        html.window,
-        'confirmStripePayment',
-        [clientSecret]
-      );
-
-      // Convertir Promise a Future
-      final paymentResult = await js.promiseToFuture(resultPromise);
-      final success = js.getProperty(paymentResult, 'success') as bool;
-
-      if (!success) {
-        final error = js.getProperty(paymentResult, 'error') as String;
-        throw Exception(error);
-      }
-
-      print('✅ Pago procesado exitosamente');
-
-      // Confirmar en backend
-      final confirmResponse = await http.post(
-        Uri.parse('https://web-production-700fe.up.railway.app/api/v1/vlx/payments/stripe/confirm'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'payment_intent_id': paymentIntentId,
-          'booking_id': bookingId,
-        }),
-      );
-
-      if (confirmResponse.statusCode != 200) {
-        throw Exception('Error confirmando pago en backend');
-      }
-      
       if (!mounted) return;
       Navigator.of(context).pop(); // Cerrar loading
 
-      // Mostrar éxito
+      // Mostrar diálogo temporal - el pago se simulará por ahora
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('✅ Pago Exitoso'),
+          title: const Text('⚠️ Pago Simulado'),
           content: Text(
-            'Tu reserva ha sido confirmada!\n\nBooking ID: $bookingId\nMonto: \$${widget.totalPrice.toStringAsFixed(2)}\n\nRecibirás un email de confirmación.',
+            'Tu reserva ha sido creada!\n\nBooking ID: $bookingId\nMonto: \$${widget.totalPrice.toStringAsFixed(2)}\n\n🚧 La integración de pago real con Stripe está en proceso.\n\nPor ahora, la reserva se guardó correctamente.',
           ),
           actions: [
             TextButton(

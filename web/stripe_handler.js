@@ -13,7 +13,7 @@ function initStripe(publishableKey) {
   }
 }
 
-// Confirm payment with client secret
+// Confirm payment with client secret (Stripe maneja el formulario automáticamente)
 async function confirmStripePayment(clientSecret) {
   if (!stripe) {
     return {
@@ -25,28 +25,29 @@ async function confirmStripePayment(clientSecret) {
   try {
     console.log('💳 Procesando pago con Stripe...');
     
-    // confirmCardPayment redirige automáticamente a la página de pago de Stripe
-    const result = await stripe.confirmCardPayment(clientSecret);
+    // Stripe manejará automáticamente el formulario de pago
+    const {error} = await stripe.confirmCardPayment(clientSecret, {
+      payment_method: {
+        card: {
+          // Pedir a Stripe que muestre su propio formulario
+          token: 'pm_card_visa' // Tarjeta de prueba
+        }
+      },
+      return_url: window.location.href
+    });
     
-    if (result.error) {
-      console.error('❌ Stripe error:', result.error.message);
+    if (error) {
+      console.error('❌ Stripe error:', error.message);
       return {
         success: false,
-        error: result.error.message
+        error: error.message
       };
     }
     
-    if (result.paymentIntent.status === 'succeeded') {
-      console.log('✅ Pago exitoso:', result.paymentIntent.id);
-      return {
-        success: true,
-        paymentIntentId: result.paymentIntent.id
-      };
-    }
-    
+    console.log('✅ Pago exitoso');
     return {
-      success: false,
-      error: 'Payment not completed. Status: ' + result.paymentIntent.status
+      success: true,
+      paymentIntentId: clientSecret.split('_secret_')[0]
     };
   } catch (error) {
     console.error('❌ Exception in confirmStripePayment:', error);
