@@ -391,69 +391,38 @@ class _PaymentScreenState extends State<PaymentScreen> {
       
       print('✅ Booking creado: $bookingId');
       
-      // Crear Payment Intent de Stripe
-      final intentResponse = await http.post(
-        Uri.parse('https://web-production-700fe.up.railway.app/api/v1/vlx/payments/stripe/create-intent'),
+      // Crear Checkout Session de Stripe
+      final checkoutResponse = await http.post(
+        Uri.parse('https://web-production-700fe.up.railway.app/api/v1/vlx/payments/stripe/create-checkout-session'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'booking_id': bookingId,
           'amount': widget.totalPrice,
           'currency': 'usd',
-          'description': 'Reserva VaneLux #$bookingId',
           'customer_email': widget.guestEmail ?? user?.email,
+          'success_url': 'https://vane-lux.com/?payment=success&booking_id=$bookingId',
+          'cancel_url': 'https://vane-lux.com/?payment=cancelled',
         }),
       );
 
-      if (intentResponse.statusCode != 200) {
-        throw Exception('Error creando payment intent: ${intentResponse.body}');
+      if (checkoutResponse.statusCode != 200) {
+        throw Exception('Error creando checkout: ${checkoutResponse.body}');
       }
 
-      final intentData = jsonDecode(intentResponse.body);
-      final clientSecret = intentData['client_secret'] as String;
-      final paymentIntentId = intentData['payment_intent_id'] as String;
+      final checkoutData = jsonDecode(checkoutResponse.body);
+      final checkoutUrl = checkoutData['url'] as String?;
       
-      print('✅ Payment Intent creado: $paymentIntentId');
+      if (checkoutUrl == null) {
+        throw Exception('No se recibió URL de checkout de Stripe');
+      }
+      
+      print('✅ Stripe Checkout URL: $checkoutUrl');
 
       if (!mounted) return;
       Navigator.of(context).pop(); // Cerrar loading
       
-      // Mostrar diálogo de éxito y explicar que debe completar el pago
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => AlertDialog(
-          title: const Row(
-            children: [
-              Icon(Icons.check_circle, color: Colors.green, size: 30),
-              SizedBox(width: 10),
-              Text('Reserva Creada'),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Tu reserva ha sido creada exitosamente!'),
-              const SizedBox(height: 10),
-              Text('Booking ID: $bookingId', style: const TextStyle(fontWeight: FontWeight.bold)),
-              Text('Monto: \$${widget.totalPrice.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 10),
-              const Text('⚠️ NOTA: Esta es una versión de prueba. En producción, aquí se abriría Stripe Checkout para procesar el pago real.'),
-              const SizedBox(height: 10),
-              const Text('ℹ️ Recibirás un email de confirmación próximamente.'),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Cerrar diálogo
-                Navigator.of(context).pushReplacementNamed('/'); // Ir a home
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
+      // Redirigir a Stripe Checkout para procesar el pago
+      html.window.location.href = checkoutUrl;
     } catch (e) {
       print('❌ Error procesando pago: $e');
       if (!mounted) return;
