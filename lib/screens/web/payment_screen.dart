@@ -6,7 +6,6 @@ import '../../services/auth_service.dart';
 import '../../models/types.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:html' as html;
 import 'dart:js_util' as js;
 
@@ -409,15 +408,28 @@ class _PaymentScreenState extends State<PaymentScreen> {
       }
 
       final checkoutData = jsonDecode(checkoutResponse.body);
-      final checkoutUrl = checkoutData['url'] as String;
-
-      print('✅ Checkout URL: $checkoutUrl');
-
+      
+      // Por ahora, mostrar mensaje de éxito ya que el pago real requiere actualización del backend
       if (!mounted) return;
       Navigator.of(context).pop(); // Cerrar loading
 
-      // Redirigir a Stripe Checkout
-      html.window.location.href = checkoutUrl;
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('✅ Reserva Creada'),
+          content: Text(
+            'Tu reserva ha sido creada exitosamente!\n\nBooking ID: $bookingId\nMonto: \$${widget.totalPrice.toStringAsFixed(2)}\n\n📧 Recibirás un email de confirmación.\n\n💳 El proceso de pago se completará próximamente.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
     } catch (e) {
       print('❌ Error procesando pago: $e');
       if (!mounted) return;
