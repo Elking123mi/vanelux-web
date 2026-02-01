@@ -67,7 +67,7 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
   final List<_VehicleOption> _vehicles = const [
     _VehicleOption(
       name: 'Test Ride - Economy',
-      description: 'Test vehicle for payment testing (minimum charge)',
+      description: 'Test vehicle for payment testing - only $0.50',
       passengers: 2,
       luggage: 1,
       imageUrl: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=400&q=80',
