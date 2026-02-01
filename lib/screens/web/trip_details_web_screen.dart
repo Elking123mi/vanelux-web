@@ -66,6 +66,15 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
   
   final List<_VehicleOption> _vehicles = const [
     _VehicleOption(
+      name: 'Test Ride - Economy',
+      description: 'Test vehicle for payment testing (minimum charge)',
+      passengers: 2,
+      luggage: 1,
+      imageUrl: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=400&q=80',
+      basePrice: 0.50,
+      perMileRate: 0.00,
+    ),
+    _VehicleOption(
       name: 'Mercedes-Maybach S 680',
       description: 'Black exterior, premium interior, enhanced features, entertainment system',
       passengers: 4,

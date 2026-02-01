@@ -6,8 +6,10 @@ import '../../services/auth_service.dart';
 import '../../models/types.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'dart:html' as html;
-import 'dart:js_util' as js;
+import 'package:flutter/foundation.dart' show kIsWeb;
+// Conditional imports
+import 'dart:html' as html if (dart.library.io) 'dart:io';
+import 'dart:js_util' as js if (dart.library.io) 'dart:io';
 
 // Formatter para número de tarjeta (xxxx xxxx xxxx xxxx)
 class CardNumberFormatter extends TextInputFormatter {
