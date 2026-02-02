@@ -6,7 +6,6 @@ import '../../services/auth_service.dart';
 import '../../models/types.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:flutter/foundation.dart' show kIsWeb;
 // Conditional imports
 import 'dart:html' as html if (dart.library.io) 'dart:io';
 import 'dart:js_util' as js if (dart.library.io) 'dart:io';
@@ -382,6 +381,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
         'status': 'pending',
         'customer_email': widget.guestEmail ?? user?.email,
         'customer_name': widget.guestName ?? user?.name ?? _nameController.text.trim(),
+        // Guest booking fields for email confirmation
+        'guest_email': widget.guestEmail ?? user?.email,
+        'guest_first_name': (widget.guestName ?? user?.name ?? '').split(' ').first,
+        'guest_last_name': (widget.guestName ?? user?.name ?? '').split(' ').skip(1).join(' '),
+        'guest_phone': widget.guestPhone ?? user?.phone ?? '',
       };
 
       print('📤 Creando booking con payload: ${jsonEncode(bookingPayload)}');
