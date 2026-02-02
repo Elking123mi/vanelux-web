@@ -396,7 +396,25 @@ class _PaymentScreenState extends State<PaymentScreen> {
       print('🔍 DEBUG - guest_last_name: ${bookingPayload['guest_last_name']}');
       print('🔍 DEBUG - guest_phone: ${bookingPayload['guest_phone']}');
       
-      final result = await BookingService.createBooking(bookingPayload);
+      // Para guests, llamar directamente al endpoint guest
+      Map<String, dynamic> result;
+      if (widget.guestEmail != null) {
+        print('📤 Creando guest booking...');
+        final response = await http.post(
+          Uri.parse('https://web-production-700fe.up.railway.app/api/v1/vlx/bookings/guest'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(bookingPayload),
+        );
+        
+        if (response.statusCode != 201) {
+          throw Exception('Error creando booking: ${response.statusCode} - ${response.body}');
+        }
+        
+        result = jsonDecode(response.body);
+        print('✅ Guest booking creado: ${result['id']}');
+      } else {
+        result = await BookingService.createBooking(bookingPayload);
+      }
       
       print('📥 Resultado del booking: $result');
       
