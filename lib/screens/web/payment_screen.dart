@@ -433,7 +433,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
         Uri.parse('https://web-production-700fe.up.railway.app/api/v1/vlx/payments/stripe/create-checkout-session'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'booking_id': bookingId,
+          'booking_id': bookingId.toString(),
           'amount': widget.totalPrice,
           'currency': 'usd',
           'customer_email': widget.guestEmail ?? user?.email,
