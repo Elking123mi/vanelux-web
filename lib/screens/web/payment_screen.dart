@@ -390,6 +390,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
       print('📤 Creando booking con payload: ${jsonEncode(bookingPayload)}');
       
+      // DEBUG: Verificar que los campos de guest estén presentes
+      print('🔍 DEBUG - guest_email: ${bookingPayload['guest_email']}');
+      print('🔍 DEBUG - guest_first_name: ${bookingPayload['guest_first_name']}');
+      print('🔍 DEBUG - guest_last_name: ${bookingPayload['guest_last_name']}');
+      print('🔍 DEBUG - guest_phone: ${bookingPayload['guest_phone']}');
+      
       final result = await BookingService.createBooking(bookingPayload);
       
       print('📥 Resultado del booking: $result');
