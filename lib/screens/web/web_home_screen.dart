@@ -1,14 +1,15 @@
 import 'dart:async';
+import 'dart:html' as html;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 import '../../models/user.dart';
 import '../../services/auth_service.dart';
 import '../../services/google_maps_service.dart';
 import '../../widgets/route_map_view.dart';
 import 'customer_dashboard_web.dart';
-import 'fleet_page.dart';
 import 'fleet_screen.dart';
 import 'service_detail_screen.dart';
 import 'trip_details_web_screen.dart';
@@ -265,6 +266,64 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     // NO cerrar dropdown al perder foco - esto causaba el problema
     _loadCurrentUser();
     _startCarousel();
+    _checkPaymentStatus();
+  }
+
+  Future<void> _checkPaymentStatus() async {
+    if (!kIsWeb) return;
+    
+    try {
+      final uri = Uri.parse(html.window.location.href);
+      final paymentStatus = uri.queryParameters['payment'];
+      final bookingId = uri.queryParameters['booking_id'];
+      
+      if (paymentStatus == 'success' && bookingId != null) {
+        print('✅ Pago exitoso detectado para booking $bookingId');
+        print('📧 Enviando email de confirmación...');
+        
+        // Enviar email de confirmación
+        final response = await http.post(
+          Uri.parse('https://web-production-700fe.up.railway.app/api/v1/vlx/bookings/$bookingId/send-confirmation'),
+        );
+        
+        if (response.statusCode == 200) {
+          print('✅ Email de confirmación enviado exitosamente');
+          
+          // Limpiar parámetros de la URL sin recargar la página
+          html.window.history.pushState({}, '', '/');
+          
+          // Mostrar mensaje de éxito al usuario
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('✅ Pago exitoso! Se ha enviado un email de confirmación.'),
+                backgroundColor: Colors.green,
+                duration: Duration(seconds: 5),
+              ),
+            );
+          }
+        } else {
+          print('⚠️ Error enviando email: ${response.statusCode} - ${response.body}');
+        }
+      } else if (paymentStatus == 'cancelled') {
+        print('❌ Pago cancelado');
+        
+        // Limpiar parámetros de la URL
+        html.window.history.pushState({}, '', '/');
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Pago cancelado. Puedes intentar de nuevo cuando quieras.'),
+              backgroundColor: Colors.orange,
+              duration: Duration(seconds: 4),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      print('❌ Error verificando estado del pago: $e');
+    }
   }
 
   @override
