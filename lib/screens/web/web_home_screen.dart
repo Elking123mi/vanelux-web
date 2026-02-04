@@ -272,14 +272,14 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       print('🔍 booking_id parameter: $bookingId');
       
       if (paymentStatus == 'success' && bookingId != null) {
-        print('✅ Pago exitoso detectado para booking #$bookingId');
-        print('📧 Enviando email de confirmación...');
+        print('✅ Payment success detected for booking #$bookingId');
+        print('📧 Sending confirmation email...');
         
-        // Mostrar mensaje ANTES de enviar
+        // Show message BEFORE sending
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('📧 Enviando confirmación por email para booking #$bookingId...'),
+              content: Text('📧 Sending email confirmation for booking #$bookingId...'),
               backgroundColor: Colors.blue,
               duration: const Duration(seconds: 3),
             ),
@@ -296,24 +296,24 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
-          print('✅ Email enviado: ${data['message']}');
+          print('✅ Email sent: ${data['message']}');
           
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('✅ Confirmación enviada por email exitosamente'),
+                content: Text('✅ Confirmation email sent successfully'),
                 backgroundColor: Colors.green,
                 duration: Duration(seconds: 5),
               ),
             );
           }
         } else {
-          print('⚠️ No se pudo enviar email: ${response.body}');
+          print('⚠️ Could not send email: ${response.body}');
           
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('⚠️ Error al enviar confirmación: ${response.statusCode}'),
+                content: Text('⚠️ Error sending confirmation: ${response.statusCode}'),
                 backgroundColor: Colors.orange,
                 duration: const Duration(seconds: 5),
               ),
@@ -321,10 +321,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           }
         }
       } else {
-        print('ℹ️ No hay pago exitoso para procesar (payment=$paymentStatus, booking_id=$bookingId)');
+        print('ℹ️ No successful payment to process (payment=$paymentStatus, booking_id=$bookingId)');
       }
     } catch (e) {
-      print('❌ Error enviando email de confirmación: $e');
+      print('❌ Error sending confirmation email: $e');
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
