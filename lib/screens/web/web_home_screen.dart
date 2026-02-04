@@ -263,17 +263,36 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   Future<void> _checkPaymentSuccess() async {
     try {
       final uri = Uri.base;
+      print('🔍 URL actual completa: ${uri.toString()}');
+      
       final paymentStatus = uri.queryParameters['payment'];
       final bookingId = uri.queryParameters['booking_id'];
+      
+      print('🔍 payment parameter: $paymentStatus');
+      print('🔍 booking_id parameter: $bookingId');
       
       if (paymentStatus == 'success' && bookingId != null) {
         print('✅ Pago exitoso detectado para booking #$bookingId');
         print('📧 Enviando email de confirmación...');
         
+        // Mostrar mensaje ANTES de enviar
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('📧 Enviando confirmación por email para booking #$bookingId...'),
+              backgroundColor: Colors.blue,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+        
         final response = await http.post(
           Uri.parse('https://web-production-700fe.up.railway.app/api/v1/vlx/bookings/$bookingId/send-confirmation'),
           headers: {'Content-Type': 'application/json'},
         );
+        
+        print('📬 Response status: ${response.statusCode}');
+        print('📬 Response body: ${response.body}');
         
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
@@ -282,7 +301,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('✅ Confirmación enviada por email'),
+                content: Text('✅ Confirmación enviada por email exitosamente'),
                 backgroundColor: Colors.green,
                 duration: Duration(seconds: 5),
               ),
@@ -290,10 +309,32 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           }
         } else {
           print('⚠️ No se pudo enviar email: ${response.body}');
+          
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('⚠️ Error al enviar confirmación: ${response.statusCode}'),
+                backgroundColor: Colors.orange,
+                duration: const Duration(seconds: 5),
+              ),
+            );
+          }
         }
+      } else {
+        print('ℹ️ No hay pago exitoso para procesar (payment=$paymentStatus, booking_id=$bookingId)');
       }
     } catch (e) {
       print('❌ Error enviando email de confirmación: $e');
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Error: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
     }
   }
 
