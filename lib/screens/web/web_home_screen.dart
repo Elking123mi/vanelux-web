@@ -1,15 +1,14 @@
 import 'dart:async';
-import 'dart:html' as html;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
 import '../../models/user.dart';
 import '../../services/auth_service.dart';
 import '../../services/google_maps_service.dart';
 import '../../widgets/route_map_view.dart';
 import 'customer_dashboard_web.dart';
+import 'fleet_page.dart';
 import 'fleet_screen.dart';
 import 'service_detail_screen.dart';
 import 'trip_details_web_screen.dart';
@@ -174,7 +173,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   Timer? _carouselTimer;
 
   // Mobile menu state
-  final bool _isMobileMenuOpen = false;
+  bool _isMobileMenuOpen = false;
 
   // Booking form state
   String? selectedServiceType;
@@ -258,6 +257,44 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     ),
   ];
 
+  // Verificar si viene de un pago exitoso y enviar email de confirmación
+  Future<void> _checkPaymentSuccess() async {
+    try {
+      final uri = Uri.base;
+      final paymentStatus = uri.queryParameters['payment'];
+      final bookingId = uri.queryParameters['booking_id'];
+      
+      if (paymentStatus == 'success' && bookingId != null) {
+        print('✅ Pago exitoso detectado para booking #$bookingId');
+        print('📧 Enviando email de confirmación...');
+        
+        final response = await http.post(
+          Uri.parse('https://web-production-700fe.up.railway.app/api/v1/vlx/bookings/$bookingId/send-confirmation'),
+          headers: {'Content-Type': 'application/json'},
+        );
+        
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          print('✅ Email enviado: ${data['message']}');
+          
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('✅ Confirmación enviada por email'),
+                backgroundColor: Colors.green,
+                duration: Duration(seconds: 5),
+              ),
+            );
+          }
+        } else {
+          print('⚠️ No se pudo enviar email: ${response.body}');
+        }
+      }
+    } catch (e) {
+      print('❌ Error enviando email de confirmación: $e');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -266,64 +303,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     // NO cerrar dropdown al perder foco - esto causaba el problema
     _loadCurrentUser();
     _startCarousel();
-    _checkPaymentStatus();
-  }
-
-  Future<void> _checkPaymentStatus() async {
-    if (!kIsWeb) return;
-    
-    try {
-      final uri = Uri.parse(html.window.location.href);
-      final paymentStatus = uri.queryParameters['payment'];
-      final bookingId = uri.queryParameters['booking_id'];
-      
-      if (paymentStatus == 'success' && bookingId != null) {
-        print('✅ Pago exitoso detectado para booking $bookingId');
-        print('📧 Enviando email de confirmación...');
-        
-        // Enviar email de confirmación
-        final response = await http.post(
-          Uri.parse('https://web-production-700fe.up.railway.app/api/v1/vlx/bookings/$bookingId/send-confirmation'),
-        );
-        
-        if (response.statusCode == 200) {
-          print('✅ Email de confirmación enviado exitosamente');
-          
-          // Limpiar parámetros de la URL sin recargar la página
-          html.window.history.pushState({}, '', '/');
-          
-          // Mostrar mensaje de éxito al usuario
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('✅ Pago exitoso! Se ha enviado un email de confirmación.'),
-                backgroundColor: Colors.green,
-                duration: Duration(seconds: 5),
-              ),
-            );
-          }
-        } else {
-          print('⚠️ Error enviando email: ${response.statusCode} - ${response.body}');
-        }
-      } else if (paymentStatus == 'cancelled') {
-        print('❌ Pago cancelado');
-        
-        // Limpiar parámetros de la URL
-        html.window.history.pushState({}, '', '/');
-        
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Pago cancelado. Puedes intentar de nuevo cuando quieras.'),
-              backgroundColor: Colors.orange,
-              duration: Duration(seconds: 4),
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      print('❌ Error verificando estado del pago: $e');
-    }
+    _checkPaymentSuccess(); // Verificar si viene de pago exitoso
   }
 
   @override
@@ -3266,39 +3246,33 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         'title': 'Point to Point',
         'description': 'Direct transportation from pickup to destination',
         'icon': Icons.location_on,
-        'image': 'assets/images/point to point.jpg',
       },
       {
         'title': 'Hourly Service',
         'description': 'Hourly chauffeur service',
         'icon': Icons.access_time,
-        'image': 'assets/images/hourly service.jpg',
       },
       {
         'title': 'Airport Transfer',
         'description': 'Airport pickup and drop-off service',
         'icon': Icons.flight,
-        'image': 'assets/images/all airports.jpg',
       },
       {
         'title': 'Weddings',
         'description':
             'Exclusive service for the most important day of your life',
         'icon': Icons.favorite,
-        'image': 'assets/images/weeding.jpg',
       },
       {
         'title': 'Proms',
         'description': 'Arrive in style to your prom or special event',
         'icon': Icons.celebration,
-        'image': 'assets/images/corporate service.jpg',
       },
       {
         'title': 'Tours',
         'description':
             'Explore the city in style with a chauffeur who knows every corner',
         'icon': Icons.tour,
-        'image': 'assets/images/city tours.png',
       },
     ];
 
@@ -3333,7 +3307,6 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                     services[i]['title'] as String,
                     services[i]['description'] as String,
                     services[i]['icon'] as IconData,
-                    services[i]['image'] as String?,
                   ),
                   if (i != services.length - 1) const SizedBox(height: 24),
                 ],
@@ -3358,7 +3331,6 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
               services[i]['title'] as String,
               services[i]['description'] as String,
               services[i]['icon'] as IconData,
-              services[i]['image'] as String?,
             ),
           ),
           if (i != services.length - 1) const SizedBox(width: 30),
@@ -3367,7 +3339,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     );
   }
 
-  Widget _buildServiceCard(String title, String description, IconData icon, String? imagePath) {
+  Widget _buildServiceCard(String title, String description, IconData icon) {
     // Mapear títulos a los tipos de servicio para navegación
     String getServiceType(String title) {
       switch (title) {
@@ -3389,7 +3361,6 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     }
 
     return Container(
-      width: double.infinity,
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -3403,44 +3374,19 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         ],
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          // Mostrar imagen si existe, de lo contrario mostrar icono
-          if (imagePath != null)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.asset(
-                imagePath,
-                width: 120,
-                height: 120,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    width: 80,
-                    height: 80,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF0B3254),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(icon, color: const Color(0xFFD4AF37), size: 40),
-                  );
-                },
-              ),
-            )
-          else
-            Container(
-              width: 80,
-              height: 80,
-              decoration: const BoxDecoration(
-                color: Color(0xFF0B3254),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: const Color(0xFFD4AF37), size: 40),
+          Container(
+            width: 80,
+            height: 80,
+            decoration: const BoxDecoration(
+              color: Color(0xFF0B3254),
+              shape: BoxShape.circle,
             ),
+            child: Icon(icon, color: const Color(0xFFD4AF37), size: 40),
+          ),
           const SizedBox(height: 24),
           Text(
             title,
-            textAlign: TextAlign.center,
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
