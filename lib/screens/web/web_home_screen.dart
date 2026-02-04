@@ -1338,7 +1338,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Reserva tu viaje',
+                  'Book Your Ride',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
@@ -1347,7 +1347,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Servicio personalizado con chofer profesional',
+                  'Personalized service with professional chauffeur',
                   style: TextStyle(color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 24),
@@ -1393,7 +1393,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                 ),
                 const SizedBox(height: 24),
                 const Text(
-                  'Tipo de servicio',
+                  'Service Type',
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
@@ -1403,7 +1403,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
                   initialValue: selectedServiceType,
-                  hint: const Text('Selecciona el servicio'),
+                  hint: const Text('Select service type'),
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -1427,7 +1427,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                 ),
                 const SizedBox(height: 24),
                 const Text(
-                  'Punto de recogida',
+                  'Pickup Location',
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
@@ -1440,7 +1440,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                   focusNode: pickupFocusNode,
                   onChanged: _onPickupChanged,
                   decoration: InputDecoration(
-                    hintText: 'Ingresa la dirección de origen',
+                    hintText: 'Enter pickup address',
                     prefixIcon: const Icon(
                       Icons.my_location_outlined,
                       color: Color(0xFF0B3254),
@@ -1482,7 +1482,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                 ),
                 const SizedBox(height: 20),
                 const Text(
-                  'Destino',
+                  'Destination',
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
@@ -1495,7 +1495,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                   focusNode: destinationFocusNode,
                   onChanged: _onDestinationChanged,
                   decoration: InputDecoration(
-                    hintText: '¿A dónde viajamos?',
+                    hintText: 'Where are you going?',
                     prefixIcon: const Icon(
                       Icons.location_on_outlined,
                       color: Color(0xFF0B3254),
@@ -1538,7 +1538,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                 ),
                 const SizedBox(height: 20),
                 const Text(
-                  'Fecha y hora de recogida',
+                  'Pickup Date & Time',
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
