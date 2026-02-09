@@ -263,40 +263,44 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     try {
       final uri = Uri.base;
       print('🔍 URL actual completa: ${uri.toString()}');
-      
+
       final paymentStatus = uri.queryParameters['payment'];
       final bookingId = uri.queryParameters['booking_id'];
-      
+
       print('🔍 payment parameter: $paymentStatus');
       print('🔍 booking_id parameter: $bookingId');
-      
+
       if (paymentStatus == 'success' && bookingId != null) {
         print('✅ Payment success detected for booking #$bookingId');
         print('📧 Sending confirmation email...');
-        
+
         // Show message BEFORE sending
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('📧 Sending email confirmation for booking #$bookingId...'),
+              content: Text(
+                '📧 Sending email confirmation for booking #$bookingId...',
+              ),
               backgroundColor: Colors.blue,
               duration: const Duration(seconds: 3),
             ),
           );
         }
-        
+
         final response = await http.post(
-          Uri.parse('https://web-production-700fe.up.railway.app/api/v1/vlx/bookings/$bookingId/send-confirmation'),
+          Uri.parse(
+            'https://web-production-700fe.up.railway.app/api/v1/vlx/bookings/$bookingId/send-confirmation',
+          ),
           headers: {'Content-Type': 'application/json'},
         );
-        
+
         print('📬 Response status: ${response.statusCode}');
         print('📬 Response body: ${response.body}');
-        
+
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
           print('✅ Email sent: ${data['message']}');
-          
+
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -308,11 +312,13 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           }
         } else {
           print('⚠️ Could not send email: ${response.body}');
-          
+
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('⚠️ Error sending confirmation: ${response.statusCode}'),
+                content: Text(
+                  '⚠️ Error sending confirmation: ${response.statusCode}',
+                ),
                 backgroundColor: Colors.orange,
                 duration: const Duration(seconds: 5),
               ),
@@ -320,11 +326,13 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           }
         }
       } else {
-        print('ℹ️ No successful payment to process (payment=$paymentStatus, booking_id=$bookingId)');
+        print(
+          'ℹ️ No successful payment to process (payment=$paymentStatus, booking_id=$bookingId)',
+        );
       }
     } catch (e) {
       print('❌ Error sending confirmation email: $e');
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -419,9 +427,9 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Welcome back to VaneLux!')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Welcome back to VaneLux!')));
     }
   }
 
@@ -488,7 +496,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                         const SizedBox(height: 12),
                         Text(
                           errorMessage!,
-                          style: const TextStyle(color: Colors.red, fontSize: 13),
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 13,
+                          ),
                         ),
                       ],
                     ],
@@ -524,7 +535,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                             });
 
                             try {
-                              final user = await AuthService.login(email, password);
+                              final user = await AuthService.login(
+                                email,
+                                password,
+                              );
                               if (!dialogContext.mounted) {
                                 return;
                               }
@@ -645,9 +659,12 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                         ),
                         if (errorMessage != null) ...[
                           const SizedBox(height: 12),
-              Text(
-                errorMessage!,
-                            style: const TextStyle(color: Colors.red, fontSize: 13),
+                          Text(
+                            errorMessage!,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 13,
+                            ),
                           ),
                         ],
                       ],
@@ -711,7 +728,9 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                               setDialogState(() {
                                 // Mostrar el error específico del backend
                                 final errorText = e.toString();
-                                if (errorText.contains('Ya existe un usuario')) {
+                                if (errorText.contains(
+                                  'Ya existe un usuario',
+                                )) {
                                   errorMessage =
                                       'This email is already registered. Please login instead.';
                                 } else if (errorText.contains('timeout') ||
@@ -1017,8 +1036,9 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     String fallback, {
     required bool isPickup,
   }) async {
-    final TextEditingController controller =
-        isPickup ? pickupController : destinationController;
+    final TextEditingController controller = isPickup
+        ? pickupController
+        : destinationController;
 
     if (placeId == null || placeId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1061,8 +1081,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
 
       final String resolvedAddress =
           (details['address'] as String?)?.trim().isNotEmpty == true
-              ? details['address'] as String
-              : fallback;
+          ? details['address'] as String
+          : fallback;
 
       final _SelectedLocation selection = _SelectedLocation(
         placeId: placeId,
@@ -1122,10 +1142,12 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   Future<_SelectedLocation?> _ensurePlaceSelection({
     required bool isPickup,
   }) async {
-    final TextEditingController controller =
-        isPickup ? pickupController : destinationController;
-    final _SelectedLocation? currentSelection =
-        isPickup ? _pickupPlace : _destinationPlace;
+    final TextEditingController controller = isPickup
+        ? pickupController
+        : destinationController;
+    final _SelectedLocation? currentSelection = isPickup
+        ? _pickupPlace
+        : _destinationPlace;
     final String input = controller.text.trim();
 
     if (input.isEmpty) {
@@ -1133,16 +1155,20 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     }
 
     if (currentSelection != null &&
-        input.toLowerCase() == currentSelection.description.trim().toLowerCase()) {
+        input.toLowerCase() ==
+            currentSelection.description.trim().toLowerCase()) {
       return currentSelection;
     }
 
-    final List<Map<String, dynamic>> suggestions =
-        isPickup ? pickupSuggestions : destinationSuggestions;
+    final List<Map<String, dynamic>> suggestions = isPickup
+        ? pickupSuggestions
+        : destinationSuggestions;
 
     Map<String, dynamic>? matchingSuggestion;
     for (final suggestion in suggestions) {
-      final String fallback = _suggestionFallback(suggestion).trim().toLowerCase();
+      final String fallback = _suggestionFallback(
+        suggestion,
+      ).trim().toLowerCase();
       if (fallback == input.toLowerCase()) {
         matchingSuggestion = suggestion;
         break;
@@ -1929,7 +1955,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         ),
         const SizedBox(height: 16),
         ...quote.options.map(
-          (option) => _buildVehicleQuoteTile(option, quote.totalMiles, isCompact),
+          (option) =>
+              _buildVehicleQuoteTile(option, quote.totalMiles, isCompact),
         ),
         const SizedBox(height: 12),
         Text(
@@ -1944,7 +1971,11 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     );
   }
 
-  Widget _buildVehicleQuoteTile(_VehicleQuote option, double totalMiles, bool isCompact) {
+  Widget _buildVehicleQuoteTile(
+    _VehicleQuote option,
+    double totalMiles,
+    bool isCompact,
+  ) {
     final vehicle = option.vehicle;
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -2097,7 +2128,12 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     );
   }
 
-  Widget _buildInfoPill(IconData icon, String label, String value, bool isCompact) {
+  Widget _buildInfoPill(
+    IconData icon,
+    String label,
+    String value,
+    bool isCompact,
+  ) {
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: isCompact ? 12 : 16,
@@ -2182,9 +2218,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const ServiceDetailScreen(
-                                        serviceType: 'Airport Transfer',
-                                      ),
+                                      builder: (context) =>
+                                          const ServiceDetailScreen(
+                                            serviceType: 'Airport Transfer',
+                                          ),
                                     ),
                                   );
                                 },
@@ -2205,9 +2242,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => const ServiceDetailScreen(
-                                      serviceType: 'Airport Transfer',
-                                    ),
+                                    builder: (context) =>
+                                        const ServiceDetailScreen(
+                                          serviceType: 'Airport Transfer',
+                                        ),
                                   ),
                                 );
                               },
@@ -2222,9 +2260,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const ServiceDetailScreen(
-                                        serviceType: 'Hourly Service',
-                                      ),
+                                      builder: (context) =>
+                                          const ServiceDetailScreen(
+                                            serviceType: 'Hourly Service',
+                                          ),
                                     ),
                                   );
                                 },
@@ -2245,9 +2284,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => const ServiceDetailScreen(
-                                      serviceType: 'Hourly Service',
-                                    ),
+                                    builder: (context) =>
+                                        const ServiceDetailScreen(
+                                          serviceType: 'Hourly Service',
+                                        ),
                                   ),
                                 );
                               },
@@ -2270,9 +2310,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const ServiceDetailScreen(
-                                        serviceType: 'Point to Point',
-                                      ),
+                                      builder: (context) =>
+                                          const ServiceDetailScreen(
+                                            serviceType: 'Point to Point',
+                                          ),
                                     ),
                                   );
                                 },
@@ -2293,9 +2334,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => const ServiceDetailScreen(
-                                      serviceType: 'Point to Point',
-                                    ),
+                                    builder: (context) =>
+                                        const ServiceDetailScreen(
+                                          serviceType: 'Point to Point',
+                                        ),
                                   ),
                                 );
                               },
@@ -2310,9 +2352,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const ServiceDetailScreen(
-                                        serviceType: 'Corporate',
-                                      ),
+                                      builder: (context) =>
+                                          const ServiceDetailScreen(
+                                            serviceType: 'Corporate',
+                                          ),
                                     ),
                                   );
                                 },
@@ -2333,9 +2376,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => const ServiceDetailScreen(
-                                      serviceType: 'Corporate',
-                                    ),
+                                    builder: (context) =>
+                                        const ServiceDetailScreen(
+                                          serviceType: 'Corporate',
+                                        ),
                                   ),
                                 );
                               },
@@ -2358,9 +2402,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const ServiceDetailScreen(
-                                        serviceType: 'Events',
-                                      ),
+                                      builder: (context) =>
+                                          const ServiceDetailScreen(
+                                            serviceType: 'Events',
+                                          ),
                                     ),
                                   );
                                 },
@@ -2381,9 +2426,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => const ServiceDetailScreen(
-                                      serviceType: 'Events',
-                                    ),
+                                    builder: (context) =>
+                                        const ServiceDetailScreen(
+                                          serviceType: 'Events',
+                                        ),
                                   ),
                                 );
                               },
@@ -2398,9 +2444,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const ServiceDetailScreen(
-                                        serviceType: 'Tours',
-                                      ),
+                                      builder: (context) =>
+                                          const ServiceDetailScreen(
+                                            serviceType: 'Tours',
+                                          ),
                                     ),
                                   );
                                 },
@@ -2421,9 +2468,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => const ServiceDetailScreen(
-                                      serviceType: 'Tours',
-                                    ),
+                                    builder: (context) =>
+                                        const ServiceDetailScreen(
+                                          serviceType: 'Tours',
+                                        ),
                                   ),
                                 );
                               },
@@ -2459,9 +2507,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                   padding: EdgeInsets.zero,
                   children: [
                     DrawerHeader(
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF0B3254),
-                      ),
+                      decoration: const BoxDecoration(color: Color(0xFF0B3254)),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -2493,10 +2539,17 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                     _buildMobileMenuItem('CONTACT', Icons.contact_mail),
                     const Divider(color: Colors.white24, height: 32),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       child: Row(
                         children: [
-                          const Icon(Icons.phone, color: Color(0xFFFFD700), size: 20),
+                          const Icon(
+                            Icons.phone,
+                            color: Color(0xFFFFD700),
+                            size: 20,
+                          ),
                           const SizedBox(width: 12),
                           Text(
                             '+1 917 599-5522',
@@ -2583,7 +2636,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   Widget _buildHeader(BuildContext context) {
     final double width = MediaQuery.of(context).size.width;
     final bool isMobile = width < 800;
-    
+
     // Show a full nav bar on web/large screens, compact on mobile
     final bool isWeb = kIsWeb;
     if (isWeb) {
@@ -2623,11 +2676,13 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
             ];
 
             if (_isCheckingAuth) {
-              trailingChildren.add(const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ));
+              trailingChildren.add(
+                const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              );
             } else if (_currentUser == null) {
               trailingChildren.addAll([
                 TextButton(
@@ -2664,8 +2719,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
             } else {
               trailingChildren.add(
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFF0B3254).withOpacity(0.05),
                     borderRadius: BorderRadius.circular(32),
@@ -2823,8 +2880,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                         ),
                       ),
                     ),
-                  ]
-                  else
+                  ] else
                     PopupMenuButton<String>(
                       onSelected: (value) {
                         switch (value) {
@@ -2998,10 +3054,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
               ),
             ),
           ],
-          icon: const Icon(
-            Icons.arrow_drop_down,
-            color: Color(0xFF0B3254),
-          ),
+          icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF0B3254)),
         ),
       );
     } else {
@@ -3474,9 +3527,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ServiceDetailScreen(
-                    serviceType: getServiceType(title),
-                  ),
+                  builder: (context) =>
+                      ServiceDetailScreen(serviceType: getServiceType(title)),
                 ),
               );
             },
@@ -3610,15 +3662,11 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
             child: Text(
               'Experience the ultimate private chauffeur service. Encounter every destination in our top of the line vehicles, where high end luxury meets safe, private and reliable journeys; just what the upscale modern day passenger needs',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
-                height: 1.6,
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.grey, height: 1.6),
             ),
           ),
           const SizedBox(height: 60),
-          
+
           // Carrusel de vehículos - Responsive
           isCompact
               ? Column(
@@ -3644,7 +3692,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                                     width: double.infinity,
                                     color: Colors.grey[200],
                                     child: const Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         Icon(
                                           Icons.directions_car,
@@ -3686,7 +3735,9 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                             ),
                             const SizedBox(height: 6),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 20),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
                               child: Text(
                                 currentVehicle['subtitle']!,
                                 textAlign: TextAlign.center,
@@ -3751,7 +3802,9 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                         IconButton(
                           onPressed: () {
                             setState(() {
-                              _currentVehicleIndex = (_currentVehicleIndex - 1 + vehicles.length) % vehicles.length;
+                              _currentVehicleIndex =
+                                  (_currentVehicleIndex - 1 + vehicles.length) %
+                                  vehicles.length;
                             });
                           },
                           icon: Container(
@@ -3778,7 +3831,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                         IconButton(
                           onPressed: () {
                             setState(() {
-                              _currentVehicleIndex = (_currentVehicleIndex + 1) % vehicles.length;
+                              _currentVehicleIndex =
+                                  (_currentVehicleIndex + 1) % vehicles.length;
                             });
                           },
                           icon: Container(
@@ -3812,7 +3866,9 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                     IconButton(
                       onPressed: () {
                         setState(() {
-                          _currentVehicleIndex = (_currentVehicleIndex - 1 + vehicles.length) % vehicles.length;
+                          _currentVehicleIndex =
+                              (_currentVehicleIndex - 1 + vehicles.length) %
+                              vehicles.length;
                         });
                       },
                       icon: Container(
@@ -3836,7 +3892,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                       ),
                     ),
                     const SizedBox(width: 40),
-                    
+
                     // Imagen del vehículo en desktop
                     Expanded(
                       child: AnimatedSwitcher(
@@ -3857,7 +3913,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                                       height: 400,
                                       color: Colors.grey[200],
                                       child: const Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         children: [
                                           Icon(
                                             Icons.directions_car,
@@ -3952,13 +4009,14 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                         ),
                       ),
                     ),
-                    
+
                     const SizedBox(width: 40),
                     // Botón siguiente en desktop
                     IconButton(
                       onPressed: () {
                         setState(() {
-                          _currentVehicleIndex = (_currentVehicleIndex + 1) % vehicles.length;
+                          _currentVehicleIndex =
+                              (_currentVehicleIndex + 1) % vehicles.length;
                         });
                       },
                       icon: Container(
@@ -3983,9 +4041,9 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                     ),
                   ],
                 ),
-          
+
           const SizedBox(height: 40),
-          
+
           // Indicadores de punto
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -4004,14 +4062,14 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
               ),
             ),
           ),
-          
+
           const SizedBox(height: 60),
-          
+
           ElevatedButton(
             onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const FleetScreen()),
-              );
+              Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const FleetScreen()));
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF0B3254),
