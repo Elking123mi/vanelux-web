@@ -41,6 +41,8 @@ class LoginWebScreen extends StatefulWidget {
 class _LoginWebScreenState extends State<LoginWebScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _fullNameController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   final _guestEmailController = TextEditingController();
   final _guestFirstNameController = TextEditingController();
   final _guestLastNameController = TextEditingController();
@@ -931,15 +933,42 @@ class _LoginWebScreenState extends State<LoginWebScreen> {
                                   ],
                                 ),
                                 const SizedBox(height: 24),
-                                const Text(
-                                  'Login to Your Account',
-                                  style: TextStyle(
+                                Text(
+                                  _isLogin ? 'Login to Your Account' : 'Create Your Account',
+                                  style: const TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                     color: Color(0xFF0B3254),
                                   ),
                                 ),
                                 const SizedBox(height: 20),
+                                
+                                // Full Name - Solo para registro
+                                if (!_isLogin) ...[
+                                  const Text(
+                                    'Full Name *',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  TextField(
+                                    controller: _fullNameController,
+                                    decoration: InputDecoration(
+                                      hintText: 'Enter your full name',
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 12,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                ],
+                                
                                 const Text(
                                   'Email address *',
                                   style: TextStyle(
@@ -982,46 +1011,120 @@ class _LoginWebScreenState extends State<LoginWebScreen> {
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 12),
-                                Row(
-                                  children: [
-                                    Checkbox(
-                                      value: _rememberMe,
-                                      onChanged: (value) => setState(() => _rememberMe = value ?? false),
+                                
+                                // Confirm Password - Solo para registro
+                                if (!_isLogin) ...[
+                                  const SizedBox(height: 16),
+                                  const Text(
+                                    'Confirm Password *',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
                                     ),
-                                    const Text('Remember me', style: TextStyle(fontSize: 14)),
-                                    const Spacer(),
-                                    TextButton(
-                                      onPressed: () {},
-                                      child: const Text(
-                                        'Forgot password?',
-                                        style: TextStyle(color: Color(0xFF4169E1), fontSize: 13),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  TextField(
+                                    controller: _confirmPasswordController,
+                                    obscureText: true,
+                                    decoration: InputDecoration(
+                                      hintText: 'Confirm your password',
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 12,
                                       ),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
+                                
+                                const SizedBox(height: 12),
+                                
+                                // Remember Me y forgot password - Solo para login
+                                if (_isLogin)
+                                  Row(
+                                    children: [
+                                      Checkbox(
+                                        value: _rememberMe,
+                                        onChanged: (value) => setState(() => _rememberMe = value ?? false),
+                                      ),
+                                      const Text('Remember me', style: TextStyle(fontSize: 14)),
+                                      const Spacer(),
+                                      TextButton(
+                                        onPressed: () {},
+                                        child: const Text(
+                                          'Forgot password?',
+                                          style: TextStyle(color: Color(0xFF4169E1), fontSize: 13),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                
                                 const SizedBox(height: 20),
                                 SizedBox(
                                   width: double.infinity,
                                   height: 48,
                                   child: ElevatedButton(
                                     onPressed: _isLoading ? null : () async {
-                                      if (_emailController.text.trim().isEmpty || _passwordController.text.isEmpty) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(
-                                            content: Text('Please enter email and password'),
-                                            backgroundColor: Colors.red,
-                                          ),
-                                        );
-                                        return;
+                                      // Validación diferente para login vs registro
+                                      if (_isLogin) {
+                                        // Validación de login
+                                        if (_emailController.text.trim().isEmpty || _passwordController.text.isEmpty) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(
+                                              content: Text('Please enter email and password'),
+                                              backgroundColor: Colors.red,
+                                            ),
+                                          );
+                                          return;
+                                        }
+                                      } else {
+                                        // Validación de registro
+                                        if (_fullNameController.text.trim().isEmpty ||
+                                            _emailController.text.trim().isEmpty ||
+                                            _passwordController.text.isEmpty ||
+                                            _confirmPasswordController.text.isEmpty) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(
+                                              content: Text('Please fill in all fields'),
+                                              backgroundColor: Colors.red,
+                                            ),
+                                          );
+                                          return;
+                                        }
+                                        
+                                        if (_passwordController.text != _confirmPasswordController.text) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(
+                                              content: Text('Passwords do not match'),
+                                              backgroundColor: Colors.red,
+                                            ),
+                                          );
+                                          return;
+                                        }
                                       }
+                                      
                                       setState(() => _isLoading = true);
+                                      
                                       try {
-                                        await AuthService.login(
-                                          _emailController.text.trim(),
-                                          _passwordController.text,
-                                        );
+                                        if (_isLogin) {
+                                          // Login
+                                          await AuthService.login(
+                                            _emailController.text.trim(),
+                                            _passwordController.text,
+                                          );
+                                        } else {
+                                          // Registro
+                                          await AuthService.register(
+                                            _fullNameController.text.trim(),
+                                            _emailController.text.trim(),
+                                            _passwordController.text,
+                                          );
+                                        }
+                                        
                                         if (mounted) {
+                                          // Navegar al paso 4 (Details)
                                           Navigator.pushReplacement(
                                             context,
                                             MaterialPageRoute(
@@ -1047,7 +1150,7 @@ class _LoginWebScreenState extends State<LoginWebScreen> {
                                         if (mounted) {
                                           ScaffoldMessenger.of(context).showSnackBar(
                                             SnackBar(
-                                              content: Text('Login failed: ${e.toString()}'),
+                                              content: Text('${_isLogin ? 'Login' : 'Registration'} failed: ${e.toString()}'),
                                               backgroundColor: Colors.red,
                                             ),
                                           );
@@ -1069,9 +1172,9 @@ class _LoginWebScreenState extends State<LoginWebScreen> {
                                               strokeWidth: 2,
                                             ),
                                           )
-                                        : const Text(
-                                            'LOGIN',
-                                            style: TextStyle(
+                                        : Text(
+                                            _isLogin ? 'LOGIN' : 'CREATE ACCOUNT',
+                                            style: const TextStyle(
                                               fontSize: 16,
                                               fontWeight: FontWeight.bold,
                                               color: Colors.white,

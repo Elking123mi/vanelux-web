@@ -2783,7 +2783,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  else if (_currentUser == null)
+                  else if (_currentUser == null) ...[
                     TextButton(
                       onPressed: _navigateToLogin,
                       style: TextButton.styleFrom(
@@ -2800,7 +2800,30 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                           color: Color(0xFF0B3254),
                         ),
                       ),
-                    )
+                    ),
+                    const SizedBox(width: 4),
+                    ElevatedButton(
+                      onPressed: _navigateToSignup,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFD4AF37),
+                        foregroundColor: const Color(0xFF0B3254),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      child: const Text(
+                        'SIGNUP',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ]
                   else
                     PopupMenuButton<String>(
                       onSelected: (value) {

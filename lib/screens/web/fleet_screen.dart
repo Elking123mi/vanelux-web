@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class FleetScreen extends StatelessWidget {
-  const FleetScreen({Key? key}) : super(key: key);
+  const FleetScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
