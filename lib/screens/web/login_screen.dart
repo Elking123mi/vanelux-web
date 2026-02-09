@@ -1117,9 +1117,10 @@ class _LoginWebScreenState extends State<LoginWebScreen> {
                                         } else {
                                           // Registro
                                           await AuthService.register(
-                                            _fullNameController.text.trim(),
-                                            _emailController.text.trim(),
-                                            _passwordController.text,
+                                            name: _fullNameController.text.trim(),
+                                            email: _emailController.text.trim(),
+                                            password: _passwordController.text,
+                                            phone: '', // Teléfono opcional
                                           );
                                         }
                                         
