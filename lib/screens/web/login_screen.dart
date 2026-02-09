@@ -42,6 +42,7 @@ class _LoginWebScreenState extends State<LoginWebScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _fullNameController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _guestEmailController = TextEditingController();
   final _guestFirstNameController = TextEditingController();
@@ -1012,6 +1013,33 @@ class _LoginWebScreenState extends State<LoginWebScreen> {
                                   ),
                                 ),
                                 
+                                // Phone - Solo para registro
+                                if (!_isLogin) ...[
+                                  const SizedBox(height: 16),
+                                  const Text(
+                                    'Phone Number *',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  TextField(
+                                    controller: _phoneController,
+                                    keyboardType: TextInputType.phone,
+                                    decoration: InputDecoration(
+                                      hintText: 'e.g., 9294180058',
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 12,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                
                                 // Confirm Password - Solo para registro
                                 if (!_isLogin) ...[
                                   const SizedBox(height: 16),
@@ -1056,7 +1084,8 @@ class _LoginWebScreenState extends State<LoginWebScreen> {
                                         child: const Text(
                                           'Forgot password?',
                                           style: TextStyle(color: Color(0xFF4169E1), fontSize: 13),
-                                        ),
+                                        ),honeController.text.trim().isEmpty ||
+                                            _p
                                       ),
                                     ],
                                   ),
@@ -1092,7 +1121,7 @@ class _LoginWebScreenState extends State<LoginWebScreen> {
                                             ),
                                           );
                                           return;
-                                        }
+                                        }_phoneController.text.trim(),
                                         
                                         if (_passwordController.text != _confirmPasswordController.text) {
                                           ScaffoldMessenger.of(context).showSnackBar(
