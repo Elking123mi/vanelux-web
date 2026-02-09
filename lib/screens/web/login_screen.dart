@@ -1084,8 +1084,7 @@ class _LoginWebScreenState extends State<LoginWebScreen> {
                                         child: const Text(
                                           'Forgot password?',
                                           style: TextStyle(color: Color(0xFF4169E1), fontSize: 13),
-                                        ),honeController.text.trim().isEmpty ||
-                                            _p
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -1121,7 +1120,7 @@ class _LoginWebScreenState extends State<LoginWebScreen> {
                                             ),
                                           );
                                           return;
-                                        }_phoneController.text.trim(),
+                                        }
                                         
                                         if (_passwordController.text != _confirmPasswordController.text) {
                                           ScaffoldMessenger.of(context).showSnackBar(
