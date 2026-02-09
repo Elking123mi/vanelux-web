@@ -10,7 +10,6 @@ import '../../services/auth_service.dart';
 import '../../services/google_maps_service.dart';
 import '../../widgets/route_map_view.dart';
 import 'customer_dashboard_web.dart';
-import 'fleet_page.dart';
 import 'fleet_screen.dart';
 import 'service_detail_screen.dart';
 import 'trip_details_web_screen.dart';
@@ -175,7 +174,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   Timer? _carouselTimer;
 
   // Mobile menu state
-  bool _isMobileMenuOpen = false;
+  final bool _isMobileMenuOpen = false;
 
   // Booking form state
   String? selectedServiceType;
