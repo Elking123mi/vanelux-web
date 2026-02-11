@@ -98,7 +98,7 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
     if (!_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Por favor completa todos los campos requeridos'),
+          content: Text('Please fill in all required fields'),
           backgroundColor: Colors.red,
         ),
       );
@@ -108,9 +108,7 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
     if (_licenseExpiryDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-            'Por favor selecciona la fecha de expiración de la licencia',
-          ),
+          content: Text('Please select the license expiration date'),
           backgroundColor: Colors.red,
         ),
       );
@@ -120,9 +118,7 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
     if (_insuranceExpiryDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-            'Por favor selecciona la fecha de expiración del seguro',
-          ),
+          content: Text('Please select the insurance expiration date'),
           backgroundColor: Colors.red,
         ),
       );
@@ -134,10 +130,6 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
     });
 
     try {
-      final url = Uri.parse(
-        'https://web-production-700fe.up.railway.app/api/v1/vlx/drivers/apply',
-      );
-
       final applicationData = {
         'full_name': _fullNameController.text.trim(),
         'email': _emailController.text.trim(),
@@ -163,28 +155,89 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
         'additional_notes': _notesController.text.trim(),
       };
 
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(applicationData),
-      );
+      // Send email notification via FormSubmit
+      bool emailSent = false;
+      try {
+        final emailUrl = Uri.parse(
+          'https://formsubmit.co/ajax/elkinchila2006@gmail.com',
+        );
+        final emailBody = {
+          '_subject': 'New Driver Application - Vanelux',
+          '_template': 'table',
+          'Full Name': applicationData['full_name'],
+          'Email': applicationData['email'],
+          'Phone': applicationData['phone'],
+          'Driver License': applicationData['driver_license'],
+          'License Expiry': applicationData['license_expiry_date'],
+          'Vehicle Type': applicationData['vehicle_type'],
+          'Vehicle':
+              '${applicationData['vehicle_year']} ${applicationData['vehicle_make']} ${applicationData['vehicle_model']}',
+          'Vehicle Color': applicationData['vehicle_color'],
+          'License Plate': applicationData['license_plate'],
+          'Insurance Company': applicationData['insurance_company'],
+          'Policy Number': applicationData['insurance_policy_number'],
+          'Insurance Expiry': applicationData['insurance_expiry_date'],
+          'Years of Experience': applicationData['years_of_experience']
+              .toString(),
+          'Languages': applicationData['languages'],
+          'Background Check': applicationData['has_background_check'] == true
+              ? 'Yes'
+              : 'No',
+          'Additional Notes': applicationData['additional_notes'],
+        };
+        final emailResponse = await http.post(
+          emailUrl,
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: jsonEncode(emailBody),
+        );
+        emailSent = emailResponse.statusCode == 200;
+      } catch (_) {
+        // Email sending failed, continue with API
+      }
+
+      // Also try backend API for database storage
+      bool apiSuccess = false;
+      String applicationId = '';
+      try {
+        final apiUrl = Uri.parse(
+          'https://web-production-700fe.up.railway.app/api/v1/vlx/drivers/apply',
+        );
+        final response = await http.post(
+          apiUrl,
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            ...applicationData,
+            'notification_email': 'elkinchila2006@gmail.com',
+          }),
+        );
+        if (response.statusCode == 201) {
+          final data = jsonDecode(response.body);
+          applicationId = data['application_id'] ?? '';
+          apiSuccess = true;
+        }
+      } catch (_) {
+        // API call failed, continue
+      }
 
       setState(() {
         _isLoading = false;
       });
 
-      if (response.statusCode == 201) {
-        final data = jsonDecode(response.body);
-        _showSuccessDialog(data['application_id']);
+      if (emailSent || apiSuccess) {
+        _showSuccessDialog(
+          applicationId.isNotEmpty ? applicationId : 'SUBMITTED',
+        );
       } else {
-        final error = jsonDecode(response.body);
-        _showErrorDialog(error['detail'] ?? 'Error al enviar la aplicación');
+        _showErrorDialog('Error submitting application. Please try again.');
       }
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
-      _showErrorDialog('Error de conexión. Por favor intenta de nuevo.');
+      _showErrorDialog('Connection error. Please try again.');
     }
   }
 
@@ -198,7 +251,7 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
           children: [
             Icon(Icons.check_circle, color: Colors.green, size: 32),
             SizedBox(width: 12),
-            Text('¡Aplicación Enviada!'),
+            Text('Application Submitted!'),
           ],
         ),
         content: Column(
@@ -206,7 +259,7 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Tu aplicación ha sido enviada exitosamente.',
+              'Your application has been submitted successfully.',
               style: TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 16),
@@ -221,7 +274,7 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'ID de Aplicación:',
+                    'Application ID:',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF0B3254),
@@ -234,7 +287,7 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
             ),
             const SizedBox(height: 16),
             const Text(
-              'Nuestro equipo revisará tu aplicación y te contactaremos pronto.',
+              'Our team will review your application and contact you soon.',
               style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
           ],
@@ -250,7 +303,7 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
               foregroundColor: const Color(0xFFD4AF37),
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
             ),
-            child: const Text('Volver al Inicio'),
+            child: const Text('Back to Home'),
           ),
         ],
       ),
@@ -273,7 +326,7 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cerrar'),
+            child: const Text('Close'),
           ),
         ],
       ),
@@ -307,7 +360,7 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
                   ),
                   const SizedBox(height: 20),
                   const Text(
-                    'Únete a Vanelux',
+                    'Join Vanelux',
                     style: TextStyle(
                       fontSize: 42,
                       fontWeight: FontWeight.bold,
@@ -316,7 +369,7 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Forma parte del equipo de conductores de lujo más exclusivo',
+                    'Join the most exclusive luxury driver team',
                     style: TextStyle(
                       fontSize: 18,
                       color: Colors.white.withOpacity(0.9),
@@ -337,15 +390,15 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Personal Information Section
-                    _buildSectionTitle('📋 Información Personal'),
+                    _buildSectionTitle('📋 Personal Information'),
                     const SizedBox(height: 24),
                     _buildTextField(
                       controller: _fullNameController,
-                      label: 'Nombre Completo',
+                      label: 'Full Name',
                       icon: Icons.person,
                       validator: (value) {
                         if (value == null || value.trim().length < 3) {
-                          return 'El nombre debe tener al menos 3 caracteres';
+                          return 'Name must be at least 3 characters';
                         }
                         return null;
                       },
@@ -363,7 +416,7 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
                               if (value == null ||
                                   !value.contains('@') ||
                                   !value.contains('.')) {
-                                return 'Email inválido';
+                                return 'Invalid email';
                               }
                               return null;
                             },
@@ -373,12 +426,12 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
                         Expanded(
                           child: _buildTextField(
                             controller: _phoneController,
-                            label: 'Teléfono',
+                            label: 'Phone',
                             icon: Icons.phone,
                             keyboardType: TextInputType.phone,
                             validator: (value) {
                               if (value == null || value.trim().length < 10) {
-                                return 'Teléfono inválido';
+                                return 'Invalid phone number';
                               }
                               return null;
                             },
@@ -392,11 +445,11 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
                         Expanded(
                           child: _buildTextField(
                             controller: _driverLicenseController,
-                            label: 'Número de Licencia',
+                            label: 'License Number',
                             icon: Icons.badge,
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
-                                return 'Requerido';
+                                return 'Required';
                               }
                               return null;
                             },
@@ -405,7 +458,7 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
                         const SizedBox(width: 20),
                         Expanded(
                           child: _buildDateField(
-                            label: 'Licencia Expira',
+                            label: 'License Expiration',
                             date: _licenseExpiryDate,
                             onTap: () => _selectDate(context, true),
                           ),
@@ -418,16 +471,16 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
                         Expanded(
                           child: _buildTextField(
                             controller: _experienceController,
-                            label: 'Años de Experiencia',
+                            label: 'Years of Experience',
                             icon: Icons.work,
                             keyboardType: TextInputType.number,
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
-                                return 'Requerido';
+                                return 'Required';
                               }
                               final years = int.tryParse(value);
                               if (years == null || years < 0) {
-                                return 'Número inválido';
+                                return 'Invalid number';
                               }
                               return null;
                             },
@@ -437,9 +490,9 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
                         Expanded(
                           child: _buildTextField(
                             controller: _languagesController,
-                            label: 'Idiomas (separados por comas)',
+                            label: 'Languages (comma separated)',
                             icon: Icons.language,
-                            hintText: 'Español, Inglés, Francés',
+                            hintText: 'English, Spanish, French',
                           ),
                         ),
                       ],
@@ -452,7 +505,7 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
                           _hasBackgroundCheck = value ?? false;
                         });
                       },
-                      title: const Text('Tengo Background Check completado'),
+                      title: const Text('I have a completed Background Check'),
                       activeColor: const Color(0xFF0B3254),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -463,12 +516,12 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
                     const SizedBox(height: 40),
 
                     // Vehicle Information Section
-                    _buildSectionTitle('🚘 Información del Vehículo'),
+                    _buildSectionTitle('🚘 Vehicle Information'),
                     const SizedBox(height: 24),
                     DropdownButtonFormField<String>(
-                      value: _selectedVehicleType,
+                      initialValue: _selectedVehicleType,
                       decoration: InputDecoration(
-                        labelText: 'Tipo de Vehículo',
+                        labelText: 'Vehicle Type',
                         prefixIcon: const Icon(Icons.directions_car),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -491,12 +544,12 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
                         Expanded(
                           child: _buildTextField(
                             controller: _vehicleMakeController,
-                            label: 'Marca',
+                            label: 'Make',
                             icon: Icons.business,
                             hintText: 'Mercedes-Benz, BMW, etc.',
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
-                                return 'Requerido';
+                                return 'Required';
                               }
                               return null;
                             },
@@ -506,12 +559,12 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
                         Expanded(
                           child: _buildTextField(
                             controller: _vehicleModelController,
-                            label: 'Modelo',
+                            label: 'Model',
                             icon: Icons.car_rental,
-                            hintText: 'S-Class, Serie 7, etc.',
+                            hintText: 'S-Class, 7 Series, etc.',
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
-                                return 'Requerido';
+                                return 'Required';
                               }
                               return null;
                             },
@@ -525,18 +578,18 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
                         Expanded(
                           child: _buildTextField(
                             controller: _vehicleYearController,
-                            label: 'Año',
+                            label: 'Year',
                             icon: Icons.calendar_today,
                             keyboardType: TextInputType.number,
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
-                                return 'Requerido';
+                                return 'Required';
                               }
                               final year = int.tryParse(value);
                               if (year == null ||
                                   year < 2015 ||
                                   year > DateTime.now().year + 1) {
-                                return 'Año entre 2015 y ${DateTime.now().year + 1}';
+                                return 'Year between 2015 and ${DateTime.now().year + 1}';
                               }
                               return null;
                             },
@@ -550,7 +603,7 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
                             icon: Icons.palette,
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
-                                return 'Requerido';
+                                return 'Required';
                               }
                               return null;
                             },
@@ -560,11 +613,11 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
                         Expanded(
                           child: _buildTextField(
                             controller: _licensePlateController,
-                            label: 'Placa',
+                            label: 'License Plate',
                             icon: Icons.pin,
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
-                                return 'Requerido';
+                                return 'Required';
                               }
                               return null;
                             },
@@ -576,18 +629,18 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
                     const SizedBox(height: 40),
 
                     // Insurance Information Section
-                    _buildSectionTitle('🛡️ Información del Seguro'),
+                    _buildSectionTitle('🛡️ Insurance Information'),
                     const SizedBox(height: 24),
                     Row(
                       children: [
                         Expanded(
                           child: _buildTextField(
                             controller: _insuranceCompanyController,
-                            label: 'Compañía de Seguro',
+                            label: 'Insurance Company',
                             icon: Icons.shield,
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
-                                return 'Requerido';
+                                return 'Required';
                               }
                               return null;
                             },
@@ -597,11 +650,11 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
                         Expanded(
                           child: _buildTextField(
                             controller: _insurancePolicyController,
-                            label: 'Número de Póliza',
+                            label: 'Policy Number',
                             icon: Icons.confirmation_number,
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
-                                return 'Requerido';
+                                return 'Required';
                               }
                               return null;
                             },
@@ -611,7 +664,7 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
                     ),
                     const SizedBox(height: 20),
                     _buildDateField(
-                      label: 'Seguro Expira',
+                      label: 'Insurance Expiration',
                       date: _insuranceExpiryDate,
                       onTap: () => _selectDate(context, false),
                     ),
@@ -619,14 +672,14 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
                     const SizedBox(height: 40),
 
                     // Additional Notes Section
-                    _buildSectionTitle('📝 Notas Adicionales (Opcional)'),
+                    _buildSectionTitle('📝 Additional Notes (Optional)'),
                     const SizedBox(height: 24),
                     TextFormField(
                       controller: _notesController,
                       maxLines: 5,
                       decoration: InputDecoration(
                         hintText:
-                            'Cuéntanos sobre tu experiencia, disponibilidad, especialidades, etc.',
+                            'Tell us about your experience, availability, specialties, etc.',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -656,7 +709,7 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
                                 color: Color(0xFFD4AF37),
                               )
                             : const Text(
-                                'Enviar Aplicación',
+                                'Submit Application',
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -689,7 +742,7 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
                               ),
                               SizedBox(width: 12),
                               Text(
-                                '¿Qué pasa después?',
+                                'What happens next?',
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -700,11 +753,11 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
                           ),
                           SizedBox(height: 12),
                           Text(
-                            '1. Recibirás un ID de aplicación al enviar el formulario\n'
-                            '2. Nuestro equipo revisará tu aplicación en 24-48 horas\n'
-                            '3. Te contactaremos por email o teléfono para próximos pasos\n'
-                            '4. Programaremos una entrevista y revisión del vehículo\n'
-                            '5. ¡Bienvenido al equipo de Vanelux!',
+                            '1. You will receive an Application ID upon submission\n'
+                            '2. Our team will review your application within 24-48 hours\n'
+                            '3. We will contact you by email or phone for next steps\n'
+                            '4. We will schedule an interview and vehicle inspection\n'
+                            '5. Welcome to the Vanelux team!',
                             style: TextStyle(
                               fontSize: 14,
                               height: 1.6,
@@ -774,9 +827,7 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
           fillColor: const Color(0xFFF8F9FA),
         ),
         child: Text(
-          date != null
-              ? DateFormat('yyyy-MM-dd').format(date)
-              : 'Seleccionar fecha',
+          date != null ? DateFormat('yyyy-MM-dd').format(date) : 'Select date',
           style: TextStyle(
             color: date != null ? Colors.black : Colors.grey[600],
           ),

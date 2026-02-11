@@ -2821,8 +2821,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                     ),
                   ),
                   child: const Text(
-                    'DRIVER',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    'BECOME A DRIVER',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                   ),
                 ),
                 const SizedBox(width: 12),
