@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import '../../models/user.dart';
 import '../../services/auth_service.dart';
 import '../../services/google_maps_service.dart';
+import 'driver_registration_screen.dart';
 import '../../widgets/route_map_view.dart';
 import 'customer_dashboard_web.dart';
 import 'fleet_screen.dart';
@@ -4437,6 +4438,18 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                     _buildFooterLink('Our Fleet'),
                     _buildFooterLink('About Us'),
                     _buildFooterLink('Contact'),
+                    _buildFooterLink(
+                      'Become a Driver',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const DriverRegistrationScreen(),
+                          ),
+                        );
+                      },
+                    ),
                     _buildFooterLink('Terms & Conditions'),
                     _buildFooterLink('Privacy Policy'),
                   ],
@@ -4513,12 +4526,25 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     );
   }
 
-  Widget _buildFooterLink(String text) {
+  Widget _buildFooterLink(String text, {VoidCallback? onTap}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: Text(
-        text,
-        style: TextStyle(fontSize: 14, color: Colors.grey[300], height: 1.2),
+      child: MouseRegion(
+        cursor: onTap != null
+            ? SystemMouseCursors.click
+            : SystemMouseCursors.basic,
+        child: GestureDetector(
+          onTap: onTap,
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 14,
+              color: onTap != null ? Colors.white : Colors.grey[300],
+              height: 1.2,
+              decoration: onTap != null ? TextDecoration.underline : null,
+            ),
+          ),
+        ),
       ),
     );
   }
