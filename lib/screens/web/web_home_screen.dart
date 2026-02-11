@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import '../../models/user.dart';
 import '../../services/auth_service.dart';
 import '../../services/google_maps_service.dart';
+import '../../services/pricing_service.dart';
 import 'driver_registration_screen.dart';
 import '../../widgets/route_map_view.dart';
 import 'customer_dashboard_web.dart';
@@ -60,6 +61,8 @@ class _RouteQuote {
     required this.destinationLat,
     required this.destinationLng,
     this.pickupDateTime,
+    this.routeLabel,
+    this.routeType,
   });
 
   final String origin;
@@ -75,6 +78,8 @@ class _RouteQuote {
   final double destinationLat;
   final double destinationLng;
   final DateTime? pickupDateTime;
+  final String? routeLabel;
+  final RouteType? routeType;
 }
 
 class _SelectedLocation {
@@ -819,7 +824,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     if (originPlace == null || destinationPlace == null) {
       if (mounted) {
         setState(() {
-          quoteError = 'Selecciona direcciones válidas desde las sugerencias.';
+          quoteError = 'Please select valid addresses from the suggestions.';
         });
       }
       if (!mounted) {
@@ -828,7 +833,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Selecciona direcciones válidas desde las sugerencias para continuar.',
+            'Please select valid addresses from the suggestions to continue.',
           ),
           backgroundColor: Colors.red,
         ),
@@ -854,22 +859,35 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
 
       final distanceValue = (route['distance_value'] as num?)?.toDouble() ?? 0;
       if (distanceValue <= 0) {
-        throw Exception(
-          'No se encontró una ruta entre los puntos seleccionados',
-        );
+        throw Exception('No route found between the selected locations');
       }
 
       final oneWayMiles = distanceValue / 1609.344;
       final totalMiles = oneWayMiles * (isReturnTrip ? 2 : 1);
-      const double baseRate = 2.0;
+
+      // Detect route type and calculate prices using PricingService
+      final routeType = PricingService.detectRouteType(
+        originPlace.latitude,
+        originPlace.longitude,
+        destinationPlace.latitude,
+        destinationPlace.longitude,
+      );
+      final routeLabel = PricingService.getRouteLabel(routeType);
 
       final options = _quoteVehicleOptions.map((vehicle) {
-        final ratePerMile = baseRate * vehicle.rateMultiplier;
-        final totalPrice = totalMiles * ratePerMile;
+        final estimate = PricingService.calculatePrice(
+          pickupLat: originPlace.latitude,
+          pickupLng: originPlace.longitude,
+          dropoffLat: destinationPlace.latitude,
+          dropoffLng: destinationPlace.longitude,
+          distanceMiles: oneWayMiles,
+          vehicleName: vehicle.name,
+          isReturnTrip: isReturnTrip,
+        );
         return _VehicleQuote(
           vehicle: vehicle,
-          totalPrice: totalPrice,
-          ratePerMile: ratePerMile,
+          totalPrice: estimate.totalPrice,
+          ratePerMile: estimate.perMileRate ?? 0,
         );
       }).toList();
 
@@ -882,7 +900,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
               '${oneWayMiles.toStringAsFixed(1)} mi',
           durationText: route['duration'] as String? ?? '',
           totalMiles: totalMiles,
-          baseRatePerMile: baseRate,
+          baseRatePerMile: 0,
           includesReturnTrip: isReturnTrip,
           options: options,
           originLat: originPlace.latitude,
@@ -890,6 +908,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           destinationLat: destinationPlace.latitude,
           destinationLng: destinationPlace.longitude,
           pickupDateTime: selectedDateTime,
+          routeLabel: routeLabel,
+          routeType: routeType,
         );
       });
     } catch (e) {
@@ -1840,7 +1860,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           ),
           const SizedBox(height: 12),
           const Text(
-            'Verifica las direcciones e intenta de nuevo.',
+            'Check the addresses and try again.',
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.black54),
           ),
@@ -1850,15 +1870,15 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       content = Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
-        children: const [
-          Icon(
+        children: [
+          const Icon(
             Icons.directions_car_filled_outlined,
             size: 56,
             color: Color(0xFF0B3254),
           ),
           SizedBox(height: 16),
           Text(
-            'Solicita tu cotización',
+            'Get Your Quote',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 20,
@@ -1868,7 +1888,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           ),
           SizedBox(height: 12),
           Text(
-            'Ingresa la dirección de origen y destino para ver las tarifas en tiempo real.',
+            'Enter pickup and destination addresses to see real-time rates.',
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.black54),
           ),
@@ -1918,13 +1938,47 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Tu experiencia Vanelux',
+          'Your Vanelux Experience',
           style: TextStyle(
             fontSize: isCompact ? 18 : 20,
             fontWeight: FontWeight.w600,
             color: const Color(0xFF0B3254),
           ),
         ),
+        if (quote.routeLabel != null) ...[
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: const Color(0xFFD4AF37).withOpacity(0.15),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: const Color(0xFFD4AF37)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  quote.routeType == RouteType.localCity
+                      ? Icons.location_city
+                      : quote.routeType == RouteType.outsideCity
+                      ? Icons.public
+                      : Icons.flight,
+                  size: 16,
+                  color: const Color(0xFF0B3254),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  quote.routeLabel!,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF0B3254),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
         const SizedBox(height: 12),
         Text(
           '${quote.origin}\n→ ${quote.destination}',
@@ -1946,23 +2000,23 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
             children: [
               _buildInfoPill(
                 Icons.route,
-                'Distancia total',
+                'Total Distance',
                 quote.distanceText,
                 isCompact,
               ),
               const SizedBox(height: 12),
               _buildInfoPill(
                 Icons.schedule,
-                'Duración estimada',
+                'Estimated Duration',
                 quote.durationText.isEmpty
-                    ? 'Calculando...'
+                    ? 'Calculating...'
                     : quote.durationText,
                 isCompact,
               ),
               const SizedBox(height: 12),
               _buildInfoPill(
                 Icons.calendar_today_outlined,
-                'Fecha',
+                'Date',
                 _formatDateTime(quote.pickupDateTime),
                 isCompact,
               ),
@@ -1970,8 +2024,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                 const SizedBox(height: 12),
                 _buildInfoPill(
                   Icons.repeat,
-                  'Servicio',
-                  'Viaje redondo',
+                  'Service',
+                  'Round Trip',
                   isCompact,
                 ),
               ],
@@ -2009,7 +2063,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                       borderRadius: BorderRadius.circular(24),
                     ),
                     child: Text(
-                      '${quote.distanceText} • ${quote.durationText.isEmpty ? 'Calculando...' : quote.durationText}',
+                      '${quote.distanceText} • ${quote.durationText.isEmpty ? 'Calculating...' : quote.durationText}',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white,
@@ -2025,7 +2079,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         ),
         const SizedBox(height: 28),
         Text(
-          'Selecciona tu vehículo',
+          'Select Your Vehicle',
           style: TextStyle(
             fontSize: isCompact ? 16 : 18,
             fontWeight: FontWeight.w600,
@@ -2038,13 +2092,41 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
               _buildVehicleQuoteTile(option, quote.totalMiles, isCompact),
         ),
         const SizedBox(height: 12),
-        Text(
-          'Tarifas calculadas con base de \$${quote.baseRatePerMile.toStringAsFixed(2)} por milla.\nLos precios finales incluyen viaje redondo cuando aplica.',
-          style: TextStyle(
-            color: Colors.grey[600],
-            height: 1.5,
-            fontSize: isCompact ? 12 : 14,
-          ),
+        Builder(
+          builder: (context) {
+            if (quote.routeType != null) {
+              final rt = quote.routeType!;
+              if (rt == RouteType.airportManhattanJFK ||
+                  rt == RouteType.airportManhattanLGA ||
+                  rt == RouteType.airportManhattanNewark) {
+                return Text(
+                  'Flat rate pricing for ${quote.routeLabel}. Round trip prices doubled when applicable.',
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    height: 1.5,
+                    fontSize: isCompact ? 12 : 14,
+                  ),
+                );
+              } else if (rt == RouteType.localCity) {
+                return Text(
+                  'NYC local rates: base fare includes up to 5 miles. Extra miles charged per vehicle type.',
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    height: 1.5,
+                    fontSize: isCompact ? 12 : 14,
+                  ),
+                );
+              }
+            }
+            return Text(
+              'Outside NYC per-mile rates. Final prices include round trip when applicable.',
+              style: TextStyle(
+                color: Colors.grey[600],
+                height: 1.5,
+                fontSize: isCompact ? 12 : 14,
+              ),
+            );
+          },
         ),
       ],
     );
@@ -2121,7 +2203,9 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '\$${option.ratePerMile.toStringAsFixed(2)} / milla',
+                      option.ratePerMile > 0
+                          ? '\$${option.ratePerMile.toStringAsFixed(2)} / mile'
+                          : 'Flat rate',
                       style: TextStyle(
                         color: Colors.grey[600],
                         fontSize: isCompact ? 12 : 14,
@@ -2174,7 +2258,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    '${vehicle.luggage} equipajes',
+                    '${vehicle.luggage} bags',
                     style: TextStyle(
                       color: const Color(0xFF0B3254),
                       fontSize: isCompact ? 13 : 14,
