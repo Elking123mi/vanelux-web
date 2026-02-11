@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 import 'fleet_screen.dart';
+import 'web_home_screen.dart';
 
 class ServiceDetailScreen extends StatefulWidget {
   final String serviceType;
 
-  const ServiceDetailScreen({
-    super.key,
-    required this.serviceType,
-  });
+  const ServiceDetailScreen({super.key, required this.serviceType});
 
   @override
   State<ServiceDetailScreen> createState() => _ServiceDetailScreenState();
@@ -36,6 +34,42 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     }
   }
 
+  String _mapServiceTypeForBooking() {
+    // Map ServiceDetailScreen service types to WebHomeScreen service types
+    switch (widget.serviceType) {
+      case 'Airport Transfer':
+        return 'To Airport';
+      case 'Hourly Service':
+        return 'Hourly/As Directed';
+      case 'Tours':
+        return 'Tour';
+      case 'Point to Point':
+      case 'Corporate':
+      case 'Events':
+      default:
+        return widget.serviceType;
+    }
+  }
+
+  String _getPackageSectionTitle() {
+    switch (widget.serviceType) {
+      case 'Airport Transfer':
+        return 'Our Airport Transfer Packages';
+      case 'Hourly Service':
+        return 'Our Hourly Service Packages';
+      case 'Corporate':
+        return 'Our Corporate Packages';
+      case 'Events':
+        return 'Our Event Packages';
+      case 'Tours':
+        return 'Our Tour Packages';
+      case 'Point to Point':
+        return 'Our Point to Point Packages';
+      default:
+        return 'Our Service Packages';
+    }
+  }
+
   Map<String, dynamic> _getServiceInfo() {
     switch (widget.serviceType) {
       case 'Airport Transfer':
@@ -51,36 +85,42 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             {
               'icon': Icons.schedule,
               'title': 'Flight Tracking',
-              'description': 'Real-time monitoring of your flight status to ensure on-time pickup',
+              'description':
+                  'Real-time monitoring of your flight status to ensure on-time pickup',
             },
             {
               'icon': Icons.people,
               'title': 'Meet & Greet',
-              'description': 'Professional chauffeur waiting at arrivals with your name sign',
+              'description':
+                  'Professional chauffeur waiting at arrivals with your name sign',
             },
             {
               'icon': Icons.luggage,
               'title': 'Luggage Assistance',
-              'description': 'Complete baggage handling from terminal to vehicle',
+              'description':
+                  'Complete baggage handling from terminal to vehicle',
             },
           ],
           'packages': [
             {
               'name': 'Basic Package',
-              'description': 'Perfect for solo travelers or couples. Includes standard sedan service.',
+              'description':
+                  'Perfect for solo travelers or couples. Includes standard sedan service.',
               'duration': '1-Way',
               'price': '\$85',
             },
             {
               'name': 'Standard Package',
-              'description': 'Ideal for families. Includes SUV with luggage space.',
+              'description':
+                  'Ideal for families. Includes SUV with luggage space.',
               'duration': 'Round Trip',
               'price': '\$150',
               'badge': 'MOST POPULAR',
             },
             {
               'name': 'Premium Package',
-              'description': 'Luxury sedan with VIP treatment. Perfect for business travelers.',
+              'description':
+                  'Luxury sedan with VIP treatment. Perfect for business travelers.',
               'duration': 'Round Trip',
               'price': '\$300',
             },
@@ -134,7 +174,8 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             {
               'icon': Icons.maps_home_work,
               'title': 'Door-to-Door',
-              'description': 'Direct pickup from your location to your exact destination',
+              'description':
+                  'Direct pickup from your location to your exact destination',
             },
             {
               'icon': Icons.gps_fixed,
@@ -150,20 +191,23 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           'packages': [
             {
               'name': 'Single Trip',
-              'description': 'One-time ride within city limits. Perfect for appointments.',
+              'description':
+                  'One-time ride within city limits. Perfect for appointments.',
               'duration': 'One-Way',
               'price': '\$45',
             },
             {
               'name': 'Round Trip',
-              'description': 'Go and return service with waiting time included.',
+              'description':
+                  'Go and return service with waiting time included.',
               'duration': 'Round Trip',
               'price': '\$85',
               'badge': 'SAVE 15%',
             },
             {
               'name': 'Weekly Pass',
-              'description': 'Unlimited city rides for one week. Best for commuters.',
+              'description':
+                  'Unlimited city rides for one week. Best for commuters.',
               'duration': '7 Days',
               'price': '\$299',
             },
@@ -222,7 +266,8 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             {
               'icon': Icons.map,
               'title': 'Multiple Destinations',
-              'description': 'Visit as many locations as you want during your rental period',
+              'description':
+                  'Visit as many locations as you want during your rental period',
             },
             {
               'icon': Icons.attach_money,
@@ -233,20 +278,23 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           'packages': [
             {
               'name': 'Basic Package',
-              'description': 'Perfect for business meetings or short shopping trips. Includes 2 hours of service.',
+              'description':
+                  'Perfect for business meetings or short shopping trips. Includes 2 hours of service.',
               'duration': '2 Hours',
               'price': '\$120',
             },
             {
               'name': 'Standard Package',
-              'description': 'Ideal for half-day sightseeing or shopping. Includes 4 hours of service.',
+              'description':
+                  'Ideal for half-day sightseeing or shopping. Includes 4 hours of service.',
               'duration': '4 Hours',
               'price': '\$220',
               'badge': 'MOST POPULAR',
             },
             {
               'name': 'Premium Package',
-              'description': 'Full-day service for extensive tours or business needs. Includes 8 hours.',
+              'description':
+                  'Full-day service for extensive tours or business needs. Includes 8 hours.',
               'duration': '8 Hours',
               'price': '\$400',
             },
@@ -300,36 +348,42 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             {
               'icon': Icons.account_circle,
               'title': 'Account Manager',
-              'description': 'Dedicated support for all your corporate transportation needs',
+              'description':
+                  'Dedicated support for all your corporate transportation needs',
             },
             {
               'icon': Icons.receipt_long,
               'title': 'Billing Reports',
-              'description': 'Consolidated monthly invoices with detailed trip reports',
+              'description':
+                  'Consolidated monthly invoices with detailed trip reports',
             },
             {
               'icon': Icons.verified_user,
               'title': 'Priority Service',
-              'description': 'Guaranteed vehicle availability for urgent business needs',
+              'description':
+                  'Guaranteed vehicle availability for urgent business needs',
             },
           ],
           'packages': [
             {
               'name': 'Starter Plan',
-              'description': 'Perfect for small businesses. Includes 20 rides per month.',
+              'description':
+                  'Perfect for small businesses. Includes 20 rides per month.',
               'duration': 'Per Month',
               'price': '\$1,500',
             },
             {
               'name': 'Business Plan',
-              'description': 'For growing companies. Includes 50 rides and priority booking.',
+              'description':
+                  'For growing companies. Includes 50 rides and priority booking.',
               'duration': 'Per Month',
               'price': '\$3,500',
               'badge': 'MOST POPULAR',
             },
             {
               'name': 'Enterprise Plan',
-              'description': 'Unlimited rides for large corporations with custom solutions.',
+              'description':
+                  'Unlimited rides for large corporations with custom solutions.',
               'duration': 'Per Month',
               'price': 'Custom',
             },
@@ -383,36 +437,42 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             {
               'icon': Icons.photo_camera,
               'title': 'Photo Ready',
-              'description': 'Vehicles decorated and prepared for your special photo moments',
+              'description':
+                  'Vehicles decorated and prepared for your special photo moments',
             },
             {
               'icon': Icons.local_bar,
               'title': 'Champagne Service',
-              'description': 'Complimentary champagne and refreshments for celebrations',
+              'description':
+                  'Complimentary champagne and refreshments for celebrations',
             },
             {
               'icon': Icons.event_available,
               'title': 'Event Coordination',
-              'description': 'Professional planning to ensure everything runs smoothly',
+              'description':
+                  'Professional planning to ensure everything runs smoothly',
             },
           ],
           'packages': [
             {
               'name': 'Prom Package',
-              'description': 'Perfect for prom night. Includes 4 hours with red carpet.',
+              'description':
+                  'Perfect for prom night. Includes 4 hours with red carpet.',
               'duration': '4 Hours',
               'price': '\$399',
             },
             {
               'name': 'Wedding Package',
-              'description': 'Complete wedding transportation with decorations and photos.',
+              'description':
+                  'Complete wedding transportation with decorations and photos.',
               'duration': '6 Hours',
               'price': '\$599',
               'badge': 'MOST POPULAR',
             },
             {
               'name': 'Luxury Event',
-              'description': 'Full premium experience for any special occasion.',
+              'description':
+                  'Full premium experience for any special occasion.',
               'duration': '8 Hours',
               'price': '\$899',
             },
@@ -466,36 +526,42 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             {
               'icon': Icons.route,
               'title': 'Custom Routes',
-              'description': 'Create your own itinerary or choose from our popular tours',
+              'description':
+                  'Create your own itinerary or choose from our popular tours',
             },
             {
               'icon': Icons.person_pin,
               'title': 'Expert Guides',
-              'description': 'Knowledgeable local guides sharing city history and culture',
+              'description':
+                  'Knowledgeable local guides sharing city history and culture',
             },
             {
               'icon': Icons.camera_alt,
               'title': 'Photo Stops',
-              'description': 'Multiple stops at the best photo spots throughout the tour',
+              'description':
+                  'Multiple stops at the best photo spots throughout the tour',
             },
           ],
           'packages': [
             {
               'name': 'City Highlights',
-              'description': 'Quick tour of top 5 attractions. Perfect for first-time visitors.',
+              'description':
+                  'Quick tour of top 5 attractions. Perfect for first-time visitors.',
               'duration': '4 Hours',
               'price': '\$299',
             },
             {
               'name': 'Full Day Tour',
-              'description': 'Complete city experience with all major attractions and lunch.',
+              'description':
+                  'Complete city experience with all major attractions and lunch.',
               'duration': '8 Hours',
               'price': '\$499',
               'badge': 'BEST VALUE',
             },
             {
               'name': 'Custom Tour',
-              'description': 'Design your own tour with our expert guide and driver.',
+              'description':
+                  'Design your own tour with our expert guide and driver.',
               'duration': 'Flexible',
               'price': '\$99/hr',
             },
@@ -583,10 +649,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-          ),
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10),
         ],
       ),
       child: Row(
@@ -705,7 +768,11 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         ),
       ),
       itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-        _buildServiceMenuItem(context, 'Airport Transfer', Icons.flight_takeoff),
+        _buildServiceMenuItem(
+          context,
+          'Airport Transfer',
+          Icons.flight_takeoff,
+        ),
         _buildServiceMenuItem(context, 'Point to Point', Icons.location_on),
         _buildServiceMenuItem(context, 'Hourly Service', Icons.access_time),
         _buildServiceMenuItem(context, 'Corporate', Icons.business_center),
@@ -715,13 +782,17 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     );
   }
 
-  PopupMenuEntry<String> _buildServiceMenuItem(BuildContext context, String title, IconData icon) {
+  PopupMenuEntry<String> _buildServiceMenuItem(
+    BuildContext context,
+    String title,
+    IconData icon,
+  ) {
     return PopupMenuItem<String>(
       value: title,
       onTap: () {
         // Si ya estamos en esa página, no hacer nada
         if (widget.serviceType == title) return;
-        
+
         // Navegar a la nueva página de servicio
         Future.delayed(Duration.zero, () {
           Navigator.pushReplacement(
@@ -738,10 +809,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           const SizedBox(width: 10),
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color(0xFF0B3254),
-            ),
+            style: const TextStyle(fontSize: 14, color: Color(0xFF0B3254)),
           ),
         ],
       ),
@@ -866,7 +934,10 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 const SizedBox(height: 40),
                 // Botón decorativo
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 30,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFFD700),
                     borderRadius: BorderRadius.circular(30),
@@ -910,10 +981,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            Colors.white,
-            Color(0xFFFAFAFA),
-          ],
+          colors: [Colors.white, Color(0xFFFAFAFA)],
         ),
       ),
       child: Column(
@@ -1002,9 +1070,9 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
   Widget _buildDetailedInfoSection(Map<String, dynamic> info) {
     if (!info.containsKey('detailedInfo')) return const SizedBox.shrink();
-    
+
     final detailedInfo = info['detailedInfo'] as List;
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 80),
       color: Colors.white,
@@ -1143,26 +1211,23 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
   Widget _buildPackagesSection(Map<String, dynamic> info) {
     if (!info.containsKey('packages')) return const SizedBox.shrink();
-    
+
     final packages = info['packages'] as List;
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 80),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFFF8F9FA),
-            Colors.white,
-          ],
+          colors: [Color(0xFFF8F9FA), Colors.white],
         ),
       ),
       child: Column(
         children: [
-          const Text(
-            'Our Hourly Service Packages',
-            style: TextStyle(
+          Text(
+            _getPackageSectionTitle(),
+            style: const TextStyle(
               fontSize: 36,
               fontWeight: FontWeight.bold,
               color: Color(0xFF0B3254),
@@ -1263,12 +1328,23 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                               width: double.infinity,
                               child: ElevatedButton(
                                 onPressed: () {
-                                  // Regresar a la página principal
-                                  Navigator.of(context).pop();
+                                  // Navigate to home screen with pre-selected service
+                                  Navigator.of(context).pushReplacement(
+                                    MaterialPageRoute(
+                                      builder: (context) => WebHomeScreen(
+                                        initialServiceType:
+                                            _mapServiceTypeForBooking(),
+                                        selectedPackage: package['name'],
+                                        isServiceLocked: true,
+                                      ),
+                                    ),
+                                  );
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF0B3254),
-                                  padding: const EdgeInsets.symmetric(vertical: 15),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 15,
+                                  ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10),
                                   ),
@@ -1313,10 +1389,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 const Text(
                   'Need a custom duration? We can accommodate any timeframe for your specific needs.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white70,
-                  ),
+                  style: TextStyle(fontSize: 16, color: Colors.white70),
                 ),
                 const SizedBox(height: 25),
                 ElevatedButton(
@@ -1326,7 +1399,10 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFFD700),
-                    padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 18),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 50,
+                      vertical: 18,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
@@ -1356,10 +1432,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF1a4d7a),
-            Color(0xFF0B3254),
-          ],
+          colors: [Color(0xFF1a4d7a), Color(0xFF0B3254)],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
@@ -1406,10 +1479,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             width: 300,
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [
-                  Color(0xFFFFD700),
-                  Colors.orange,
-                ],
+                colors: [Color(0xFFFFD700), Colors.orange],
               ),
               borderRadius: BorderRadius.circular(2),
             ),
@@ -1437,11 +1507,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           const Text(
             'Book your luxury transportation for all World Cup 2026 matches!\nExclusive packages available for fans traveling to stadiums.',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.white70,
-              height: 1.6,
-            ),
+            style: TextStyle(fontSize: 16, color: Colors.white70, height: 1.6),
           ),
           const SizedBox(height: 35),
           Row(
@@ -1464,7 +1530,10 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFFD700),
                   foregroundColor: const Color(0xFF0B3254),
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 40,
+                    vertical: 20,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
@@ -1488,7 +1557,10 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Colors.white,
                   side: const BorderSide(color: Colors.white, width: 2),
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 40,
+                    vertical: 20,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
@@ -1610,10 +1682,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           const SizedBox(height: 15),
           const Text(
             'Save more with our exclusive deals',
-            style: TextStyle(
-              fontSize: 20,
-              color: Color(0xFF666666),
-            ),
+            style: TextStyle(fontSize: 20, color: Color(0xFF666666)),
           ),
           const SizedBox(height: 60),
           Row(
@@ -1643,10 +1712,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 30),
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [
-                              Color(0xFFFFD700),
-                              Color(0xFFFFA500),
-                            ],
+                            colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
                           ),
                           borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(18),
@@ -1703,10 +1769,14 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                                 vertical: 12,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF0B3254).withOpacity(0.05),
+                                color: const Color(
+                                  0xFF0B3254,
+                                ).withOpacity(0.05),
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(
-                                  color: const Color(0xFF0B3254).withOpacity(0.2),
+                                  color: const Color(
+                                    0xFF0B3254,
+                                  ).withOpacity(0.2),
                                 ),
                               ),
                               child: Row(
@@ -1767,13 +1837,10 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           const SizedBox(height: 15),
           Text(
             'No hidden fees, just premium service',
-            style: TextStyle(
-              fontSize: 18,
-              color: Colors.grey[600],
-            ),
+            style: TextStyle(fontSize: 18, color: Colors.grey[600]),
           ),
           const SizedBox(height: 60),
-          
+
           // Mostrar vehículos con imágenes si existen
           if (hasVehicles) ...[
             const Text(
@@ -1851,7 +1918,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             ),
             const SizedBox(height: 80),
           ],
-          
+
           // Tabla de precios
           Container(
             padding: const EdgeInsets.all(50),
@@ -1876,10 +1943,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   decoration: BoxDecoration(
                     border: Border(
-                      bottom: BorderSide(
-                        color: Colors.grey[200]!,
-                        width: 1,
-                      ),
+                      bottom: BorderSide(color: Colors.grey[200]!, width: 1),
                     ),
                   ),
                   child: Row(
@@ -1928,11 +1992,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.info_outline,
-                size: 18,
-                color: Colors.grey[500],
-              ),
+              Icon(Icons.info_outline, size: 18, color: Colors.grey[500]),
               const SizedBox(width: 8),
               Text(
                 'Prices may vary based on distance, time, and vehicle availability',
@@ -2055,19 +2115,12 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                       ),
                       decoration: BoxDecoration(
                         color: Colors.transparent,
-                        border: Border.all(
-                          color: Colors.white,
-                          width: 2,
-                        ),
+                        border: Border.all(color: Colors.white, width: 2),
                         borderRadius: BorderRadius.circular(35),
                       ),
                       child: const Row(
                         children: [
-                          Icon(
-                            Icons.phone,
-                            color: Colors.white,
-                            size: 24,
-                          ),
+                          Icon(Icons.phone, color: Colors.white, size: 24),
                           SizedBox(width: 15),
                           Text(
                             'CONTACT US',
@@ -2126,18 +2179,12 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         children: [
           Text(
             '© 2026 VANELUX. All rights reserved.',
-            style: TextStyle(
-              color: Colors.white70,
-              fontSize: 14,
-            ),
+            style: TextStyle(color: Colors.white70, fontSize: 14),
           ),
           SizedBox(height: 10),
           Text(
             'Premium Luxury Transportation Services',
-            style: TextStyle(
-              color: Colors.white70,
-              fontSize: 12,
-            ),
+            style: TextStyle(color: Colors.white70, fontSize: 12),
           ),
         ],
       ),
