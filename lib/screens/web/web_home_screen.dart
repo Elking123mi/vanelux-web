@@ -2617,6 +2617,30 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                     _buildMobileMenuItem('ABOUT', Icons.info),
                     _buildMobileMenuItem('CONTACT', Icons.contact_mail),
                     const Divider(color: Colors.white24, height: 32),
+                    ListTile(
+                      leading: const Icon(
+                        Icons.local_taxi,
+                        color: Color(0xFFFFD700),
+                      ),
+                      title: const Text(
+                        'BECOME A DRIVER',
+                        style: TextStyle(
+                          color: Color(0xFFFFD700),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const DriverRegistrationScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    const Divider(color: Colors.white24, height: 32),
                     Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
@@ -2773,6 +2797,32 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF0B3254),
                     ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                OutlinedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const DriverRegistrationScreen(),
+                      ),
+                    );
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Color(0xFF0B3254), width: 2),
+                    foregroundColor: const Color(0xFF0B3254),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  child: const Text(
+                    'DRIVER',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),
                 const SizedBox(width: 12),
