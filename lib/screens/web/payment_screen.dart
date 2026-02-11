@@ -456,7 +456,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
             if (response.statusCode == 201) {
               result = jsonDecode(response.body);
-              print('✅ Guest booking creado exitosamente: ${result['id']}');
+              print('✅ Guest booking creado exitosamente: ${result?['id']}');
               break; // Éxito, salir del loop
             } else if (response.statusCode >= 500) {
               // Error de servidor, reintentar
