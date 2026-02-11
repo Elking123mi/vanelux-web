@@ -236,15 +236,25 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
 
   double _calculateTotalPrice(_VehicleOption vehicle) {
     if (_distanceMiles == null) return 0.0;
-    final estimate = PricingService.calculatePrice(
-      pickupLat: widget.pickupLat,
-      pickupLng: widget.pickupLng,
-      dropoffLat: widget.destinationLat,
-      dropoffLng: widget.destinationLng,
-      distanceMiles: _distanceMiles!,
-      vehicleName: vehicle.name,
-    );
-    return estimate.totalPrice;
+    try {
+      final estimate = PricingService.calculatePrice(
+        pickupLat: widget.pickupLat,
+        pickupLng: widget.pickupLng,
+        dropoffLat: widget.destinationLat,
+        dropoffLng: widget.destinationLng,
+        distanceMiles: _distanceMiles!,
+        vehicleName: vehicle.name,
+      );
+      final price = estimate.totalPrice;
+      if (price.isNaN || price.isInfinite || price < 0) {
+        print('⚠️ WARNING: Invalid price calculated: $price. Using fallback.');
+        return vehicle.basePrice + (_distanceMiles! * vehicle.perMileRate);
+      }
+      return price;
+    } catch (e) {
+      print('❌ ERROR in _calculateTotalPrice: $e');
+      return vehicle.basePrice + (_distanceMiles! * vehicle.perMileRate);
+    }
   }
 
   String _formatDateTime(DateTime? dateTime) {

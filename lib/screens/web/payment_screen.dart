@@ -19,14 +19,14 @@ class CardNumberFormatter extends TextInputFormatter {
   ) {
     final text = newValue.text.replaceAll(' ', '');
     final buffer = StringBuffer();
-    
+
     for (int i = 0; i < text.length; i++) {
       buffer.write(text[i]);
       if ((i + 1) % 4 == 0 && i + 1 != text.length) {
         buffer.write(' ');
       }
     }
-    
+
     final formatted = buffer.toString();
     return TextEditingValue(
       text: formatted,
@@ -44,14 +44,14 @@ class ExpiryDateFormatter extends TextInputFormatter {
   ) {
     final text = newValue.text.replaceAll('/', '');
     final buffer = StringBuffer();
-    
+
     for (int i = 0; i < text.length && i < 4; i++) {
       buffer.write(text[i]);
       if (i == 1 && text.length > 2) {
         buffer.write('/');
       }
     }
-    
+
     final formatted = buffer.toString();
     return TextEditingValue(
       text: formatted,
@@ -109,7 +109,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Set<Polyline> _polylines = {};
   bool _isLoadingRoute = true;
   List<LatLng> _routePoints = [];
-  
+
   bool _isStripeInitialized = false;
   String? _clientSecret;
   String? _paymentIntentId;
@@ -125,18 +125,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Future<void> _initializeStripe() async {
     try {
       // Inicializar Stripe con tu publishable key de PRODUCCIÓN (dinero real)
-      final publishableKey = 'pk_live_51RCrU0LcVFDlHSTpysEqLwQMCoqkSyky9pVxXeSV7J7xzmUQ0hDxEEhT74SbkrRiLY58bXBPUh3iJ85w95P8UHME00K8iOIvZd';
-      
-      final result = js.callMethod(
-        html.window, 
-        'initStripe', 
-        [publishableKey]
-      );
-      
+      final publishableKey =
+          'pk_live_51RCrU0LcVFDlHSTpysEqLwQMCoqkSyky9pVxXeSV7J7xzmUQ0hDxEEhT74SbkrRiLY58bXBPUh3iJ85w95P8UHME00K8iOIvZd';
+
+      final result = js.callMethod(html.window, 'initStripe', [publishableKey]);
+
       setState(() {
         _isStripeInitialized = result as bool;
       });
-      
+
       print('✅ Stripe inicializado: $_isStripeInitialized');
     } catch (e) {
       print('❌ Error inicializando Stripe: $e');
@@ -216,11 +213,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(),
-        ),
+        builder: (context) => const Center(child: CircularProgressIndicator()),
       );
-      
+
       final user = await AuthService.getCurrentUser();
       final userId = user?.id;
 
@@ -246,7 +241,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
         'destination_address': widget.destinationAddress,
         'destination_lat': widget.destinationLat,
         'destination_lng': widget.destinationLng,
-        'pickup_time': (widget.selectedDateTime ?? DateTime.now()).toIso8601String(),
+        'pickup_time': (widget.selectedDateTime ?? DateTime.now())
+            .toIso8601String(),
         'vehicle_name': widget.vehicleName,
         'passengers': 1,
         'price': widget.totalPrice,
@@ -257,7 +253,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
         'is_scheduled': widget.selectedDateTime != null ? 1 : 0,
         'status': 'pending',
         'customer_email': widget.guestEmail ?? user?.email,
-        'customer_name': widget.guestName ?? user?.name ?? _nameController.text.trim(),
+        'customer_name':
+            widget.guestName ?? user?.name ?? _nameController.text.trim(),
       };
 
       final result = await BookingService.createBooking(bookingPayload);
@@ -270,10 +267,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
       setState(() {
         _bookingId = bookingId;
       });
-      
+
       // Crear Payment Intent
       final intentResponse = await http.post(
-        Uri.parse('https://web-production-700fe.up.railway.app/api/v1/vlx/payments/stripe/create-intent'),
+        Uri.parse(
+          'https://web-production-700fe.up.railway.app/api/v1/vlx/payments/stripe/create-intent',
+        ),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'booking_id': bookingId,
@@ -288,7 +287,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       }
 
       final intentData = jsonDecode(intentResponse.body);
-      
+
       setState(() {
         _clientSecret = intentData['client_secret'] as String;
         _paymentIntentId = intentData['payment_intent_id'] as String;
@@ -339,11 +338,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(),
-        ),
+        builder: (context) => const Center(child: CircularProgressIndicator()),
       );
-      
+
       final user = await AuthService.getCurrentUser();
       final userId = user?.id;
 
@@ -369,7 +366,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
         'destination_address': widget.destinationAddress,
         'destination_lat': widget.destinationLat,
         'destination_lng': widget.destinationLng,
-        'pickup_time': (widget.selectedDateTime ?? DateTime.now()).toIso8601String(),
+        'pickup_time': (widget.selectedDateTime ?? DateTime.now())
+            .toIso8601String(),
         'vehicle_name': widget.vehicleName,
         'passengers': 1,
         'price': widget.totalPrice,
@@ -380,64 +378,102 @@ class _PaymentScreenState extends State<PaymentScreen> {
         'is_scheduled': widget.selectedDateTime != null ? 1 : 0,
         'status': 'pending',
         'customer_email': widget.guestEmail ?? user?.email,
-        'customer_name': widget.guestName ?? user?.name ?? _nameController.text.trim(),
+        'customer_name':
+            widget.guestName ?? user?.name ?? _nameController.text.trim(),
         // Guest booking fields for email confirmation
         'guest_email': widget.guestEmail ?? user?.email,
-        'guest_first_name': (widget.guestName ?? user?.name ?? '').split(' ').first,
-        'guest_last_name': (widget.guestName ?? user?.name ?? '').split(' ').skip(1).join(' '),
+        'guest_first_name': (widget.guestName ?? user?.name ?? '')
+            .split(' ')
+            .first,
+        'guest_last_name': (widget.guestName ?? user?.name ?? '')
+            .split(' ')
+            .skip(1)
+            .join(' '),
         'guest_phone': widget.guestPhone ?? user?.phone ?? '',
       };
 
       print('📤 Creando booking con payload: ${jsonEncode(bookingPayload)}');
-      
+
+      // Validar precio antes de enviar
+      final price = bookingPayload['price'];
+      if (price == null ||
+          price is! num ||
+          (price as num).isNaN ||
+          (price as num).isInfinite ||
+          price < 0) {
+        throw Exception('Invalid price value: $price. Cannot create booking.');
+      }
+      print('💵 Price validation passed: \$$price');
+
       // DEBUG: Verificar que los campos de guest estén presentes
       print('🔍 DEBUG - guest_email: ${bookingPayload['guest_email']}');
-      print('🔍 DEBUG - guest_first_name: ${bookingPayload['guest_first_name']}');
+      print(
+        '🔍 DEBUG - guest_first_name: ${bookingPayload['guest_first_name']}',
+      );
       print('🔍 DEBUG - guest_last_name: ${bookingPayload['guest_last_name']}');
       print('🔍 DEBUG - guest_phone: ${bookingPayload['guest_phone']}');
-      
+
       // Para guests, llamar directamente al endpoint guest
       Map<String, dynamic> result;
       if (widget.guestEmail != null) {
         print('📤 Creando guest booking...');
-        final response = await http.post(
-          Uri.parse('https://web-production-700fe.up.railway.app/api/v1/vlx/bookings/guest'),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode(bookingPayload),
-        );
-        
-        if (response.statusCode != 201) {
-          throw Exception('Error creando booking: ${response.statusCode} - ${response.body}');
+        try {
+          final response = await http
+              .post(
+                Uri.parse(
+                  'https://web-production-700fe.up.railway.app/api/v1/vlx/bookings/guest',
+                ),
+                headers: {'Content-Type': 'application/json'},
+                body: jsonEncode(bookingPayload),
+              )
+              .timeout(const Duration(seconds: 30));
+
+          print('📥 Response status: ${response.statusCode}');
+          print('📥 Response body: ${response.body}');
+
+          if (response.statusCode != 201) {
+            throw Exception(
+              'Error creando booking: ${response.statusCode} - ${response.body}',
+            );
+          }
+
+          result = jsonDecode(response.body);
+          print('✅ Guest booking creado: ${result['id']}');
+        } catch (e) {
+          print('❌ HTTP Error: $e');
+          throw Exception(
+            'Network error creating guest booking: ${e.toString()}',
+          );
         }
-        
-        result = jsonDecode(response.body);
-        print('✅ Guest booking creado: ${result['id']}');
       } else {
         result = await BookingService.createBooking(bookingPayload);
       }
-      
+
       print('📥 Resultado del booking: $result');
-      
+
       final bookingId = result['id'] ?? result['booking']?['id'];
 
       if (bookingId == null) {
         throw Exception('No se recibió ID de reserva del servidor');
       }
-      
+
       print('✅ Booking creado exitosamente: $bookingId');
-      
+
       // Crear Checkout Session de Stripe
       print('📤 Creando Stripe Checkout Session...');
-      
+
       final checkoutResponse = await http.post(
-        Uri.parse('https://web-production-700fe.up.railway.app/api/v1/vlx/payments/stripe/create-checkout-session'),
+        Uri.parse(
+          'https://web-production-700fe.up.railway.app/api/v1/vlx/payments/stripe/create-checkout-session',
+        ),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'booking_id': bookingId.toString(),
           'amount': widget.totalPrice,
           'currency': 'usd',
           'customer_email': widget.guestEmail ?? user?.email,
-          'success_url': 'https://vane-lux.com/?payment=success&booking_id=$bookingId',
+          'success_url':
+              'https://vane-lux.com/?payment=success&booking_id=$bookingId',
           'cancel_url': 'https://vane-lux.com/?payment=cancelled',
         }),
       );
@@ -446,21 +482,23 @@ class _PaymentScreenState extends State<PaymentScreen> {
       print('📥 Checkout Response Body: ${checkoutResponse.body}');
 
       if (checkoutResponse.statusCode != 200) {
-        throw Exception('Error creando checkout (${checkoutResponse.statusCode}): ${checkoutResponse.body}');
+        throw Exception(
+          'Error creando checkout (${checkoutResponse.statusCode}): ${checkoutResponse.body}',
+        );
       }
 
       final checkoutData = jsonDecode(checkoutResponse.body);
       final checkoutUrl = checkoutData['url'] as String?;
-      
+
       if (checkoutUrl == null) {
         throw Exception('No se recibió URL de checkout de Stripe');
       }
-      
+
       print('✅ Stripe Checkout URL: $checkoutUrl');
 
       if (!mounted) return;
       Navigator.of(context).pop(); // Cerrar loading
-      
+
       // Redirigir a Stripe Checkout para procesar el pago
       html.window.location.href = checkoutUrl;
     } catch (e) {
@@ -524,33 +562,33 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     const SizedBox(height: 40),
 
                     isMobile
-                      ? Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildRouteMap(),
-                            const SizedBox(height: 24),
-                            _buildBookingSummary(),
-                            const SizedBox(height: 24),
-                            _buildPaymentForm(),
-                          ],
-                        )
-                      : Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              flex: 3,
-                              child: Column(
-                                children: [
-                                  _buildRouteMap(),
-                                  const SizedBox(height: 24),
-                                  _buildBookingSummary(),
-                                ],
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildRouteMap(),
+                              const SizedBox(height: 24),
+                              _buildBookingSummary(),
+                              const SizedBox(height: 24),
+                              _buildPaymentForm(),
+                            ],
+                          )
+                        : Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                flex: 3,
+                                child: Column(
+                                  children: [
+                                    _buildRouteMap(),
+                                    const SizedBox(height: 24),
+                                    _buildBookingSummary(),
+                                  ],
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 40),
-                            Expanded(flex: 2, child: _buildPaymentForm()),
-                          ],
-                        ),
+                              const SizedBox(width: 40),
+                              Expanded(flex: 2, child: _buildPaymentForm()),
+                            ],
+                          ),
                   ],
                 ),
               ),
@@ -607,11 +645,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       child: TextButton(
         onPressed: () {
           // Navigate to main screen and scroll to section
-          Navigator.pushNamedAndRemoveUntil(
-            context,
-            '/',
-            (route) => false,
-          );
+          Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
         },
         child: Text(
           text,
@@ -768,68 +802,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
         border: Border.all(color: Colors.grey[200]!),
       ),
       child: isMobile
-        ? Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Pickup',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    widget.pickupAddress,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Destination',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    widget.destinationAddress,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Date & Time',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    _formatDateTime(widget.selectedDateTime),
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          )
-        : Row(
-            children: [
-              Expanded(
-                child: Column(
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
@@ -846,9 +822,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     ),
                   ],
                 ),
-              ),
-              Expanded(
-                child: Column(
+                const SizedBox(height: 16),
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
@@ -865,26 +840,85 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     ),
                   ],
                 ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Date & Time',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    _formatDateTime(widget.selectedDateTime),
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+                const SizedBox(height: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Date & Time',
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
                     ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _formatDateTime(widget.selectedDateTime),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            )
+          : Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Pickup',
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        widget.pickupAddress,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ],
-          ),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Destination',
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        widget.destinationAddress,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Date & Time',
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _formatDateTime(widget.selectedDateTime),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
     );
   }
 
@@ -1151,7 +1185,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
             style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
-          
+
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
