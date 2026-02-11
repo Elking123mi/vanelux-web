@@ -156,7 +156,16 @@ bool _sameAddress(String? a, String? b) {
 }
 
 class WebHomeScreen extends StatefulWidget {
-  const WebHomeScreen({super.key});
+  final String? initialServiceType;
+  final String? selectedPackage;
+  final bool isServiceLocked;
+
+  const WebHomeScreen({
+    super.key,
+    this.initialServiceType,
+    this.selectedPackage,
+    this.isServiceLocked = false,
+  });
 
   @override
   State<WebHomeScreen> createState() => _WebHomeScreenState();
@@ -199,6 +208,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   bool _showDestinationDropdown = false;
   User? _currentUser;
   bool _isCheckingAuth = true;
+  bool _isServiceLockedState = false;
 
   final List<String> serviceTypes = const [
     'To Airport',
@@ -348,6 +358,11 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   @override
   void initState() {
     super.initState();
+    // Initialize service type from widget parameters
+    if (widget.initialServiceType != null) {
+      selectedServiceType = widget.initialServiceType;
+    }
+    _isServiceLockedState = widget.isServiceLocked;
     _showPickupDropdown = false;
     _showDestinationDropdown = false;
     // NO cerrar dropdown al perder foco - esto causaba el problema
@@ -1426,30 +1441,93 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                DropdownButtonFormField<String>(
-                  initialValue: selectedServiceType,
-                  hint: const Text('Select service type'),
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
+                if (_isServiceLockedState)
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
+                      border: Border.all(
+                        color: const Color(0xFFFFD700),
+                        width: 2,
+                      ),
+                      color: const Color(0xFFFFFDF5),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
-                    ),
-                  ),
-                  items: serviceTypes
-                      .map(
-                        (service) => DropdownMenuItem<String>(
-                          value: service,
-                          child: Text(service),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                selectedServiceType ?? 'Hourly/As Directed',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF0B3254),
+                                ),
+                              ),
+                              if (widget.selectedPackage != null) ...[
+                                const SizedBox(height: 4),
+                                Text(
+                                  widget.selectedPackage!,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[700],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
                         ),
-                      )
-                      .toList(),
-                  onChanged: (value) =>
-                      setState(() => selectedServiceType = value),
-                ),
+                        TextButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _isServiceLockedState = false;
+                              selectedServiceType = null;
+                            });
+                          },
+                          icon: const Icon(
+                            Icons.edit,
+                            size: 18,
+                            color: Color(0xFF0B3254),
+                          ),
+                          label: const Text(
+                            'Change',
+                            style: TextStyle(
+                              color: Color(0xFF0B3254),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  DropdownButtonFormField<String>(
+                    initialValue: selectedServiceType,
+                    hint: const Text('Select service type'),
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                    ),
+                    items: serviceTypes
+                        .map(
+                          (service) => DropdownMenuItem<String>(
+                            value: service,
+                            child: Text(service),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) =>
+                        setState(() => selectedServiceType = value),
+                  ),
                 const SizedBox(height: 24),
                 const Text(
                   'Pickup Location',
