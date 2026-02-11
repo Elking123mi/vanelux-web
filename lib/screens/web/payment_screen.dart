@@ -414,36 +414,98 @@ class _PaymentScreenState extends State<PaymentScreen> {
       print('🔍 DEBUG - guest_phone: ${bookingPayload['guest_phone']}');
 
       // Para guests, llamar directamente al endpoint guest
-      Map<String, dynamic> result;
+      Map<String, dynamic>? result;
       if (widget.guestEmail != null) {
         print('📤 Creando guest booking...');
-        try {
-          final response = await http
-              .post(
-                Uri.parse(
-                  'https://web-production-700fe.up.railway.app/api/v1/vlx/bookings/guest',
-                ),
-                headers: {'Content-Type': 'application/json'},
-                body: jsonEncode(bookingPayload),
-              )
-              .timeout(const Duration(seconds: 30));
 
-          print('📥 Response status: ${response.statusCode}');
-          print('📥 Response body: ${response.body}');
+        // Reintentar hasta 3 veces si falla
+        int attempts = 0;
+        const maxAttempts = 3;
+        Exception? lastError;
 
-          if (response.statusCode != 201) {
-            throw Exception(
-              'Error creando booking: ${response.statusCode} - ${response.body}',
+        while (attempts < maxAttempts) {
+          attempts++;
+          print('🔄 Intento $attempts de $maxAttempts...');
+
+          try {
+            final url = Uri.parse(
+              'https://web-production-700fe.up.railway.app/api/v1/vlx/bookings/guest',
             );
-          }
+            print('🎯 Target URL: $url');
 
-          result = jsonDecode(response.body);
-          print('✅ Guest booking creado: ${result['id']}');
-        } catch (e) {
-          print('❌ HTTP Error: $e');
-          throw Exception(
-            'Network error creating guest booking: ${e.toString()}',
-          );
+            final response = await http
+                .post(
+                  url,
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
+                  },
+                  body: jsonEncode(bookingPayload),
+                )
+                .timeout(
+                  const Duration(seconds: 30),
+                  onTimeout: () {
+                    throw Exception('Request timeout after 30 seconds');
+                  },
+                );
+
+            print('📥 Response status: ${response.statusCode}');
+            print('📥 Response headers: ${response.headers}');
+            print('📥 Response body: ${response.body}');
+
+            if (response.statusCode == 201) {
+              result = jsonDecode(response.body);
+              print('✅ Guest booking creado exitosamente: ${result['id']}');
+              break; // Éxito, salir del loop
+            } else if (response.statusCode >= 500) {
+              // Error de servidor, reintentar
+              lastError = Exception(
+                'Server error ${response.statusCode}: ${response.body}',
+              );
+              if (attempts < maxAttempts) {
+                print('⚠️ Server error, reintentando en 2 segundos...');
+                await Future.delayed(const Duration(seconds: 2));
+                continue;
+              }
+            } else {
+              // Error de cliente (4xx), no reintentar
+              throw Exception('Error ${response.statusCode}: ${response.body}');
+            }
+          } on http.ClientException catch (e) {
+            lastError = Exception(
+              'Network/CORS error: ${e.message}. '
+              'Verificar (1) Backend está corriendo en Railway, '
+              '(2) CORS habilitado para https://vane-lux.com, '
+              '(3) Endpoint /api/v1/vlx/bookings/guest existe.',
+            );
+            print('❌ ClientException: ${e.message}');
+            print('❌ URI: ${e.uri}');
+
+            if (attempts < maxAttempts) {
+              print('🔄 Reintentando en 2 segundos...');
+              await Future.delayed(const Duration(seconds: 2));
+              continue;
+            }
+          } on Exception catch (e) {
+            lastError = e;
+            print('❌ Exception: $e');
+
+            if (attempts < maxAttempts && e.toString().contains('timeout')) {
+              print('⏱️ Timeout, reintentando...');
+              await Future.delayed(const Duration(seconds: 2));
+              continue;
+            }
+            break; // No reintentar otros errores
+          }
+        }
+
+        // Si llegamos aquí sin resultado, lanzar el último error
+        if (result == null || !result.containsKey('id')) {
+          throw lastError ??
+              Exception(
+                'Failed to create guest booking after $maxAttempts attempts',
+              );
         }
       } else {
         result = await BookingService.createBooking(bookingPayload);
