@@ -513,7 +513,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
       print('📥 Resultado del booking: $result');
 
-      final bookingId = result['id'] ?? result['booking']?['id'];
+      final bookingId = result?['id'] ?? result?['booking']?['id'];
 
       if (bookingId == null) {
         throw Exception('No se recibió ID de reserva del servidor');
