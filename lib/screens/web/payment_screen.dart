@@ -258,7 +258,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       };
 
       final result = await BookingService.createBooking(bookingPayload);
-      final bookingId = result['id'] ?? result['booking']?['id'];
+      final bookingId = result?['id'] ?? result?['booking']?['id'];
 
       if (bookingId == null) {
         throw Exception('No se recibió ID de reserva');
