@@ -1885,8 +1885,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     } else if (currentQuote == null) {
       // Mobile App Advertisement Carousel
       final images = [
-        'assets/images/telefono1.png',
-        'assets/images/telefono2.png',
+        'assets/images/telefono3.png',
+        'assets/images/telefono4.png',
       ];
 
       content = Stack(
@@ -1914,68 +1914,42 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
               ),
             );
           }),
-          // Texto superpuesto
+          // Badge "Coming Soon" pequeño y elegante
           Positioned(
-            bottom: 20,
-            left: 20,
+            top: 20,
             right: 20,
             child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    const Color(0xFF0B3254).withOpacity(0.95),
-                    const Color(0xFFD4AF37).withOpacity(0.95),
+                    const Color(0xFF0B3254).withOpacity(0.9),
+                    const Color(0xFFD4AF37).withOpacity(0.9),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
-              child: Column(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.phone_iphone, color: Colors.white, size: 24),
-                      SizedBox(width: 8),
-                      Text(
-                        'COMING SOON',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                          letterSpacing: 2,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
+                  Icon(Icons.phone_iphone, color: Colors.white, size: 14),
+                  const SizedBox(width: 6),
                   Text(
-                    'Vanelux Mobile App',
-                    textAlign: TextAlign.center,
+                    'Coming Soon',
                     style: TextStyle(
-                      fontSize: isCompact ? 18 : 22,
-                      fontWeight: FontWeight.w800,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
                       color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Book your luxury ride on the go',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: isCompact ? 12 : 14,
-                      color: Colors.white.withOpacity(0.9),
+                      letterSpacing: 0.5,
                     ),
                   ),
                 ],
