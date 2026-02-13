@@ -12,8 +12,14 @@ class SecureConfigService {
   static const MethodChannel _channel = MethodChannel('com.vanelux/config');
 
   static const Map<String, String> _envOverrides = {
-    'OPENAI_API_KEY_CLIENT': String.fromEnvironment('OPENAI_API_KEY_CLIENT'),
-    'OPENAI_API_KEY_DRIVER': String.fromEnvironment('OPENAI_API_KEY_DRIVER'),
+    'OPENAI_API_KEY_CLIENT': String.fromEnvironment(
+      'OPENAI_API_KEY_CLIENT',
+      defaultValue: String.fromEnvironment('OPENAI_API_KEY'),
+    ),
+    'OPENAI_API_KEY_DRIVER': String.fromEnvironment(
+      'OPENAI_API_KEY_DRIVER',
+      defaultValue: String.fromEnvironment('OPENAI_API_KEY'),
+    ),
     'STRIPE_PUBLISHABLE_KEY': String.fromEnvironment('STRIPE_PUBLISHABLE_KEY'),
     'STRIPE_SECRET_KEY': String.fromEnvironment('STRIPE_SECRET_KEY'),
   };

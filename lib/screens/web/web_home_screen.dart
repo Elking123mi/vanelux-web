@@ -5,9 +5,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+import '../../models/assistant_message.dart';
 import '../../models/user.dart';
 import '../../services/auth_service.dart';
 import '../../services/google_maps_service.dart';
+import '../../services/openai_assistant_service.dart';
 import '../../services/pricing_service.dart';
 import 'driver_registration_screen.dart';
 import '../../widgets/route_map_view.dart';
@@ -220,6 +222,13 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   bool _isCheckingAuth = true;
   bool _isServiceLockedState = false;
 
+  // AI Assistant state
+  bool _showAssistantChat = false;
+  final List<AssistantMessage> _assistantMessages = [];
+  final TextEditingController _assistantController = TextEditingController();
+  final OpenAIAssistantService _assistantService = OpenAIAssistantService();
+  bool _isAssistantTyping = false;
+
   final List<String> serviceTypes = const [
     'To Airport',
     'From Airport',
@@ -392,6 +401,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     _destinationDebounce?.cancel();
     _carouselTimer?.cancel();
     _mobileAppAdTimer?.cancel();
+    _assistantController.dispose();
+    _assistantService.dispose();
     super.dispose();
   }
 
@@ -2837,35 +2848,465 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
               ),
             )
           : null,
-      body: SingleChildScrollView(
-        child: Column(
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                // Header/Navbar
+                _buildHeader(context),
+
+                // Hero Section
+                Container(key: _heroKey, child: _buildHeroSection(context)),
+
+                // World Cup Section
+                _buildWorldCupSection(context),
+
+                // Services Section
+                Container(
+                  key: _servicesKey,
+                  child: _buildServicesSection(context),
+                ),
+
+                // Fleet Section
+                Container(key: _fleetKey, child: _buildFleetSection(context)),
+
+                // About Section
+                Container(key: _aboutKey, child: _buildAboutSection(context)),
+
+                // Contact Section
+                Container(
+                  key: _contactKey,
+                  child: _buildContactSection(context),
+                ),
+
+                // Footer
+                _buildFooter(context),
+              ],
+            ),
+          ),
+          // AI Assistant Floating Button & Chat
+          _buildFloatingAssistant(context, isMobile),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _sendAssistantMessage() async {
+    final text = _assistantController.text.trim();
+    if (text.isEmpty) return;
+
+    setState(() {
+      _assistantMessages.add(
+        AssistantMessage(role: AssistantRole.user, content: text),
+      );
+      _assistantController.clear();
+      _isAssistantTyping = true;
+    });
+
+    try {
+      final reply = await _assistantService.sendMessage(
+        persona: AssistantPersona.client,
+        messages: _assistantMessages,
+      );
+      if (mounted) {
+        setState(() {
+          _assistantMessages.add(
+            AssistantMessage(role: AssistantRole.assistant, content: reply),
+          );
+          _isAssistantTyping = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _assistantMessages.add(
+            const AssistantMessage(
+              role: AssistantRole.assistant,
+              content:
+                  'Sorry, I\'m having trouble connecting right now. Please try again or contact us directly at info@vane-lux.com',
+            ),
+          );
+          _isAssistantTyping = false;
+        });
+      }
+    }
+  }
+
+  Widget _buildFloatingAssistant(BuildContext context, bool isMobile) {
+    final chatWidth = isMobile
+        ? MediaQuery.of(context).size.width - 32.0
+        : 380.0;
+    final chatHeight = isMobile
+        ? MediaQuery.of(context).size.height * 0.6
+        : 500.0;
+
+    return Positioned(
+      bottom: 24,
+      right: 24,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Chat Window
+          if (_showAssistantChat)
+            Container(
+              width: chatWidth,
+              height: chatHeight,
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.15),
+                    blurRadius: 30,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Column(
+                  children: [
+                    // Header
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 16,
+                      ),
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Color(0xFF0B3254), Color(0xFF163D5C)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFD4AF37).withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.auto_awesome,
+                              color: Color(0xFFD4AF37),
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Vanelux Concierge',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                SizedBox(height: 2),
+                                Text(
+                                  'AI-Powered Assistant',
+                                  style: TextStyle(
+                                    color: Color(0xFFD4AF37),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.close,
+                              color: Colors.white70,
+                              size: 20,
+                            ),
+                            onPressed: () =>
+                                setState(() => _showAssistantChat = false),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Messages
+                    Expanded(
+                      child: _assistantMessages.isEmpty
+                          ? Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(32),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.auto_awesome,
+                                      size: 48,
+                                      color: const Color(
+                                        0xFFD4AF37,
+                                      ).withOpacity(0.5),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    const Text(
+                                      'Welcome to Vanelux',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w700,
+                                        color: Color(0xFF0B3254),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Ask me anything about our luxury transportation services, rates, or fleet.',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.grey[600],
+                                        height: 1.5,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 20),
+                                    Wrap(
+                                      spacing: 8,
+                                      runSpacing: 8,
+                                      alignment: WrapAlignment.center,
+                                      children: [
+                                        _buildQuickAction('Airport rates'),
+                                        _buildQuickAction('Fleet options'),
+                                        _buildQuickAction('Book a ride'),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
+                          : ListView.builder(
+                              reverse: true,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              itemCount:
+                                  _assistantMessages.length +
+                                  (_isAssistantTyping ? 1 : 0),
+                              itemBuilder: (context, index) {
+                                if (_isAssistantTyping && index == 0) {
+                                  return _buildTypingIndicator();
+                                }
+                                final msgIndex = _isAssistantTyping
+                                    ? _assistantMessages.length - index
+                                    : _assistantMessages.length - 1 - index;
+                                if (msgIndex < 0 ||
+                                    msgIndex >= _assistantMessages.length) {
+                                  return const SizedBox.shrink();
+                                }
+                                final msg = _assistantMessages[msgIndex];
+                                return _buildChatBubble(msg);
+                              },
+                            ),
+                    ),
+                    // Input
+                    Container(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade50,
+                        border: Border(
+                          top: BorderSide(color: Colors.grey.shade200),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _assistantController,
+                              decoration: InputDecoration(
+                                hintText: 'Type your message...',
+                                hintStyle: TextStyle(
+                                  color: Colors.grey[400],
+                                  fontSize: 14,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(24),
+                                  borderSide: BorderSide.none,
+                                ),
+                                filled: true,
+                                fillColor: Colors.white,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 12,
+                                ),
+                              ),
+                              onSubmitted: (_) => _sendAssistantMessage(),
+                              textInputAction: TextInputAction.send,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF0B3254), Color(0xFFD4AF37)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            child: IconButton(
+                              icon: const Icon(
+                                Icons.send_rounded,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                              onPressed: _isAssistantTyping
+                                  ? null
+                                  : _sendAssistantMessage,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          // Floating Button
+          GestureDetector(
+            onTap: () =>
+                setState(() => _showAssistantChat = !_showAssistantChat),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF0B3254), Color(0xFFD4AF37)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF0B3254).withOpacity(0.4),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Icon(
+                _showAssistantChat ? Icons.close : Icons.auto_awesome,
+                color: Colors.white,
+                size: 26,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickAction(String label) {
+    return InkWell(
+      onTap: () {
+        _assistantController.text = label;
+        _sendAssistantMessage();
+      },
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          border: Border.all(color: const Color(0xFFD4AF37)),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            color: Color(0xFF0B3254),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChatBubble(AssistantMessage msg) {
+    final isUser = msg.isUser;
+    return Align(
+      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        constraints: const BoxConstraints(maxWidth: 280),
+        decoration: BoxDecoration(
+          color: isUser ? const Color(0xFF0B3254) : Colors.grey.shade100,
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(16),
+            topRight: const Radius.circular(16),
+            bottomLeft: Radius.circular(isUser ? 16 : 4),
+            bottomRight: Radius.circular(isUser ? 4 : 16),
+          ),
+        ),
+        child: Text(
+          msg.content,
+          style: TextStyle(
+            fontSize: 14,
+            color: isUser ? Colors.white : Colors.black87,
+            height: 1.5,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTypingIndicator() {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(16),
+            topRight: Radius.circular(16),
+            bottomRight: Radius.circular(16),
+            bottomLeft: Radius.circular(4),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // Header/Navbar
-            _buildHeader(context),
-
-            // Hero Section
-            Container(key: _heroKey, child: _buildHeroSection(context)),
-
-            // World Cup Section
-            _buildWorldCupSection(context),
-
-            // Services Section
-            Container(key: _servicesKey, child: _buildServicesSection(context)),
-
-            // Fleet Section
-            Container(key: _fleetKey, child: _buildFleetSection(context)),
-
-            // About Section
-            Container(key: _aboutKey, child: _buildAboutSection(context)),
-
-            // Contact Section
-            Container(key: _contactKey, child: _buildContactSection(context)),
-
-            // Footer
-            _buildFooter(context),
+            _buildDot(0),
+            const SizedBox(width: 4),
+            _buildDot(1),
+            const SizedBox(width: 4),
+            _buildDot(2),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildDot(int index) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.3, end: 1.0),
+      duration: Duration(milliseconds: 600 + (index * 200)),
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: const Color(0xFF0B3254).withOpacity(0.5),
+              shape: BoxShape.circle,
+            ),
+          ),
+        );
+      },
     );
   }
 
