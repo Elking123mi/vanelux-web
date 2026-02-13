@@ -107,6 +107,8 @@ flutter:
     - assets/images/mercedez-sprinter.png
     - assets/images/suburban rts.png
     - assets/images/suburban.png
+    - assets/images/telefono1.png
+    - assets/images/telefono2.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

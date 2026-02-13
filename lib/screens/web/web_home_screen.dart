@@ -188,6 +188,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   int _currentVehicleIndex = 0;
   Timer? _carouselTimer;
 
+  // Mobile app ad carousel state
+  int _mobileAppAdIndex = 0;
+  Timer? _mobileAppAdTimer;
+
   // Mobile menu state
   final bool _isMobileMenuOpen = false;
 
@@ -374,6 +378,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     // NO cerrar dropdown al perder foco - esto causaba el problema
     _loadCurrentUser();
     _startCarousel();
+    _startMobileAppAdCarousel();
     _checkPaymentSuccess(); // Verificar si viene de pago exitoso
   }
 
@@ -386,6 +391,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     _pickupDebounce?.cancel();
     _destinationDebounce?.cancel();
     _carouselTimer?.cancel();
+    _mobileAppAdTimer?.cancel();
     super.dispose();
   }
 
@@ -394,6 +400,16 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       if (mounted) {
         setState(() {
           _currentVehicleIndex = (_currentVehicleIndex + 1) % 7; // 7 vehículos
+        });
+      }
+    });
+  }
+
+  void _startMobileAppAdCarousel() {
+    _mobileAppAdTimer = Timer.periodic(const Duration(seconds: 4), (timer) {
+      if (mounted) {
+        setState(() {
+          _mobileAppAdIndex = (_mobileAppAdIndex + 1) % 2; // 2 imágenes
         });
       }
     });
@@ -1867,30 +1883,124 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         ],
       );
     } else if (currentQuote == null) {
-      content = Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
+      // Mobile App Advertisement Carousel
+      final images = [
+        'assets/images/telefono1.png',
+        'assets/images/telefono2.png',
+      ];
+
+      content = Stack(
+        alignment: Alignment.center,
         children: [
-          const Icon(
-            Icons.directions_car_filled_outlined,
-            size: 56,
-            color: Color(0xFF0B3254),
-          ),
-          SizedBox(height: 16),
-          Text(
-            'Get Your Quote',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF0B3254),
+          // Imágenes con transición
+          ...List.generate(images.length, (index) {
+            return AnimatedOpacity(
+              opacity: _mobileAppAdIndex == index ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 800),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.asset(
+                  images[index],
+                  fit: BoxFit.contain,
+                  height: isCompact ? 350 : 450,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Icon(
+                      Icons.phone_android,
+                      size: 100,
+                      color: Color(0xFF0B3254),
+                    );
+                  },
+                ),
+              ),
+            );
+          }),
+          // Texto superpuesto
+          Positioned(
+            bottom: 20,
+            left: 20,
+            right: 20,
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    const Color(0xFF0B3254).withOpacity(0.95),
+                    const Color(0xFFD4AF37).withOpacity(0.95),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.phone_iphone, color: Colors.white, size: 24),
+                      SizedBox(width: 8),
+                      Text(
+                        'COMING SOON',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Vanelux Mobile App',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: isCompact ? 18 : 22,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Book your luxury ride on the go',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: isCompact ? 12 : 14,
+                      color: Colors.white.withOpacity(0.9),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-          SizedBox(height: 12),
-          Text(
-            'Enter pickup and destination addresses to see real-time rates.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.black54),
+          // Indicadores de página
+          Positioned(
+            top: 16,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(images.length, (index) {
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  width: _mobileAppAdIndex == index ? 24 : 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: _mobileAppAdIndex == index
+                        ? const Color(0xFFD4AF37)
+                        : Colors.white.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                );
+              }),
+            ),
           ),
         ],
       );
