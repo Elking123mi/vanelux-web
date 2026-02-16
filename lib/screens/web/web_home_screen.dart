@@ -229,6 +229,19 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   final OpenAIAssistantService _assistantService = OpenAIAssistantService();
   bool _isAssistantTyping = false;
 
+  // Chat Booking Form state
+  bool _showChatBookingForm = false;
+  final TextEditingController _chatPickupController = TextEditingController();
+  final TextEditingController _chatDropoffController = TextEditingController();
+  List<Map<String, dynamic>> _chatPickupSuggestions = [];
+  List<Map<String, dynamic>> _chatDropoffSuggestions = [];
+  bool _showChatPickupDropdown = false;
+  bool _showChatDropoffDropdown = false;
+  Timer? _chatPickupDebounce;
+  Timer? _chatDropoffDebounce;
+  _SelectedLocation? _chatPickupPlace;
+  _SelectedLocation? _chatDropoffPlace;
+
   final List<String> serviceTypes = const [
     'To Airport',
     'From Airport',
@@ -403,6 +416,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     _mobileAppAdTimer?.cancel();
     _assistantController.dispose();
     _assistantService.dispose();
+    _chatPickupController.dispose();
+    _chatDropoffController.dispose();
+    _chatPickupDebounce?.cancel();
+    _chatDropoffDebounce?.cancel();
     super.dispose();
   }
 
@@ -2913,12 +2930,19 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       print(
         '🤖 AI Concierge reply: "${reply.substring(0, reply.length > 50 ? 50 : reply.length)}..."',
       );
+      // Detect booking intent in AI reply
+      final lowerReply = reply.toLowerCase();
+      final bookingKeywords = ['pickup', 'drop-off', 'dropoff', 'recogida', 'destino', 'where would you like', 'dónde te recojo', 'dirección', 'address', 'pick you up', 'destination', 'booking', 'reserv'];
+      final showBooking = bookingKeywords.any((kw) => lowerReply.contains(kw));
       if (mounted) {
         setState(() {
           _assistantMessages.add(
             AssistantMessage(role: AssistantRole.assistant, content: reply),
           );
           _isAssistantTyping = false;
+          if (showBooking) {
+            _showChatBookingForm = true;
+          }
         });
       }
     } catch (e) {
@@ -2936,6 +2960,344 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         });
       }
     }
+  }
+
+  // ── Chat Booking Form helpers ──────────────────────────────────
+
+  void _onChatPickupChanged(String value) {
+    _chatPickupDebounce?.cancel();
+    final query = value.trim();
+    if (query.isEmpty) {
+      setState(() {
+        _chatPickupPlace = null;
+        _chatPickupSuggestions = [];
+        _showChatPickupDropdown = false;
+      });
+      return;
+    }
+    setState(() {
+      _chatPickupPlace = null;
+      _showChatPickupDropdown = true;
+    });
+    if (query.length < 3) {
+      setState(() => _chatPickupSuggestions = []);
+      return;
+    }
+    _chatPickupDebounce = Timer(const Duration(milliseconds: 350), () async {
+      try {
+        final results = await GoogleMapsService.searchPlaces(query);
+        if (mounted) setState(() => _chatPickupSuggestions = results.take(5).toList());
+      } catch (_) {
+        if (mounted) setState(() => _chatPickupSuggestions = []);
+      }
+    });
+  }
+
+  void _onChatDropoffChanged(String value) {
+    _chatDropoffDebounce?.cancel();
+    final query = value.trim();
+    if (query.isEmpty) {
+      setState(() {
+        _chatDropoffPlace = null;
+        _chatDropoffSuggestions = [];
+        _showChatDropoffDropdown = false;
+      });
+      return;
+    }
+    setState(() {
+      _chatDropoffPlace = null;
+      _showChatDropoffDropdown = true;
+    });
+    if (query.length < 3) {
+      setState(() => _chatDropoffSuggestions = []);
+      return;
+    }
+    _chatDropoffDebounce = Timer(const Duration(milliseconds: 350), () async {
+      try {
+        final results = await GoogleMapsService.searchPlaces(query);
+        if (mounted) setState(() => _chatDropoffSuggestions = results.take(5).toList());
+      } catch (_) {
+        if (mounted) setState(() => _chatDropoffSuggestions = []);
+      }
+    });
+  }
+
+  void _selectChatPickup(Map<String, dynamic> suggestion) {
+    _chatPickupDebounce?.cancel();
+    final desc = suggestion['description'] ?? '';
+    final placeId = suggestion['place_id'] as String?;
+    setState(() {
+      _chatPickupController.text = desc;
+      _chatPickupSuggestions = [];
+      _showChatPickupDropdown = false;
+      _chatPickupPlace = null;
+    });
+    if (placeId != null) {
+      _resolveChatPlace(placeId, desc).then((loc) {
+        if (loc != null && mounted) {
+          setState(() => _chatPickupPlace = loc);
+        }
+      });
+    }
+  }
+
+  void _selectChatDropoff(Map<String, dynamic> suggestion) {
+    _chatDropoffDebounce?.cancel();
+    final desc = suggestion['description'] ?? '';
+    final placeId = suggestion['place_id'] as String?;
+    setState(() {
+      _chatDropoffController.text = desc;
+      _chatDropoffSuggestions = [];
+      _showChatDropoffDropdown = false;
+      _chatDropoffPlace = null;
+    });
+    if (placeId != null) {
+      _resolveChatPlace(placeId, desc).then((loc) {
+        if (loc != null && mounted) {
+          setState(() => _chatDropoffPlace = loc);
+        }
+      });
+    }
+  }
+
+  Future<_SelectedLocation?> _resolveChatPlace(String placeId, String fallback) async {
+    try {
+      final details = await GoogleMapsService.getPlaceDetails(placeId);
+      if (!mounted) return null;
+      final location = details['location'] as Map<String, dynamic>?;
+      final lat = (location?['lat'] as num?)?.toDouble();
+      final lng = (location?['lng'] as num?)?.toDouble();
+      if (lat == null || lng == null) return null;
+      final address = (details['address'] as String?)?.trim().isNotEmpty == true
+          ? details['address'] as String
+          : fallback;
+      return _SelectedLocation(
+        placeId: placeId,
+        description: address,
+        latitude: lat,
+        longitude: lng,
+      );
+    } catch (e) {
+      debugPrint('Error resolving chat place: $e');
+      return null;
+    }
+  }
+
+  Widget _buildChatBookingCard() {
+    return Container(
+      margin: const EdgeInsets.all(0),
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            const Color(0xFF0B3254).withOpacity(0.05),
+            const Color(0xFFD4AF37).withOpacity(0.07),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        border: Border(
+          top: BorderSide(color: const Color(0xFFD4AF37).withOpacity(0.3)),
+          bottom: BorderSide(color: const Color(0xFFD4AF37).withOpacity(0.3)),
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Title row
+          Row(
+            children: [
+              const Icon(Icons.directions_car, color: Color(0xFFD4AF37), size: 18),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  'Quick Booking',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF0B3254),
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: () => setState(() => _showChatBookingForm = false),
+                child: Icon(Icons.close, size: 16, color: Colors.grey[500]),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          // Pickup field
+          _buildChatAddressField(
+            controller: _chatPickupController,
+            hint: '📍 Pickup address',
+            icon: Icons.my_location,
+            onChanged: _onChatPickupChanged,
+            selectedPlace: _chatPickupPlace,
+          ),
+          // Pickup suggestions
+          if (_showChatPickupDropdown && _chatPickupSuggestions.isNotEmpty)
+            _buildChatSuggestions(_chatPickupSuggestions, _selectChatPickup),
+          const SizedBox(height: 8),
+          // Dropoff field
+          _buildChatAddressField(
+            controller: _chatDropoffController,
+            hint: '📍 Drop-off address',
+            icon: Icons.location_on,
+            onChanged: _onChatDropoffChanged,
+            selectedPlace: _chatDropoffPlace,
+          ),
+          // Dropoff suggestions
+          if (_showChatDropoffDropdown && _chatDropoffSuggestions.isNotEmpty)
+            _buildChatSuggestions(_chatDropoffSuggestions, _selectChatDropoff),
+          const SizedBox(height: 10),
+          // Book Now button
+          SizedBox(
+            width: double.infinity,
+            height: 38,
+            child: ElevatedButton(
+              onPressed: (_chatPickupPlace != null && _chatDropoffPlace != null)
+                  ? () {
+                      // Navigate to TripDetailsWebScreen with selected addresses
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TripDetailsWebScreen(
+                            pickupAddress: _chatPickupController.text,
+                            destinationAddress: _chatDropoffController.text,
+                            pickupLat: _chatPickupPlace!.latitude,
+                            pickupLng: _chatPickupPlace!.longitude,
+                            destinationLat: _chatDropoffPlace!.latitude,
+                            destinationLng: _chatDropoffPlace!.longitude,
+                            selectedDateTime: DateTime.now().add(const Duration(hours: 1)),
+                            serviceType: 'Point to Point',
+                          ),
+                        ),
+                      );
+                    }
+                  : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0B3254),
+                disabledBackgroundColor: Colors.grey[300],
+                foregroundColor: const Color(0xFFD4AF37),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.arrow_forward, size: 16),
+                  const SizedBox(width: 6),
+                  Text(
+                    (_chatPickupPlace != null && _chatDropoffPlace != null)
+                        ? 'See Vehicles & Prices'
+                        : 'Enter both addresses',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChatAddressField({
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    required ValueChanged<String> onChanged,
+    _SelectedLocation? selectedPlace,
+  }) {
+    return Container(
+      height: 40,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: selectedPlace != null
+              ? const Color(0xFF2E7D32)
+              : Colors.grey.shade300,
+          width: selectedPlace != null ? 1.5 : 1,
+        ),
+      ),
+      child: TextField(
+        controller: controller,
+        onChanged: onChanged,
+        style: const TextStyle(fontSize: 13),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: TextStyle(fontSize: 12, color: Colors.grey[400]),
+          prefixIcon: Icon(icon, size: 16, color: const Color(0xFF0B3254)),
+          suffixIcon: selectedPlace != null
+              ? const Icon(Icons.check_circle, size: 16, color: Color(0xFF2E7D32))
+              : null,
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+          isDense: true,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChatSuggestions(
+    List<Map<String, dynamic>> suggestions,
+    void Function(Map<String, dynamic>) onSelect,
+  ) {
+    return Container(
+      margin: const EdgeInsets.only(top: 4),
+      constraints: const BoxConstraints(maxHeight: 150),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: ListView.separated(
+        shrinkWrap: true,
+        padding: EdgeInsets.zero,
+        itemCount: suggestions.length,
+        separatorBuilder: (_, __) => Divider(height: 1, color: Colors.grey[200]),
+        itemBuilder: (context, index) {
+          final s = suggestions[index];
+          final mainText = _getSuggestionMainText(s);
+          final secondary = _getSuggestionSecondaryText(s);
+          return InkWell(
+            onTap: () => onSelect(s),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              child: Row(
+                children: [
+                  const Icon(Icons.location_on_outlined, size: 16, color: Color(0xFF0B3254)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(mainText, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                        if (secondary.isNotEmpty)
+                          Text(secondary, style: TextStyle(fontSize: 11, color: Colors.grey[600])),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   Widget _buildFloatingAssistant(BuildContext context, bool isMobile) {
@@ -3080,6 +3442,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                                       runSpacing: 8,
                                       alignment: WrapAlignment.center,
                                       children: [
+                                        _buildQuickAction('📍 Book a ride'),
                                         _buildQuickAction('✈️ Airport rates'),
                                         _buildQuickAction('🚘 Our fleet'),
                                         _buildQuickAction('💰 Get a quote'),
@@ -3115,6 +3478,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                               },
                             ),
                     ),
+                    // Chat Booking Form (Google Maps autocomplete)
+                    if (_showChatBookingForm) _buildChatBookingCard(),
                     // Input
                     Container(
                       padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
