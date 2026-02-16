@@ -31,40 +31,42 @@ class OpenAIAssistantService {
     required AssistantPersona persona,
     required List<AssistantMessage> messages,
   }) async {
-    final apiKey = await _resolveApiKey(persona);
-    if (apiKey == null || apiKey.isEmpty) {
-      throw OpenAIAssistantException(
-        'OpenAI API key not found. Please configure OPENAI_API_KEY in Netlify environment variables.',
-      );
-    }
-
     final filteredMessages = messages.where((m) => m.includeInContext).toList();
     final requestMessages = <Map<String, String>>[
       {'role': 'system', 'content': _systemPromptFor(persona)},
       ...filteredMessages.map((message) => message.toRequestMap()),
     ];
 
-    // Use Netlify proxy to avoid CORS issues in web
+    // On web: use Netlify serverless function (API key is server-side, no CORS)
+    // On mobile: call OpenAI directly with key from SecureConfigService
     final Uri uri;
+    final Map<String, String> headers;
+    
     if (kIsWeb) {
       final origin = Uri.base.origin;
-      uri = Uri.parse('$origin/api/openai/v1/chat/completions');
+      uri = Uri.parse('$origin/api/chat');
+      headers = {'Content-Type': 'application/json'};
+      print('🤖 AI Concierge: Using Netlify Function at $uri');
     } else {
+      final apiKey = await _resolveApiKey(persona);
+      if (apiKey == null || apiKey.isEmpty) {
+        throw OpenAIAssistantException(
+          'OpenAI API key not found.',
+        );
+      }
       uri = Uri.https('api.openai.com', '/v1/chat/completions');
+      headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $apiKey',
+      };
     }
 
-    print('🤖 AI Concierge: Sending request to $uri');
-    print(
-      '🤖 AI Concierge: API key present: ${apiKey.isNotEmpty}, length: ${apiKey.length}',
-    );
+    print('🤖 AI Concierge: Sending ${requestMessages.length} messages');
 
     final response = await _client
         .post(
           uri,
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $apiKey',
-          },
+          headers: headers,
           body: jsonEncode(<String, dynamic>{
             'model': _model,
             'messages': requestMessages,

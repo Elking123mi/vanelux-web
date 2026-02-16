@@ -5,21 +5,18 @@
     export PATH="$PATH:`pwd`/flutter/bin" && \
     flutter config --enable-web && \
     flutter pub get && \
-    flutter build web --release --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY --dart-define=OPENAI_API_KEY=$OPENAI_API_KEY
+    flutter build web --release --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
   """
   publish = "build/web"
-  # No usar Netlify Functions para esta app
-  functions = ""
+  functions = "netlify/functions"
 
 [build.environment]
   FLUTTER_VERSION = "stable"
-  # Variable GOOGLE_MAPS_API_KEY debe estar configurada en Netlify Site Settings > Environment Variables
-  # Desactivar completamente el escaneo de secretos - Google Maps API keys son seguras para web apps
   SECRETS_SCAN_SMART_DETECTION_ENABLED = "false"
 
-# Proxy OpenAI API calls through Netlify to avoid CORS issues
+# Redirect /api/chat to the Netlify Function
 [[redirects]]
-  from = "/api/openai/*"
-  to = "https://api.openai.com/:splat"
+  from = "/api/chat"
+  to = "/.netlify/functions/chat"
   status = 200
   force = true
