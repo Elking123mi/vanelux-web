@@ -44,7 +44,7 @@ class OpenAIAssistantService {
     
     if (kIsWeb) {
       final origin = Uri.base.origin;
-      uri = Uri.parse('$origin/api/chat');
+      uri = Uri.parse('$origin/.netlify/functions/chat');
       headers = {'Content-Type': 'application/json'};
       print('🤖 AI Concierge: Using Netlify Function at $uri');
     } else {
