@@ -2905,9 +2905,13 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     });
 
     try {
+      print('🤖 Sending message to AI Concierge: "$text"');
       final reply = await _assistantService.sendMessage(
         persona: AssistantPersona.client,
         messages: _assistantMessages,
+      );
+      print(
+        '🤖 AI Concierge reply: "${reply.substring(0, reply.length > 50 ? 50 : reply.length)}..."',
       );
       if (mounted) {
         setState(() {
@@ -2918,13 +2922,14 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         });
       }
     } catch (e) {
+      print('🤖 AI Concierge ERROR: $e');
       if (mounted) {
         setState(() {
           _assistantMessages.add(
-            const AssistantMessage(
+            AssistantMessage(
               role: AssistantRole.assistant,
               content:
-                  'Sorry, I\'m having trouble connecting right now. Please try again or contact us directly at info@vane-lux.com',
+                  'I apologize for the inconvenience. I\'m having trouble connecting right now. Please try again in a moment, or contact us directly at info@vane-lux.com or call us for immediate assistance.',
             ),
           );
           _isAssistantTyping = false;
@@ -3075,9 +3080,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                                       runSpacing: 8,
                                       alignment: WrapAlignment.center,
                                       children: [
-                                        _buildQuickAction('Airport rates'),
-                                        _buildQuickAction('Fleet options'),
-                                        _buildQuickAction('Book a ride'),
+                                        _buildQuickAction('✈️ Airport rates'),
+                                        _buildQuickAction('🚘 Our fleet'),
+                                        _buildQuickAction('💰 Get a quote'),
+                                        _buildQuickAction('📞 Contact us'),
                                       ],
                                     ),
                                   ],

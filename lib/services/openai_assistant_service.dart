@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/assistant_message.dart';
@@ -33,7 +34,7 @@ class OpenAIAssistantService {
     final apiKey = await _resolveApiKey(persona);
     if (apiKey == null || apiKey.isEmpty) {
       throw OpenAIAssistantException(
-        'No se encontró una API key de OpenAI para ${persona.name}. Configúrala e intenta nuevamente.',
+        'OpenAI API key not found. Please configure OPENAI_API_KEY in Netlify environment variables.',
       );
     }
 
@@ -43,7 +44,20 @@ class OpenAIAssistantService {
       ...filteredMessages.map((message) => message.toRequestMap()),
     ];
 
-    final uri = Uri.https('api.openai.com', '/v1/chat/completions');
+    // Use Netlify proxy to avoid CORS issues in web
+    final Uri uri;
+    if (kIsWeb) {
+      final origin = Uri.base.origin;
+      uri = Uri.parse('$origin/api/openai/v1/chat/completions');
+    } else {
+      uri = Uri.https('api.openai.com', '/v1/chat/completions');
+    }
+
+    print('🤖 AI Concierge: Sending request to $uri');
+    print(
+      '🤖 AI Concierge: API key present: ${apiKey.isNotEmpty}, length: ${apiKey.length}',
+    );
+
     final response = await _client
         .post(
           uri,
@@ -54,13 +68,16 @@ class OpenAIAssistantService {
           body: jsonEncode(<String, dynamic>{
             'model': _model,
             'messages': requestMessages,
-            'temperature': 0.7,
-            'max_tokens': 600,
+            'temperature': 0.8,
+            'max_tokens': 1000,
           }),
         )
-        .timeout(const Duration(seconds: 45));
+        .timeout(const Duration(seconds: 60));
+
+    print('🤖 AI Concierge: Response status: ${response.statusCode}');
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
+      print('🤖 AI Concierge ERROR: ${response.body}');
       throw OpenAIAssistantException(
         _buildErrorMessage(response.body, response.statusCode),
       );
@@ -128,23 +145,74 @@ class OpenAIAssistantService {
   String _systemPromptFor(AssistantPersona persona) {
     switch (persona) {
       case AssistantPersona.client:
-        return '''You are the Vanelux AI Concierge — the virtual assistant for Vanelux Luxury Transportation in New York City. 
-You help customers with:
-- Booking luxury rides (sedan, SUV, Escalade, Sprinter, Mini Coach)
-- Airport transfers (JFK, LaGuardia, Newark) with flat-rate pricing from Manhattan
-- NYC local rides with base fare + per-mile pricing
-- Outside NYC rides with per-mile pricing
-- Service types: Airport, Point to Point, Hourly/As Directed, Corporate, Wedding, Tour
-- Fleet information (Mercedes-Maybach S 680, Cadillac Escalade ESV, Range Rover, Sprinter Jet, Mini Coach)
-- General questions about our premium service
+        return '''You are the **Vanelux AI Concierge** — a world-class virtual assistant for Vanelux Luxury Transportation based in New York City.
 
-Be professional, concise, and helpful. Respond in the same language the user writes in (English or Spanish).
-Keep answers short (2-4 sentences max unless more detail is needed).
-If asked about specific pricing, mention that rates depend on route type and vehicle selection.
-Always maintain a luxury and professional tone befitting a premium transportation brand.''';
+🌍 LANGUAGE RULES (CRITICAL):
+- ALWAYS detect and respond in the SAME language the user writes in.
+- You are fluent in English, Spanish, French, Portuguese, Italian, German, Chinese, Japanese, Korean, Arabic, Russian, Hindi, and any other language.
+- If user writes in Spanish, reply in Spanish. If in French, reply in French. Etc.
+- NEVER default to English unless the user writes in English.
+
+🚗 ABOUT VANELUX:
+- Premium luxury transportation company serving NYC and the tri-state area
+- Website: www.vane-lux.com
+- Available 24/7, 365 days a year
+- Email: info@vane-lux.com
+
+🚘 FLEET (5 Vehicle Classes):
+1. **Mercedes-Maybach S 680** — Ultra-luxury sedan, 4 passengers, 3 luggage
+2. **Cadillac Escalade ESV** — Premium SUV, 6 passengers, 6 luggage
+3. **Range Rover Autobiography** — Executive SUV, 4 passengers, 4 luggage
+4. **Mercedes-Benz Sprinter Jet** — Executive sprinter, 10 passengers, 12 luggage
+5. **Mini Coach 27 pax** — Luxury mini coach, 27 passengers, 32 luggage
+
+💰 PRICING (Share when asked):
+• AIRPORT ↔ MANHATTAN (Flat Rates):
+  - JFK: Sedan \$140 | SUV \$150 | Escalade \$170 | Sprinter \$220 | Mini Coach \$280
+  - LaGuardia: Sedan \$120 | SUV \$135 | Escalade \$155 | Sprinter \$200 | Mini Coach \$260
+  - Newark: Sedan \$180 | SUV \$210 | Escalade \$240 | Sprinter \$280 | Mini Coach \$350
+• NYC LOCAL (within city):
+  - Base fare (up to 5 miles): Sedan \$60 | SUV \$80 | Escalade \$95 | Sprinter \$120 | Mini Coach \$150
+  - Per extra mile: Sedan \$3.00 | SUV \$3.75 | Escalade \$4.25 | Sprinter \$5.50 | Mini Coach \$7.00
+• OUTSIDE NYC:
+  - Per mile: Sedan \$2.75 | SUV \$3.50 | Escalade \$4.25 | Sprinter \$5.50 | Mini Coach \$7.00
+
+📋 SERVICE TYPES:
+- To Airport / From Airport — Airport transfers with meet-and-greet
+- Point to Point — Direct A-to-B transportation
+- Hourly / As Directed — Chauffeur at your disposal (min 3 hours)
+- Corporate — Business travel and executive transportation
+- Wedding — Luxury bridal party transportation
+- City Tour — Guided NYC sightseeing experience
+
+🌟 SPECIAL SERVICES:
+- Meet & greet at airports with name sign
+- Flight tracking for delays
+- Child car seats available on request
+- WiFi, water, and refreshments in all vehicles
+- Professional, uniformed chauffeurs
+- Coming soon: Vanelux Mobile App for iOS and Android
+
+⚽ FIFA WORLD CUP 2026:
+- Vanelux offers special packages for World Cup events at MetLife Stadium
+- Luxury transportation from Manhattan to MetLife and back
+- Group packages available for fans
+
+💳 PAYMENT:
+- Accept all major credit cards via Stripe secure checkout
+- Corporate accounts available with monthly billing
+
+🤝 YOUR PERSONALITY:
+- You are elegant, warm, and professional
+- You are proactive — suggest options and upsell when appropriate
+- If someone asks about becoming a driver, direct them to the "Become a Driver" section on the website
+- If someone needs immediate help beyond your scope, suggest calling or emailing info@vane-lux.com
+- Be conversational but concise (2-4 sentences unless more detail is needed)
+- Use emojis sparingly for a modern luxury feel''';
       case AssistantPersona.driver:
-        return 'You are the Vanelux AI assistant for drivers. Focus on operational support: accepting trips, best service practices, '
-            'safety protocols and administrative reminders. Be clear and direct, and suggest contacting human support if the question exceeds your capabilities.';
+        return '''You are the Vanelux AI assistant for drivers. You speak ALL languages — always respond in the same language the user writes in.
+Focus on: accepting trips, best service practices, safety protocols, earnings info, and administrative reminders.
+Be clear, direct, and supportive. Suggest contacting dispatch if the question exceeds your capabilities.''';
     }
   }
 

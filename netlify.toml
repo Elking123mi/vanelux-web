@@ -16,3 +16,10 @@
   # Variable GOOGLE_MAPS_API_KEY debe estar configurada en Netlify Site Settings > Environment Variables
   # Desactivar completamente el escaneo de secretos - Google Maps API keys son seguras para web apps
   SECRETS_SCAN_SMART_DETECTION_ENABLED = "false"
+
+# Proxy OpenAI API calls through Netlify to avoid CORS issues
+[[redirects]]
+  from = "/api/openai/*"
+  to = "https://api.openai.com/:splat"
+  status = 200
+  force = true
