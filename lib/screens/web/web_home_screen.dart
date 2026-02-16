@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' show sin, cos, sqrt, atan2, pi;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ import 'driver_registration_screen.dart';
 import '../../widgets/route_map_view.dart';
 import 'customer_dashboard_web.dart';
 import 'fleet_screen.dart';
+import 'payment_screen.dart';
 import 'service_detail_screen.dart';
 import 'trip_details_web_screen.dart';
 
@@ -241,6 +243,9 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   Timer? _chatDropoffDebounce;
   _SelectedLocation? _chatPickupPlace;
   _SelectedLocation? _chatDropoffPlace;
+  bool _showChatVehicleCards = false;
+  Map<VehicleTier, PriceEstimate>? _chatPrices;
+  double _chatDistanceMiles = 0.0;
 
   final List<String> serviceTypes = const [
     'To Airport',
@@ -3110,10 +3115,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
             children: [
               const Icon(Icons.directions_car, color: Color(0xFFD4AF37), size: 18),
               const SizedBox(width: 8),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Quick Booking',
-                  style: TextStyle(
+                  _showChatVehicleCards ? 'Choose Your Vehicle' : 'Quick Booking',
+                  style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF0B3254),
@@ -3121,88 +3126,276 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                 ),
               ),
               GestureDetector(
-                onTap: () => setState(() => _showChatBookingForm = false),
+                onTap: () => setState(() {
+                  _showChatBookingForm = false;
+                  _showChatVehicleCards = false;
+                  _chatPrices = null;
+                }),
                 child: Icon(Icons.close, size: 16, color: Colors.grey[500]),
               ),
             ],
           ),
           const SizedBox(height: 10),
-          // Pickup field
-          _buildChatAddressField(
-            controller: _chatPickupController,
-            hint: '📍 Pickup address',
-            icon: Icons.my_location,
-            onChanged: _onChatPickupChanged,
-            selectedPlace: _chatPickupPlace,
-          ),
-          // Pickup suggestions
-          if (_showChatPickupDropdown && _chatPickupSuggestions.isNotEmpty)
-            _buildChatSuggestions(_chatPickupSuggestions, _selectChatPickup),
-          const SizedBox(height: 8),
-          // Dropoff field
-          _buildChatAddressField(
-            controller: _chatDropoffController,
-            hint: '📍 Drop-off address',
-            icon: Icons.location_on,
-            onChanged: _onChatDropoffChanged,
-            selectedPlace: _chatDropoffPlace,
-          ),
-          // Dropoff suggestions
-          if (_showChatDropoffDropdown && _chatDropoffSuggestions.isNotEmpty)
-            _buildChatSuggestions(_chatDropoffSuggestions, _selectChatDropoff),
-          const SizedBox(height: 10),
-          // Book Now button
-          SizedBox(
-            width: double.infinity,
-            height: 38,
-            child: ElevatedButton(
-              onPressed: (_chatPickupPlace != null && _chatDropoffPlace != null)
-                  ? () {
-                      // Navigate to TripDetailsWebScreen with selected addresses
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => TripDetailsWebScreen(
-                            pickupAddress: _chatPickupController.text,
-                            destinationAddress: _chatDropoffController.text,
-                            pickupLat: _chatPickupPlace!.latitude,
-                            pickupLng: _chatPickupPlace!.longitude,
-                            destinationLat: _chatDropoffPlace!.latitude,
-                            destinationLng: _chatDropoffPlace!.longitude,
-                            selectedDateTime: DateTime.now().add(const Duration(hours: 1)),
-                            serviceType: 'Point to Point',
-                          ),
-                        ),
-                      );
-                    }
-                  : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0B3254),
-                disabledBackgroundColor: Colors.grey[300],
-                foregroundColor: const Color(0xFFD4AF37),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+
+          // ── STEP 1: Address fields ──
+          if (!_showChatVehicleCards) ...[
+            _buildChatAddressField(
+              controller: _chatPickupController,
+              hint: '📍 Pickup address',
+              icon: Icons.my_location,
+              onChanged: _onChatPickupChanged,
+              selectedPlace: _chatPickupPlace,
+            ),
+            if (_showChatPickupDropdown && _chatPickupSuggestions.isNotEmpty)
+              _buildChatSuggestions(_chatPickupSuggestions, _selectChatPickup),
+            const SizedBox(height: 8),
+            _buildChatAddressField(
+              controller: _chatDropoffController,
+              hint: '📍 Drop-off address',
+              icon: Icons.location_on,
+              onChanged: _onChatDropoffChanged,
+              selectedPlace: _chatDropoffPlace,
+            ),
+            if (_showChatDropoffDropdown && _chatDropoffSuggestions.isNotEmpty)
+              _buildChatSuggestions(_chatDropoffSuggestions, _selectChatDropoff),
+            const SizedBox(height: 10),
+            // See vehicles button
+            SizedBox(
+              width: double.infinity,
+              height: 38,
+              child: ElevatedButton(
+                onPressed: (_chatPickupPlace != null && _chatDropoffPlace != null)
+                    ? _calculateChatPrices
+                    : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0B3254),
+                  disabledBackgroundColor: Colors.grey[300],
+                  foregroundColor: const Color(0xFFD4AF37),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.arrow_forward, size: 16),
+                    const SizedBox(width: 6),
+                    Text(
+                      (_chatPickupPlace != null && _chatDropoffPlace != null)
+                          ? 'See Vehicles & Prices'
+                          : 'Enter both addresses',
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                    ),
+                  ],
                 ),
               ),
+            ),
+          ],
+
+          // ── STEP 2: Vehicle cards with prices ──
+          if (_showChatVehicleCards && _chatPrices != null) ...[
+            // Route info
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0B3254).withOpacity(0.08),
+                borderRadius: BorderRadius.circular(8),
+              ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.arrow_forward, size: 16),
+                  const Icon(Icons.route, size: 14, color: Color(0xFF0B3254)),
                   const SizedBox(width: 6),
-                  Text(
-                    (_chatPickupPlace != null && _chatDropoffPlace != null)
-                        ? 'See Vehicles & Prices'
-                        : 'Enter both addresses',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
+                  Expanded(
+                    child: Text(
+                      '${_chatPrices!.values.first.routeLabel} • ${_chatDistanceMiles.toStringAsFixed(1)} mi',
+                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF0B3254)),
                     ),
+                  ),
+                  GestureDetector(
+                    onTap: () => setState(() {
+                      _showChatVehicleCards = false;
+                      _chatPrices = null;
+                    }),
+                    child: const Text('✏️ Edit', style: TextStyle(fontSize: 11, color: Color(0xFFD4AF37), fontWeight: FontWeight.w600)),
                   ),
                 ],
               ),
             ),
-          ),
+            const SizedBox(height: 8),
+            // Vehicle list
+            ..._buildChatVehicleCards(),
+          ],
         ],
+      ),
+    );
+  }
+
+  void _calculateChatPrices() {
+    if (_chatPickupPlace == null || _chatDropoffPlace == null) return;
+
+    // Estimate distance using Haversine (PricingService uses it internally too)
+    final distanceMiles = _haversineDistance(
+      _chatPickupPlace!.latitude, _chatPickupPlace!.longitude,
+      _chatDropoffPlace!.latitude, _chatDropoffPlace!.longitude,
+    );
+
+    final prices = PricingService.calculateAllTierPrices(
+      pickupLat: _chatPickupPlace!.latitude,
+      pickupLng: _chatPickupPlace!.longitude,
+      dropoffLat: _chatDropoffPlace!.latitude,
+      dropoffLng: _chatDropoffPlace!.longitude,
+      distanceMiles: distanceMiles,
+    );
+
+    setState(() {
+      _chatDistanceMiles = distanceMiles;
+      _chatPrices = prices;
+      _showChatVehicleCards = true;
+    });
+
+    // Add AI message about the vehicles
+    _assistantMessages.add(
+      AssistantMessage(
+        role: AssistantRole.assistant,
+        content: 'Here are our available vehicles for your trip. Select one to proceed to payment:',
+      ),
+    );
+  }
+
+  double _haversineDistance(double lat1, double lng1, double lat2, double lng2) {
+    const double earthRadiusMiles = 3958.8;
+    final dLat = (lat2 - lat1) * pi / 180;
+    final dLng = (lng2 - lng1) * pi / 180;
+    final a = sin(dLat / 2) * sin(dLat / 2) +
+        cos(lat1 * pi / 180) * cos(lat2 * pi / 180) *
+        sin(dLng / 2) * sin(dLng / 2);
+    final c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    return earthRadiusMiles * c;
+  }
+
+  List<Widget> _buildChatVehicleCards() {
+    // Define vehicle display info per tier
+    const vehicleInfo = <VehicleTier, Map<String, dynamic>>{
+      VehicleTier.sedan: {
+        'name': 'Mercedes-Maybach S 680',
+        'short': 'Luxury Sedan',
+        'pax': '4 pax • 3 bags',
+        'icon': Icons.directions_car,
+      },
+      VehicleTier.escalade: {
+        'name': 'Cadillac Escalade ESV',
+        'short': 'Premium SUV',
+        'pax': '6 pax • 6 bags',
+        'icon': Icons.directions_car,
+      },
+      VehicleTier.sprinter: {
+        'name': 'Mercedes Sprinter Jet',
+        'short': 'Executive Sprinter',
+        'pax': '10 pax • 12 bags',
+        'icon': Icons.airport_shuttle,
+      },
+      VehicleTier.miniCoach: {
+        'name': 'Mini Coach 27 pax',
+        'short': 'Luxury Mini Coach',
+        'pax': '27 pax • 32 bags',
+        'icon': Icons.directions_bus,
+      },
+    };
+
+    final List<Widget> cards = [];
+    for (final tier in [VehicleTier.sedan, VehicleTier.escalade, VehicleTier.sprinter, VehicleTier.miniCoach]) {
+      final price = _chatPrices![tier];
+      if (price == null) continue;
+      final info = vehicleInfo[tier]!;
+
+      cards.add(
+        GestureDetector(
+          onTap: () => _onChatVehicleSelected(tier, info['name'] as String, price),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.grey.shade200),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0B3254).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(info['icon'] as IconData, size: 18, color: const Color(0xFF0B3254)),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        info['short'] as String,
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF0B3254)),
+                      ),
+                      Text(
+                        info['pax'] as String,
+                        style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '\$${price.totalPrice.toStringAsFixed(0)}',
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFFD4AF37)),
+                    ),
+                    if (price.isFlat)
+                      Text('Flat rate', style: TextStyle(fontSize: 9, color: Colors.grey[500]))
+                    else
+                      Text('Est.', style: TextStyle(fontSize: 9, color: Colors.grey[500])),
+                  ],
+                ),
+                const SizedBox(width: 6),
+                const Icon(Icons.chevron_right, size: 18, color: Color(0xFF0B3254)),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+    return cards;
+  }
+
+  void _onChatVehicleSelected(VehicleTier tier, String vehicleName, PriceEstimate price) {
+    // Navigate directly to payment
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PaymentScreen(
+          pickupAddress: _chatPickupController.text,
+          destinationAddress: _chatDropoffController.text,
+          pickupLat: _chatPickupPlace!.latitude,
+          pickupLng: _chatPickupPlace!.longitude,
+          destinationLat: _chatDropoffPlace!.latitude,
+          destinationLng: _chatDropoffPlace!.longitude,
+          selectedDateTime: DateTime.now().add(const Duration(hours: 1)),
+          vehicleName: vehicleName,
+          totalPrice: price.totalPrice,
+          distanceMiles: price.distanceMiles,
+          duration: '${(price.distanceMiles * 2.5).toInt()} min',
+          extraServices: const {},
+        ),
       ),
     );
   }
