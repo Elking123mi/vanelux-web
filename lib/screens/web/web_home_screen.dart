@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../../models/assistant_message.dart';
+import '../../models/driver.dart';
 import '../../models/user.dart';
 import '../../services/auth_service.dart';
 import '../../services/google_maps_service.dart';
@@ -15,6 +16,7 @@ import '../../services/pricing_service.dart';
 import 'driver_registration_screen.dart';
 import '../../widgets/route_map_view.dart';
 import 'customer_dashboard_web.dart';
+import 'driver_dashboard_web.dart';
 import 'fleet_screen.dart';
 import 'payment_screen.dart';
 import 'service_detail_screen.dart';
@@ -527,48 +529,188 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         builder: (dialogContext) {
           bool isLoading = false;
           String? errorMessage;
+          bool isDriverMode = false;
           return StatefulBuilder(
             builder: (context, setDialogState) {
               return AlertDialog(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(18),
                 ),
-                title: const Text('Sign in to VaneLux'),
+                titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+                title: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Sign in to VaneLux',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF0B3254),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Client / Driver toggle
+                    Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF0F2F5),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.all(4),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => setDialogState(() {
+                                isDriverMode = false;
+                                errorMessage = null;
+                              }),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: !isDriverMode
+                                      ? const Color(0xFF0B3254)
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(9),
+                                  boxShadow: !isDriverMode
+                                      ? [const BoxShadow(color: Colors.black12, blurRadius: 4)]
+                                      : null,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.person_outline,
+                                      size: 16,
+                                      color: !isDriverMode ? Colors.white : Colors.grey,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Client',
+                                      style: TextStyle(
+                                        color: !isDriverMode ? Colors.white : Colors.grey,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => setDialogState(() {
+                                isDriverMode = true;
+                                errorMessage = null;
+                              }),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: isDriverMode
+                                      ? const Color(0xFFD4AF37)
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(9),
+                                  boxShadow: isDriverMode
+                                      ? [const BoxShadow(color: Colors.black12, blurRadius: 4)]
+                                      : null,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.directions_car_outlined,
+                                      size: 16,
+                                      color: isDriverMode ? Colors.white : Colors.grey,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Driver',
+                                      style: TextStyle(
+                                        color: isDriverMode ? Colors.white : Colors.grey,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
                 content: SizedBox(
-                  width: 420,
+                  width: 460,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Enter your credentials to access personalized bookings.',
-                        style: TextStyle(fontSize: 14, color: Colors.black54),
+                      Text(
+                        isDriverMode
+                            ? 'Sign in to your driver account to manage trips and earnings.'
+                            : 'Enter your credentials to access personalized bookings.',
+                        style: const TextStyle(fontSize: 14, color: Colors.black54),
                       ),
                       const SizedBox(height: 20),
                       TextField(
                         controller: emailController,
                         keyboardType: TextInputType.emailAddress,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Email',
-                          border: OutlineInputBorder(),
+                          border: const OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.email_outlined),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: isDriverMode
+                                  ? const Color(0xFFD4AF37)
+                                  : const Color(0xFF0B3254),
+                              width: 2,
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),
                       TextField(
                         controller: passwordController,
                         obscureText: true,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Password',
-                          border: OutlineInputBorder(),
+                          border: const OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.lock_outline),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: isDriverMode
+                                  ? const Color(0xFFD4AF37)
+                                  : const Color(0xFF0B3254),
+                              width: 2,
+                            ),
+                          ),
                         ),
                       ),
                       if (errorMessage != null) ...[
                         const SizedBox(height: 12),
-                        Text(
-                          errorMessage!,
-                          style: const TextStyle(
-                            color: Colors.red,
-                            fontSize: 13,
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.red.withOpacity(0.3)),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.error_outline, color: Colors.red, size: 16),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  errorMessage!,
+                                  style: const TextStyle(color: Colors.red, fontSize: 13),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -585,6 +727,16 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                     child: const Text('Cancel'),
                   ),
                   ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isDriverMode
+                          ? const Color(0xFFD4AF37)
+                          : const Color(0xFF0B3254),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
                     onPressed: isLoading
                         ? null
                         : () async {
@@ -604,30 +756,56 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                               errorMessage = null;
                             });
 
-                            try {
-                              final user = await AuthService.login(
-                                email,
-                                password,
-                              );
-                              if (!dialogContext.mounted) {
-                                return;
+                            if (isDriverMode) {
+                              // ─── Driver login ───
+                              try {
+                                final Driver driver =
+                                    await AuthService.loginDriver(
+                                  email,
+                                  password,
+                                );
+                                if (!dialogContext.mounted) return;
+                                Navigator.of(dialogContext).pop();
+                                // Navigate to driver dashboard
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        DriverDashboardWeb(driver: driver),
+                                  ),
+                                );
+                              } catch (e) {
+                                setDialogState(() {
+                                  errorMessage =
+                                      'Driver sign-in failed. Please check your credentials.';
+                                  isLoading = false;
+                                });
                               }
-                              Navigator.of(dialogContext).pop(user);
-                            } catch (e) {
-                              setDialogState(() {
-                                errorMessage =
-                                    'We could not sign you in. Please verify your credentials.';
-                                isLoading = false;
-                              });
+                            } else {
+                              // ─── Client login ───
+                              try {
+                                final user = await AuthService.login(
+                                  email,
+                                  password,
+                                );
+                                if (!dialogContext.mounted) return;
+                                Navigator.of(dialogContext).pop(user);
+                              } catch (e) {
+                                setDialogState(() {
+                                  errorMessage =
+                                      'We could not sign you in. Please verify your credentials.';
+                                  isLoading = false;
+                                });
+                              }
                             }
                           },
                     child: isLoading
                         ? const SizedBox(
                             height: 18,
                             width: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: Colors.white),
                           )
-                        : const Text('Sign in'),
+                        : Text(isDriverMode ? 'Driver Sign In' : 'Sign In'),
                   ),
                 ],
               );
