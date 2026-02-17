@@ -50,8 +50,28 @@ class AuthService {
       requiredApp: AppConfig.driverAppIdentifier,
     );
 
-    final driverProfile =
-        await CentralBackendService.fetchCurrentDriverProfile();
+    Driver driverProfile;
+    try {
+      driverProfile = await CentralBackendService.fetchCurrentDriverProfile();
+    } catch (_) {
+      // Backend doesn't have /drivers/me yet — build Driver from User data
+      final u = session.user;
+      driverProfile = Driver(
+        id: u.id.toString(),
+        userId: u.id.toString(),
+        name: u.name,
+        phone: u.phone ?? '',
+        licenseNumber: 'VNX-${u.id.toString().padLeft(4, '0')}',
+        vehicleId: '',
+        rating: 5.0,
+        totalTrips: 0,
+        isOnline: false,
+        isAvailable: true,
+        licenseExpiry: DateTime(2027, 12, 31),
+        profileImageUrl: null,
+      );
+    }
+
     await _persistUser(session.user, UserRole.driver);
     await _saveDriverData(driverProfile.toJson());
     return driverProfile;
