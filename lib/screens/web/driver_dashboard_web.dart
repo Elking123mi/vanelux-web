@@ -1,13 +1,16 @@
 import 'dart:async';
+import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
 
+import '../../config/app_config.dart';
 import '../../models/driver.dart';
 import '../../services/auth_service.dart';
+import '../../services/central_backend_service.dart';
 
-// ─── Data models used only by this screen ─────────────────────────────────
+// ─── Data models ─────────────────────────────────────────────────────────
 
 class _DriverTrip {
   final String id;
@@ -15,10 +18,14 @@ class _DriverTrip {
   final String dropoffAddress;
   final double earnings;
   final DateTime date;
-  final String status; // 'completed' | 'cancelled' | 'pending'
+  /// Backend statuses: pending | assigned | in_progress | completed | cancelled
+  final String status;
   final String vehicleName;
   final double distanceMiles;
   final String durationMin;
+  final String? guestName;
+  final String? guestPhone;
+  final bool isRealBooking; // true = came from backend
 
   const _DriverTrip({
     required this.id,
@@ -28,9 +35,33 @@ class _DriverTrip {
     required this.date,
     required this.status,
     required this.vehicleName,
-    required this.distanceMiles,
-    required this.durationMin,
+    this.distanceMiles = 0,
+    this.durationMin = '—',
+    this.guestName,
+    this.guestPhone,
+    this.isRealBooking = false,
   });
+
+  factory _DriverTrip.fromBookingJson(Map<String, dynamic> j) {
+    final guest = '${j['guest_first_name'] ?? ''} ${j['guest_last_name'] ?? ''}'.trim();
+    DateTime parseDate(dynamic v) {
+      try { return DateTime.parse(v.toString()); } catch (_) { return DateTime.now(); }
+    }
+    return _DriverTrip(
+      id: j['id']?.toString() ?? '0',
+      pickupAddress: j['pickup_address'] ?? '—',
+      dropoffAddress: j['destination_address'] ?? '—',
+      earnings: double.tryParse(j['price']?.toString() ?? '0') ?? 0.0,
+      date: parseDate(j['pickup_time'] ?? j['created_at']),
+      status: j['status'] ?? 'pending',
+      vehicleName: j['vehicle_name'] ?? 'Luxury Vehicle',
+      distanceMiles: double.tryParse(j['distance_miles']?.toString() ?? '0') ?? 0,
+      durationMin: j['duration_text'] ?? '—',
+      guestName: guest.isEmpty ? null : guest,
+      guestPhone: j['guest_phone'],
+      isRealBooking: true,
+    );
+  }
 }
 
 // ─── Main Widget ──────────────────────────────────────────────────────────
@@ -59,64 +90,63 @@ class _DriverDashboardWebState extends State<DriverDashboardWeb>
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
 
-  // Mock trips (replace with real API call)
-  final List<_DriverTrip> _trips = [
+  // Real bookings from backend
+  List<_DriverTrip> _realBookings = [];
+  bool _loadingBookings = false;
+  String? _bookingsError;
+  Timer? _bookingsRefreshTimer;
+
+  // Demo trips shown when no real bookings exist yet
+  static final List<_DriverTrip> _demoTrips = [
     _DriverTrip(
-      id: '1',
+      id: 'demo-1',
       pickupAddress: '350 5th Ave, Manhattan, NY',
       dropoffAddress: 'JFK Airport, Queens, NY',
       earnings: 140.00,
-      date: DateTime.now().subtract(const Duration(hours: 2)),
+      date: DateTime(2026, 2, 18, 10, 0),
       status: 'completed',
       vehicleName: 'Mercedes-Maybach S 680',
       distanceMiles: 16.2,
       durationMin: '42',
     ),
     _DriverTrip(
-      id: '2',
+      id: 'demo-2',
       pickupAddress: 'LaGuardia Airport, Queens, NY',
       dropoffAddress: '30 Rockefeller Plaza, Manhattan',
       earnings: 120.00,
-      date: DateTime.now().subtract(const Duration(hours: 5)),
+      date: DateTime(2026, 2, 18, 7, 0),
       status: 'completed',
       vehicleName: 'Cadillac Escalade ESV',
       distanceMiles: 11.4,
       durationMin: '35',
     ),
     _DriverTrip(
-      id: '3',
+      id: 'demo-3',
       pickupAddress: 'One World Trade Center, NYC',
       dropoffAddress: 'Newark Airport, NJ',
       earnings: 180.00,
-      date: DateTime.now().subtract(const Duration(days: 1)),
+      date: DateTime(2026, 2, 17, 14, 0),
       status: 'completed',
       vehicleName: 'Range Rover Autobiography',
       distanceMiles: 19.7,
       durationMin: '55',
     ),
     _DriverTrip(
-      id: '4',
-      pickupAddress: 'Central Park South, NYC',
-      dropoffAddress: 'Brooklyn Bridge, NYC',
-      earnings: 85.00,
-      date: DateTime.now().subtract(const Duration(days: 1, hours: 3)),
-      status: 'completed',
-      vehicleName: 'Mercedes-Maybach S 680',
-      distanceMiles: 6.8,
-      durationMin: '28',
-    ),
-    _DriverTrip(
-      id: '5',
+      id: 'demo-4',
       pickupAddress: 'Times Square, Manhattan, NY',
       dropoffAddress: 'JFK Airport, Queens, NY',
       earnings: 140.00,
-      date: DateTime.now().subtract(const Duration(days: 2)),
+      date: DateTime(2026, 2, 16, 9, 0),
       status: 'cancelled',
       vehicleName: 'Cadillac Escalade ESV',
       distanceMiles: 17.1,
       durationMin: '0',
     ),
   ];
+
+  // Active list: real bookings if any, else demo
+  List<_DriverTrip> get _trips =>
+      _realBookings.isNotEmpty ? _realBookings : _demoTrips;
 
   // ── Computed stats ──
   double get _todayEarnings {
@@ -160,16 +190,65 @@ class _DriverDashboardWebState extends State<DriverDashboardWeb>
     )..repeat(reverse: true);
     _pulseAnimation =
         Tween<double>(begin: 0.85, end: 1.0).animate(_pulseController);
+
+    // Fetch real bookings immediately, then every 30 s
+    _fetchBookings();
+    _bookingsRefreshTimer =
+        Timer.periodic(const Duration(seconds: 30), (_) => _fetchBookings());
   }
 
   @override
   void dispose() {
     _pulseController.dispose();
     _locationTimer?.cancel();
+    _bookingsRefreshTimer?.cancel();
     super.dispose();
   }
 
-  // ── Location ──
+  // ── Real bookings fetch ──
+
+  Future<void> _fetchBookings() async {
+    if (!mounted) return;
+    setState(() {
+      _loadingBookings = true;
+      _bookingsError = null;
+    });
+    try {
+      final token = await CentralBackendService.getValidAccessToken();
+      if (token == null) throw Exception('No auth token');
+
+      final uri = Uri.parse(AppConfig.vlxBookingsUrl);
+      final resp = await http
+          .get(uri, headers: {'Authorization': 'Bearer $token'})
+          .timeout(const Duration(seconds: 15));
+
+      if (resp.statusCode == 200) {
+        final data = jsonDecode(resp.body);
+        final List<dynamic> raw = data['bookings'] ?? data['data'] ?? [];
+        final bookings = raw
+            .map((b) => _DriverTrip.fromBookingJson(
+                Map<String, dynamic>.from(b as Map)))
+            .toList();
+        if (mounted) {
+          setState(() {
+            _realBookings = bookings;
+            _loadingBookings = false;
+          });
+        }
+      } else {
+        throw Exception('HTTP ${resp.statusCode}');
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _loadingBookings = false;
+          // Keep whatever we had; don't wipe real bookings on transient error
+          if (_realBookings.isEmpty) _bookingsError = 'Could not load bookings';
+        });
+      }
+    }
+  }
+
 
   Future<void> _toggleOnline() async {
     if (_isOnline) {
@@ -562,6 +641,42 @@ class _DriverDashboardWebState extends State<DriverDashboardWeb>
           ),
           const SizedBox(height: 28),
 
+          // ── Active assignment alert ──
+          if (_trips.any((t) => t.status == 'assigned' || t.status == 'in_progress')) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(colors: [Color(0xFF1B5E20), Color(0xFF2E7D32)]),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.notifications_active, color: Colors.white, size: 24),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('New Assignment!', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 16)),
+                        Text(
+                          '${_trips.where((t) => t.status == 'assigned' || t.status == 'in_progress').length} trip(s) waiting for you',
+                          style: TextStyle(color: Colors.white.withOpacity(0.85), fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => setState(() => _selectedIndex = 1),
+                    style: TextButton.styleFrom(foregroundColor: Colors.white),
+                    child: const Text('View →', style: TextStyle(fontWeight: FontWeight.w700)),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+
           // ── Online/Offline toggle card ──
           _buildOnlineToggleCard(),
           const SizedBox(height: 24),
@@ -570,10 +685,27 @@ class _DriverDashboardWebState extends State<DriverDashboardWeb>
           isMobile ? _buildStatsColumnMobile() : _buildStatsRowDesktop(),
           const SizedBox(height: 24),
 
-          // ── Recent trips ──
-          const Text(
-            'Recent Trips',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF0B3254)),
+          // ── Recent Trips ──
+          Row(
+            children: [
+              const Expanded(
+                child: Text('Recent Trips', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF0B3254))),
+              ),
+              if (_loadingBookings)
+                const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF0B3254)))
+              else if (_realBookings.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(color: const Color(0xFF2E7D32).withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.cloud_done, size: 12, color: Color(0xFF2E7D32)),
+                      SizedBox(width: 4),
+                      Text('Live data', style: TextStyle(fontSize: 11, color: Color(0xFF2E7D32), fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 12),
           ..._trips.take(3).map((t) => _buildTripCard(t)),
@@ -772,29 +904,87 @@ class _DriverDashboardWebState extends State<DriverDashboardWeb>
 
   Widget _buildTripsPage() {
     final isMobile = MediaQuery.of(context).size.width < 768;
+    final hasReal = _realBookings.isNotEmpty;
+
     return SingleChildScrollView(
       padding: EdgeInsets.all(isMobile ? 16 : 32),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('My Trips', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: Color(0xFF0B3254))),
-          const SizedBox(height: 4),
-          Text('${_trips.length} total trips', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
-          const SizedBox(height: 24),
-          // Filter chips
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                _filterChip('All', true),
-                const SizedBox(width: 8),
-                _filterChip('Completed', false),
-                const SizedBox(width: 8),
-                _filterChip('Cancelled', false),
-              ],
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('My Trips', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: Color(0xFF0B3254))),
+                    const SizedBox(height: 4),
+                    Text(
+                      hasReal ? '${_trips.length} assigned trips from system' : '${_trips.length} demo trips',
+                      style: TextStyle(fontSize: 14, color: hasReal ? const Color(0xFF2E7D32) : Colors.grey[600]),
+                    ),
+                  ],
+                ),
+              ),
+              // Refresh button
+              if (_loadingBookings)
+                const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF0B3254)))
+              else
+                IconButton(
+                  onPressed: _fetchBookings,
+                  icon: const Icon(Icons.refresh, color: Color(0xFF0B3254)),
+                  tooltip: 'Refresh',
+                ),
+            ],
           ),
-          const SizedBox(height: 16),
+          // "Demo data" notice
+          if (!hasReal) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF8E1),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: const Color(0xFFFFD54F)),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.info_outline, size: 16, color: Color(0xFFF57F17)),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'No real bookings assigned yet. Showing demo data. Once an admin assigns a trip, it will appear here automatically.',
+                      style: TextStyle(fontSize: 12, color: Color(0xFFF57F17)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          // "Active assignment" banner
+          if (_trips.any((t) => t.status == 'assigned' || t.status == 'in_progress')) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(colors: [Color(0xFF1B5E20), Color(0xFF2E7D32)]),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.notifications_active, color: Colors.white, size: 20),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      '🚕 You have ${_trips.where((t) => t.status == 'assigned' || t.status == 'in_progress').length} active assignment(s)!',
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          const SizedBox(height: 20),
           ..._trips.map((t) => _buildTripCard(t, expanded: true)),
         ],
       ),
@@ -813,14 +1003,32 @@ class _DriverDashboardWebState extends State<DriverDashboardWeb>
     );
   }
 
-  Widget _buildTripCard(_DriverTrip trip, {bool expanded = false}) {
-    final statusColor = trip.status == 'completed'
-        ? const Color(0xFF4CAF50)
-        : trip.status == 'cancelled'
-            ? Colors.red
-            : const Color(0xFFD4AF37);
+  // Full status → color + label
+  Color _statusColor(String status) {
+    switch (status) {
+      case 'completed': return const Color(0xFF4CAF50);
+      case 'cancelled': return Colors.red;
+      case 'in_progress': return const Color(0xFF2196F3);
+      case 'assigned': return const Color(0xFFD4AF37);
+      default: return Colors.grey;
+    }
+  }
 
-    final statusLabel = trip.status == 'completed' ? 'Completed' : trip.status == 'cancelled' ? 'Cancelled' : 'Pending';
+  String _statusLabel(String status) {
+    switch (status) {
+      case 'completed': return 'Completed';
+      case 'cancelled': return 'Cancelled';
+      case 'in_progress': return 'In Progress';
+      case 'assigned': return 'Assigned';
+      case 'pending': return 'Pending';
+      default: return status;
+    }
+  }
+
+  Widget _buildTripCard(_DriverTrip trip, {bool expanded = false}) {
+    final statusColor = _statusColor(trip.status);
+    final statusLabel = _statusLabel(trip.status);
+    final isActive = trip.status == 'assigned' || trip.status == 'in_progress';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -828,6 +1036,7 @@ class _DriverDashboardWebState extends State<DriverDashboardWeb>
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
+        border: isActive ? Border.all(color: statusColor, width: 2) : null,
         boxShadow: [
           BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4)),
         ],
@@ -886,13 +1095,57 @@ class _DriverDashboardWebState extends State<DriverDashboardWeb>
             _addressRow(Icons.my_location, const Color(0xFF0B3254), trip.pickupAddress),
             const SizedBox(height: 6),
             _addressRow(Icons.location_on, const Color(0xFFD4AF37), trip.dropoffAddress),
-            if (trip.status == 'completed') ...[
+            // Guest info for real bookings
+            if (trip.guestName != null || trip.guestPhone != null) ...[
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0B3254).withOpacity(0.04),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.person_outline, size: 14, color: Color(0xFF0B3254)),
+                    const SizedBox(width: 6),
+                    if (trip.guestName != null)
+                      Text(trip.guestName!, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF0B3254))),
+                    if (trip.guestPhone != null) ...[
+                      const SizedBox(width: 8),
+                      const Icon(Icons.phone, size: 12, color: Colors.grey),
+                      const SizedBox(width: 4),
+                      Text(trip.guestPhone!, style: TextStyle(fontSize: 11, color: Colors.grey[600])),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+            if (trip.distanceMiles > 0 || trip.durationMin != '—') ...[
               const SizedBox(height: 10),
               Row(
                 children: [
-                  _tripMeta(Icons.straighten, '${trip.distanceMiles} mi'),
-                  const SizedBox(width: 16),
-                  if (trip.durationMin != '0') _tripMeta(Icons.timer, '${trip.durationMin} min'),
+                  if (trip.distanceMiles > 0)
+                    _tripMeta(Icons.straighten, '${trip.distanceMiles} mi'),
+                  if (trip.distanceMiles > 0) const SizedBox(width: 16),
+                  if (trip.durationMin != '—' && trip.durationMin != '0')
+                    _tripMeta(Icons.timer, '${trip.durationMin} min'),
+                  if (trip.isRealBooking) ...[
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2E7D32).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.cloud_done, size: 10, color: Color(0xFF2E7D32)),
+                          SizedBox(width: 3),
+                          Text('Live', style: TextStyle(fontSize: 9, color: Color(0xFF2E7D32), fontWeight: FontWeight.w700)),
+                        ],
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ],
