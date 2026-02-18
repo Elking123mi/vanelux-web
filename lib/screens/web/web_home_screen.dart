@@ -15,6 +15,7 @@ import '../../services/auth_service.dart';
 import '../../services/google_maps_service.dart';
 import '../../services/openai_assistant_service.dart';
 import '../../services/pricing_service.dart';
+import 'driver_applications_admin_screen.dart';
 import 'driver_registration_screen.dart';
 import '../../widgets/route_map_view.dart';
 import 'customer_dashboard_web.dart';
@@ -4285,6 +4286,15 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                                 ),
                               );
                               break;
+                            case 'driver_apps':
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const DriverApplicationsAdminScreen(),
+                                ),
+                              );
+                              break;
                             case 'logout':
                               _logout();
                               break;
@@ -4301,6 +4311,20 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                               ],
                             ),
                           ),
+                          if (_currentUser != null &&
+                              (_currentUser!.roles.contains('admin') ||
+                                  _currentUser!.roles.contains('ceo') ||
+                                  _currentUser!.roles.contains('manager')))
+                            const PopupMenuItem(
+                              value: 'driver_apps',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.people, size: 20),
+                                  SizedBox(width: 12),
+                                  Text('Driver Applications'),
+                                ],
+                              ),
+                            ),
                           const PopupMenuItem(
                             value: 'logout',
                             child: Row(
@@ -4413,6 +4437,15 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                               ),
                             );
                             break;
+                          case 'driver_apps':
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const DriverApplicationsAdminScreen(),
+                              ),
+                            );
+                            break;
                           case 'logout':
                             _logout();
                             break;
@@ -4429,6 +4462,20 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                             ],
                           ),
                         ),
+                        if (_currentUser != null &&
+                            (_currentUser!.roles.contains('admin') ||
+                                _currentUser!.roles.contains('ceo') ||
+                                _currentUser!.roles.contains('manager')))
+                          const PopupMenuItem(
+                            value: 'driver_apps',
+                            child: Row(
+                              children: [
+                                Icon(Icons.people, size: 20),
+                                SizedBox(width: 12),
+                                Text('Driver Applications'),
+                              ],
+                            ),
+                          ),
                         const PopupMenuItem(
                           value: 'logout',
                           child: Row(
@@ -4547,6 +4594,15 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                   ),
                 );
                 break;
+              case 'driver_apps':
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        const DriverApplicationsAdminScreen(),
+                  ),
+                );
+                break;
               case 'logout':
                 _logout();
                 break;
@@ -4563,6 +4619,20 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                 ],
               ),
             ),
+            if (_currentUser != null &&
+                (_currentUser!.roles.contains('admin') ||
+                    _currentUser!.roles.contains('ceo') ||
+                    _currentUser!.roles.contains('manager')))
+              const PopupMenuItem(
+                value: 'driver_apps',
+                child: Row(
+                  children: [
+                    Icon(Icons.people, size: 20),
+                    SizedBox(width: 12),
+                    Text('Driver Applications'),
+                  ],
+                ),
+              ),
             const PopupMenuItem(
               value: 'logout',
               child: Row(

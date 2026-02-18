@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:html' as html;
 import 'screens/auth/login_screen.dart';
 import 'screens/web/web_home_screen.dart';
+import 'screens/web/driver_set_password_screen.dart';
 import 'screens/auth/register_screen.dart';
 import 'constants/vanelux_colors.dart';
 
@@ -107,7 +110,30 @@ class VaneLuxApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
       },
-      home: kIsWeb ? const WebHomeScreen() : const LoginScreen(),
+      home: kIsWeb ? const _WebEntry() : const LoginScreen(),
     );
+  }
+}
+
+/// Checks the current URL hash on startup.
+/// If the URL is `#/set-password?token=...`, shows the password setup screen.
+/// Otherwise shows the normal web home.
+class _WebEntry extends StatelessWidget {
+  const _WebEntry();
+
+  @override
+  Widget build(BuildContext context) {
+    if (kIsWeb) {
+      // Parse the hash fragment: e.g. #/set-password?token=eyJ...
+      final hash = html.window.location.hash; // e.g. "#/set-password?token=XXX"
+      if (hash.contains('/set-password')) {
+        final uri = Uri.tryParse(hash.replaceFirst('#', ''));
+        final token = uri?.queryParameters['token'] ?? '';
+        if (token.isNotEmpty) {
+          return DriverSetPasswordScreen(token: token);
+        }
+      }
+    }
+    return const WebHomeScreen();
   }
 }
