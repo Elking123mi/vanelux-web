@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math' show sin, cos, sqrt, atan2, pi;
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:html' as html;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -3071,8 +3073,14 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                 // Fleet Section
                 Container(key: _fleetKey, child: _buildFleetSection(context)),
 
+                // Why Choose Us / Stats Section
+                _buildWhyChooseUsSection(context),
+
                 // About Section
                 Container(key: _aboutKey, child: _buildAboutSection(context)),
+
+                // Testimonials Section
+                _buildTestimonialsSection(context),
 
                 // Contact Section
                 Container(
@@ -3083,6 +3091,38 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                 // Footer
                 _buildFooter(context),
               ],
+            ),
+          ),
+          // WhatsApp Floating Button
+          Positioned(
+            bottom: isMobile ? 100 : 110,
+            right: isMobile ? 16 : 24,
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () {
+                  // ignore: avoid_web_libraries_in_flutter
+                  html.window.open(
+                      'https://wa.me/19175995522?text=Hello%2C%20I%27d%20like%20to%20book%20a%20luxury%20ride%20with%20Vanelux.',
+                      '_blank');
+                },
+                child: Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF25D366),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF25D366).withOpacity(0.4),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(Icons.chat, color: Colors.white, size: 28),
+                ),
+              ),
             ),
           ),
           // AI Assistant Floating Button & Chat
@@ -5784,13 +5824,13 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                     // Social Media Icons
                     Row(
                       children: [
-                        _buildSocialIcon(Icons.facebook),
+                        _buildSocialIcon(Icons.facebook, 'https://www.facebook.com/vanelux'),
                         const SizedBox(width: 16),
-                        _buildSocialIcon(Icons.chat),
+                        _buildSocialIcon(Icons.chat, 'https://wa.me/19175995522'),
                         const SizedBox(width: 16),
-                        _buildSocialIcon(Icons.camera_alt),
+                        _buildSocialIcon(Icons.camera_alt, 'https://www.instagram.com/vanelux'),
                         const SizedBox(width: 16),
-                        _buildSocialIcon(Icons.video_camera_back),
+                        _buildSocialIcon(Icons.video_camera_back, 'https://www.tiktok.com/@vanelux'),
                       ],
                     ),
                   ],
@@ -5871,7 +5911,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    _buildContactItem(Icons.phone, '+1 (555) 123-4567'),
+                    _buildContactItem(Icons.phone, '+1 (917) 599-5522'),
                     _buildContactItem(Icons.email, 'info@vanelux.com'),
                     _buildContactItem(Icons.location_on, 'Miami, FL 33101'),
                     const SizedBox(height: 16),
@@ -5915,15 +5955,307 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     );
   }
 
-  Widget _buildSocialIcon(IconData icon) {
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        color: const Color(0xFFD4AF37),
-        shape: BoxShape.circle,
+  Widget _buildSocialIcon(IconData icon, String url) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () {
+          // ignore: avoid_web_libraries_in_flutter
+          html.window.open(url, '_blank');
+        },
+        child: Container(
+          width: 40,
+          height: 40,
+          decoration: const BoxDecoration(
+            color: Color(0xFFD4AF37),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: const Color(0xFF0B3254), size: 20),
+        ),
       ),
-      child: Icon(icon, color: const Color(0xFF0B3254), size: 20),
+    );
+  }
+
+  // ─── WHY CHOOSE US ────────────────────────────────────────────────────────
+  Widget _buildWhyChooseUsSection(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 768;
+    final stats = [
+      {'number': '10,000+', 'label': 'Rides Completed', 'sub': 'Since 2019'},
+      {'number': '4.9★', 'label': 'Average Rating', 'sub': 'Across all platforms'},
+      {'number': '7', 'label': 'Luxury Vehicles', 'sub': 'Mercedes, Cadillac & more'},
+      {'number': '24/7', 'label': 'Available', 'sub': 'Always here for you'},
+      {'number': '\$0', 'label': 'Hidden Fees', 'sub': 'Transparent pricing'},
+    ];
+    return Container(
+      padding: EdgeInsets.symmetric(
+          vertical: isMobile ? 60 : 80, horizontal: isMobile ? 24 : 60),
+      color: const Color(0xFF0B3254),
+      child: Column(
+        children: [
+          const Text(
+            'Why Choose Vanelux?',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 36,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            width: 60,
+            height: 3,
+            color: const Color(0xFFD4AF37),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'New York City\'s premium black-car service — trusted by executives,\ncelebrities, and travelers who refuse to compromise.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 16, color: Colors.white70, height: 1.6),
+          ),
+          const SizedBox(height: 48),
+          isMobile
+              ? GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 1.2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                  ),
+                  itemCount: stats.length,
+                  itemBuilder: (context, i) =>
+                      _buildStatCard(stats[i], isMobile),
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: stats
+                      .map((s) => Expanded(
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
+                              child: _buildStatCard(s, isMobile),
+                            ),
+                          ))
+                      .toList(),
+                ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatCard(Map<String, String> stat, bool isMobile) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.07),
+        borderRadius: BorderRadius.circular(16),
+        border:
+            Border.all(color: const Color(0xFFD4AF37).withOpacity(0.35), width: 1),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            stat['number']!,
+            style: const TextStyle(
+              fontSize: 34,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFFD4AF37),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            stat['label']!,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            stat['sub']!,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.55)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─── TESTIMONIALS ─────────────────────────────────────────────────────────
+  Widget _buildTestimonialsSection(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 768;
+    final reviews = [
+      {
+        'name': 'James M.',
+        'location': 'Manhattan, NY',
+        'text':
+            'Vanelux made my JFK pickup absolutely seamless. The driver was early, the car was immaculate, and the service was five-star from start to finish. Won\'t use anyone else.',
+        'initials': 'JM',
+        'stars': 5,
+      },
+      {
+        'name': 'Sarah L.',
+        'location': 'Corporate Client, NYC',
+        'text':
+            'I book Vanelux for all my executive clients. The level of professionalism and the quality of the vehicles sets them completely apart. My clients are always impressed.',
+        'initials': 'SL',
+        'stars': 5,
+      },
+      {
+        'name': 'Robert K.',
+        'location': 'Wedding Event, NJ',
+        'text':
+            'Used Vanelux for our wedding day. The team went above and beyond — white-glove treatment throughout. The Mercedes was gorgeous and the driver was incredibly courteous.',
+        'initials': 'RK',
+        'stars': 5,
+      },
+      {
+        'name': 'Diana P.',
+        'location': 'LaGuardia Transfer',
+        'text':
+            'Flight was delayed and they tracked it and adjusted without me having to call. Peace of mind on a stressful travel day. Absolutely recommend Vanelux.',
+        'initials': 'DP',
+        'stars': 5,
+      },
+    ];
+    return Container(
+      padding: EdgeInsets.symmetric(
+          vertical: isMobile ? 60 : 80, horizontal: isMobile ? 24 : 60),
+      color: Colors.white,
+      child: Column(
+        children: [
+          const Text(
+            'What Our Clients Say',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 36,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF0B3254),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(width: 60, height: 3, color: const Color(0xFFD4AF37)),
+          const SizedBox(height: 12),
+          const Text(
+            'Real experiences from real clients across New York City.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                fontSize: 16, color: Color(0xFF555555), height: 1.6),
+          ),
+          const SizedBox(height: 48),
+          isMobile
+              ? Column(
+                  children: reviews
+                      .map((r) => Padding(
+                            padding: const EdgeInsets.only(bottom: 20),
+                            child: _buildReviewCard(r),
+                          ))
+                      .toList(),
+                )
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: reviews
+                      .map((r) => Expanded(
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10),
+                              child: _buildReviewCard(r),
+                            ),
+                          ))
+                      .toList(),
+                ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReviewCard(Map<String, dynamic> review) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
+          ),
+        ],
+        border: Border.all(
+            color: const Color(0xFFD4AF37).withOpacity(0.2), width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFD4AF37),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(
+                    review['initials'] as String,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0B3254),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      review['name'] as String,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF0B3254),
+                        fontSize: 15,
+                      ),
+                    ),
+                    Text(
+                      review['location'] as String,
+                      style: const TextStyle(
+                          fontSize: 12, color: Color(0xFF888888)),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: List.generate(
+              review['stars'] as int,
+              (_) => const Icon(Icons.star,
+                  color: Color(0xFFD4AF37), size: 16),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            '"${review['text']}"',
+            style: const TextStyle(
+              fontSize: 14,
+              color: Color(0xFF444444),
+              height: 1.65,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
