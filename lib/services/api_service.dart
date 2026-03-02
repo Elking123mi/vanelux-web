@@ -166,7 +166,7 @@ class ApiService {
   }) async {
     await post(
       '/api/v1/vlx/bookings/$bookingId/rate',
-      body: {'rating': rating, 'comment': comment ?? ''},
+      {'rating': rating, 'comment': comment ?? ''},
       token: token,
     );
   }
