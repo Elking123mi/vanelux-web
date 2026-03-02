@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:html' as html;
+import 'dart:js_util' as js_util;
 import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/material.dart';
@@ -141,7 +142,7 @@ class _TripTrackingScreenState extends State<TripTrackingScreen> {
           }
         })();
       ''';
-      html.window.eval(js);
+      js_util.callMethod(html.window, 'eval', [js]);
     } catch (_) {}
   }
 
