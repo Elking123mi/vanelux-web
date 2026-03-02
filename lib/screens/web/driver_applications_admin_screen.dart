@@ -83,12 +83,15 @@ class _DriverApplicationsAdminScreenState
 
     if (resp.statusCode == 200) {
       final data = jsonDecode(resp.body);
+      final emailSent = data['email_sent'] == true;
+      final emailError = data['email_error'] as String?;
       if (mounted) {
         _showResultDialog(
           success: true,
           title: '✅ Application Approved',
-          message:
-              'Email sent to ${app['email']}.\n\nSetup link (for testing):\n${data['setup_link'] ?? ''}',
+          message: emailSent
+              ? 'Setup email sent to ${app['email']}.\n\nSetup link (for testing):\n${data['setup_link'] ?? ''}'
+              : '⚠️ Application approved but email FAILED to send.\n\nError: ${emailError ?? 'unknown'}\n\nSetup link (share manually):\n${data['setup_link'] ?? ''}',
           setupLink: data['setup_link'],
         );
         _loadApplications();
@@ -98,6 +101,39 @@ class _DriverApplicationsAdminScreenState
         success: false,
         title: 'Error',
         message: 'Error: ${resp.body}',
+      );
+    }
+  }
+
+  Future<void> _resendApprovalEmail(Map<String, dynamic> app) async {
+    final token = await AuthService.getToken();
+    if (token == null) return;
+
+    final resp = await http.post(
+      Uri.parse(
+          '${AppConfig.centralApiBaseUrl}/vlx/drivers/applications/${app['id']}/resend-approval'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    if (!mounted) return;
+    if (resp.statusCode == 200) {
+      final data = jsonDecode(resp.body);
+      final emailSent = data['email_sent'] == true;
+      final emailError = data['email_error'] as String?;
+      _showResultDialog(
+        success: emailSent,
+        title: emailSent ? '📧 Email Resent' : '⚠️ Resend Failed',
+        message: emailSent
+            ? 'Setup email resent to ${data['sent_to']}.\n\nSetup link:\n${data['setup_link'] ?? ''}'
+            : 'Could not resend email.\nError: ${emailError ?? 'unknown'}\n\nSetup link (share manually):\n${data['setup_link'] ?? ''}',
+        setupLink: data['setup_link'],
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Resend failed: ${resp.body}'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -402,6 +438,27 @@ class _DriverApplicationsAdminScreenState
                         ),
                       ),
                     ],
+                  ),
+                )
+              else if (app['status'] == 'approved' ||
+                  app['status'] == 'onboarded')
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 20),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        _resendApprovalEmail(app);
+                      },
+                      icon: const Icon(Icons.email, color: Colors.white),
+                      label: const Text('Resend Setup Email',
+                          style: TextStyle(color: Colors.white)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0B3254),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                    ),
                   ),
                 ),
             ],
