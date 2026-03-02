@@ -96,6 +96,9 @@ class _DriverDashboardWebState extends State<DriverDashboardWeb>
   String? _bookingsError;
   Timer? _bookingsRefreshTimer;
 
+  // Active booking for live tracking
+  String? _activeBookingId;
+
   // Demo trips shown when no real bookings exist yet
   static final List<_DriverTrip> _demoTrips = [
     _DriverTrip(
@@ -295,14 +298,27 @@ class _DriverDashboardWebState extends State<DriverDashboardWeb>
       });
 
       // Update location every 30 seconds
-      _locationTimer = Timer.periodic(const Duration(seconds: 30), (_) async {
+      _locationTimer = Timer.periodic(const Duration(seconds: 10), (_) async {
         try {
           final newPos = await Geolocator.getCurrentPosition(
             desiredAccuracy: LocationAccuracy.high,
           );
           if (mounted) setState(() => _currentPosition = newPos);
-          // TODO: POST location to backend
-          // await ApiService.updateDriverLocation(lat: newPos.latitude, lng: newPos.longitude);
+          // POST location to backend for the active booking
+          final bookingId = _activeBookingId ??
+              (_trips.isNotEmpty
+                  ? (_trips.firstWhere(
+                          (t) => t.status == 'assigned' ||
+                              t.status == 'en_route_to_pickup' ||
+                              t.status == 'arrived_at_pickup' ||
+                              t.status == 'in_progress',
+                          orElse: () => _trips.first)
+                      .id)
+                  : null);
+          if (bookingId != null && int.tryParse(bookingId) != null) {
+            await _postDriverLocation(
+                int.parse(bookingId), newPos.latitude, newPos.longitude, null);
+          }
         } catch (_) {}
       });
 
@@ -315,6 +331,69 @@ class _DriverDashboardWebState extends State<DriverDashboardWeb>
       });
       _showSnack('Online (location not available in this browser).', isError: false);
     }
+  }
+
+  Future<void> _postDriverLocation(
+      int bookingId, double lat, double lng, String? status) async {
+    try {
+      final token = await AuthService.getToken();
+      if (token == null) return;
+      final body = <String, dynamic>{'lat': lat, 'lng': lng};
+      if (status != null) body['status'] = status;
+      await http.put(
+        Uri.parse(
+            '${AppConfig.centralApiBaseUrl}/vlx/bookings/$bookingId/driver-location'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      ).timeout(const Duration(seconds: 8));
+    } catch (e) {
+      debugPrint('⚠️ Location post failed: $e');
+    }
+  }
+
+  Future<void> _updateTripStatus(String tripId, String newStatus) async {
+    final bookingId = int.tryParse(tripId);
+    if (bookingId == null) return;
+
+    setState(() => _activeBookingId = tripId);
+
+    final lat = _currentPosition?.latitude ?? 40.7128;
+    final lng = _currentPosition?.longitude ?? -74.0060;
+    await _postDriverLocation(bookingId, lat, lng, newStatus);
+
+    // Update local state
+    setState(() {
+      _realBookings = _realBookings.map((t) {
+        if (t.id == tripId) {
+          return _DriverTrip(
+            id: t.id,
+            pickupAddress: t.pickupAddress,
+            dropoffAddress: t.dropoffAddress,
+            earnings: t.earnings,
+            date: t.date,
+            status: newStatus,
+            vehicleName: t.vehicleName,
+            distanceMiles: t.distanceMiles,
+            durationMin: t.durationMin,
+            guestName: t.guestName,
+            guestPhone: t.guestPhone,
+            isRealBooking: t.isRealBooking,
+          );
+        }
+        return t;
+      }).toList();
+    });
+
+    final labels = {
+      'en_route_to_pickup': 'Status updated — heading to pickup 🚗',
+      'arrived_at_pickup': 'Status updated — arrived at pickup 📍',
+      'in_progress': 'Trip started! Client notified 🎉',
+      'completed': 'Trip completed! Great job ✅',
+    };
+    _showSnack(labels[newStatus] ?? 'Status updated', isError: false);
   }
 
   void _showSnack(String msg, {required bool isError}) {
@@ -1149,9 +1228,61 @@ class _DriverDashboardWebState extends State<DriverDashboardWeb>
                 ],
               ),
             ],
+            // ── Status action buttons for active real bookings ──────────────
+            if (trip.isRealBooking &&
+                trip.status != 'completed' &&
+                trip.status != 'cancelled') ...[
+              const SizedBox(height: 14),
+              Divider(height: 1, color: Colors.grey[100]),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  if (trip.status == 'assigned' || trip.status == 'pending')
+                    _statusBtn(
+                      '🚗  I\'m On My Way',
+                      const Color(0xFF8B5CF6),
+                      () => _updateTripStatus(trip.id, 'en_route_to_pickup'),
+                    ),
+                  if (trip.status == 'en_route_to_pickup')
+                    _statusBtn(
+                      '📍  I\'ve Arrived',
+                      const Color(0xFF3B82F6),
+                      () => _updateTripStatus(trip.id, 'arrived_at_pickup'),
+                    ),
+                  if (trip.status == 'arrived_at_pickup')
+                    _statusBtn(
+                      '▶️  Start Trip',
+                      const Color(0xFF10B981),
+                      () => _updateTripStatus(trip.id, 'in_progress'),
+                    ),
+                  if (trip.status == 'in_progress')
+                    _statusBtn(
+                      '✅  Complete Trip',
+                      const Color(0xFFD4AF37),
+                      () => _updateTripStatus(trip.id, 'completed'),
+                    ),
+                ],
+              ),
+            ],
           ],
         ],
       ),
+    );
+  }
+
+  Widget _statusBtn(String label, Color color, VoidCallback onTap) {
+    return ElevatedButton(
+      onPressed: onTap,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        elevation: 0,
+      ),
+      child: Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
     );
   }
 

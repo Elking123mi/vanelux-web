@@ -3,6 +3,7 @@ import '../../models/user.dart';
 import '../../models/trip.dart';
 import '../../services/auth_service.dart';
 import '../../services/booking_service.dart';
+import 'trip_tracking_screen.dart';
 
 class CustomerDashboardWeb extends StatefulWidget {
   final User user;
@@ -844,6 +845,35 @@ class _CustomerDashboardWebState extends State<CustomerDashboardWeb> {
                         side: const BorderSide(color: Colors.red),
                       ),
                       child: const Text('Cancel'),
+                    ),
+                  const SizedBox(width: 8),
+                  if (statusText != 'completed' && statusText != 'cancelled' &&
+                      int.tryParse(booking.id) != null)
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => TripTrackingScreen(
+                              bookingId: int.parse(booking.id),
+                              pickupAddress: booking.pickupLocation.address,
+                              destinationAddress:
+                                  booking.destinationLocation.address,
+                            ),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.location_on, size: 16),
+                      label: const Text('Track Live'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0B3254),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
                     ),
                 ],
               ),
