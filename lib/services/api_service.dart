@@ -156,4 +156,32 @@ class ApiService {
       requiresAuth: token != null,
     );
   }
+
+  // ── Rating ────────────────────────────────────────────────
+  static Future<void> rateTrip({
+    required int bookingId,
+    required int rating,
+    String? comment,
+    String? token,
+  }) async {
+    await post(
+      '/api/v1/vlx/bookings/$bookingId/rate',
+      body: {'rating': rating, 'comment': comment ?? ''},
+      token: token,
+    );
+  }
+
+  static Future<Map<String, dynamic>> getDriverRatings(
+    String driverId, {String? token}) async {
+    return get('/api/v1/vlx/drivers/$driverId/ratings', token: token);
+  }
+
+  static Future<Map<String, dynamic>?> getBookingRating(
+    int bookingId, {String? token}) async {
+    try {
+      return await get('/api/v1/vlx/bookings/$bookingId/rating', token: token);
+    } catch (_) {
+      return null;
+    }
+  }
 }

@@ -7,14 +7,19 @@ import 'dart:html' as html;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 import '../../models/assistant_message.dart';
 import '../../models/driver.dart';
 import '../../models/user.dart';
+import '../../providers/locale_provider.dart';
+import '../../providers/notification_provider.dart';
 import '../../services/auth_service.dart';
 import '../../services/google_maps_service.dart';
 import '../../services/openai_assistant_service.dart';
 import '../../services/pricing_service.dart';
+import '../../widgets/vanelux_logo.dart';
+import '../../widgets/notifications_panel.dart';
 import 'driver_applications_admin_screen.dart';
 import 'driver_registration_screen.dart';
 import '../../widgets/route_map_view.dart';
@@ -2973,23 +2978,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text(
-                            'VANELUX',
-                            style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFFFFD700),
-                              letterSpacing: 2,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Luxury Transportation',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.white.withOpacity(0.8),
-                            ),
-                          ),
+                          const VaneluxLogo(size: 36, dark: true, showText: true),
                         ],
                       ),
                     ),
@@ -4167,7 +4156,37 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                   color: Color(0xFF0B3254),
                 ),
               ),
-              const SizedBox(width: 24),
+              const SizedBox(width: 16),
+              // Language toggle EN | ES
+              Consumer<LocaleProvider>(
+                builder: (_, localeProvider, __) => TextButton(
+                  onPressed: () => localeProvider.setLocale(
+                    localeProvider.locale == 'en' ? 'es' : 'en',
+                  ),
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color(0xFF0B3254),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.language, size: 16),
+                      const SizedBox(width: 4),
+                      Text(
+                        localeProvider.locale.toUpperCase(),
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              // Notification bell (only when logged in)
+              if (_currentUser != null)
+                const NotificationBell(iconColor: Color(0xFF0B3254)),
+              const SizedBox(width: 8),
             ];
 
             if (_isCheckingAuth) {
@@ -4368,15 +4387,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                     },
                   ),
                   const SizedBox(width: 8),
-                  const Text(
-                    'VANELUX',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF0B3254),
-                      letterSpacing: 1.5,
-                    ),
-                  ),
+                  const VaneluxLogo(size: 32, dark: false, showText: true),
                   const Spacer(),
                   if (_isCheckingAuth)
                     const SizedBox(
@@ -4512,15 +4523,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
             return Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const Text(
-                  'VANELUX',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF0B3254),
-                    letterSpacing: 2,
-                  ),
-                ),
+                const VaneluxLogo(size: 40, dark: false, showText: true),
                 const SizedBox(width: 32),
                 Expanded(
                   child: isNarrow
@@ -4695,14 +4698,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
         children: [
-          const Text(
-            'VANELUX',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF0B3254),
-            ),
-          ),
+          const VaneluxLogo(size: 32, dark: false, showText: false),
           const Spacer(),
           ...actions,
         ],

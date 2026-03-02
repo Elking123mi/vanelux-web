@@ -90,6 +90,94 @@
   <!-- Stripe.js for payment processing -->
   <script src="https://js.stripe.com/v3/"></script>
   <script src="stripe_handler.js"></script>
+
+  <!-- Structured Data: TaxiService (Google Rich Results) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TaxiService",
+    "name": "Vanelux Luxury Transportation",
+    "alternateName": "VaneLux",
+    "url": "https://vanelux.netlify.app",
+    "logo": "https://vanelux.netlify.app/icons/Icon-192.png",
+    "image": "https://vanelux.netlify.app/icons/Icon-512.png",
+    "description": "Premium luxury car service and ride-hailing in New York City. Airport transfers, events, corporate travel. Available 24/7.",
+    "priceRange": "$$$",
+    "telephone": "+19175995522",
+    "email": "info@vanelux.com",
+    "currenciesAccepted": "USD",
+    "paymentAccepted": "Credit Card, Cash",
+    "openingHours": "Mo-Su 00:00-23:59",
+    "availableLanguage": ["English", "Spanish"],
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "New York City",
+      "addressLocality": "New York",
+      "addressRegion": "NY",
+      "postalCode": "10001",
+      "addressCountry": "US"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": "40.7128",
+      "longitude": "-74.0060"
+    },
+    "areaServed": [
+      {"@type": "City", "name": "New York City"},
+      {"@type": "City", "name": "Newark"},
+      {"@type": "City", "name": "Jersey City"},
+      {"@type": "State", "name": "New York"},
+      {"@type": "State", "name": "New Jersey"}
+    ],
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Vanelux Services",
+      "itemListElement": [
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Airport Transfer"}},
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Corporate Travel"}},
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Special Events"}},
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Hourly Charter"}}
+      ]
+    },
+    "sameAs": [
+      "https://wa.me/19175995522"
+    ]
+  }
+  </script>
+
+  <!-- FAQ Structured Data for Google rich results -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I book a luxury car in New York City?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Visit vanelux.netlify.app, enter your pickup location, destination, date and preferred vehicle class, then submit your booking request. A driver will be assigned and you will receive a confirmation email."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does Vanelux offer airport transfers in NYC?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Vanelux provides premium airport transfers to and from JFK, LGA, EWR and all New York metropolitan area airports, 24 hours a day, 7 days a week."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What vehicles does Vanelux operate?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Our fleet includes luxury sedans (Mercedes-Benz, BMW), SUVs (Cadillac Escalade, Lincoln Navigator), and executive vans — all late model, fully maintained and climate controlled."
+        }
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
   <!-- Contenedor para Stripe Card Element -->

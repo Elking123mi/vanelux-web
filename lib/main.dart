@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:html' as html;
 import 'screens/auth/login_screen.dart';
@@ -8,6 +9,8 @@ import 'screens/web/web_home_screen.dart';
 import 'screens/web/driver_set_password_screen.dart';
 import 'screens/auth/register_screen.dart';
 import 'constants/vanelux_colors.dart';
+import 'providers/locale_provider.dart';
+import 'providers/notification_provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,7 +31,15 @@ void main() {
     );
   }
 
-  runApp(const VaneLuxApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => LocaleProvider()),
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
+      ],
+      child: const VaneLuxApp(),
+    ),
+  );
 }
 
 class VaneLuxApp extends StatelessWidget {
