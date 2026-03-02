@@ -4754,22 +4754,22 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
             'Luxury Transportation in NYC',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: isCompact ? 34 : 48,
+              fontSize: isCompact ? 26 : 38,
               fontWeight: FontWeight.w700,
               color: const Color(0xFF0B3254),
               height: 1.2,
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 10),
           Text(
-            'Choferes profesionales, vehículos exclusivos y reservas confirmadas al instante.',
+            'Professional chauffeurs, exclusive vehicles and instant confirmed reservations.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: isCompact ? 16 : 18,
+              fontSize: isCompact ? 13 : 15,
               color: Colors.grey[600],
             ),
           ),
-          const SizedBox(height: 40),
+          const SizedBox(height: 28),
           if (isCompact)
             Column(
               children: [
@@ -4977,18 +4977,18 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
             'Our Services',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: isCompact ? 32 : 42,
+              fontSize: isCompact ? 22 : 28,
               fontWeight: FontWeight.bold,
               color: const Color(0xFF0B3254),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
           Text(
             'We offer luxury transportation for all your needs with first-class vehicles and chauffeurs.',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: isCompact ? 16 : 18, color: Colors.grey),
+            style: TextStyle(fontSize: isCompact ? 13 : 14, color: Colors.grey),
           ),
-          const SizedBox(height: 48),
+          const SizedBox(height: 32),
 
           if (isCompact)
             Column(
@@ -5052,49 +5052,49 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     }
 
     return Container(
-      padding: const EdgeInsets.all(32),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
         children: [
           Container(
-            width: 80,
-            height: 80,
+            width: 48,
+            height: 48,
             decoration: const BoxDecoration(
               color: Color(0xFF0B3254),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: const Color(0xFFD4AF37), size: 40),
+            child: Icon(icon, color: const Color(0xFFD4AF37), size: 22),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 14),
           Text(
             title,
             style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
               color: Color(0xFF0B3254),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 6),
           Text(
             description,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 12,
               color: Colors.grey[600],
-              height: 1.5,
+              height: 1.4,
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 14),
           ElevatedButton(
             onPressed: () {
               Navigator.push(
@@ -6060,7 +6060,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     ];
     return Container(
       padding: EdgeInsets.symmetric(
-          vertical: isMobile ? 60 : 80, horizontal: isMobile ? 24 : 60),
+          vertical: isMobile ? 40 : 56, horizontal: isMobile ? 20 : 60),
       color: const Color(0xFF0B3254),
       child: Column(
         children: [
@@ -6068,24 +6068,24 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
             'Why Choose Vanelux?',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 36,
+              fontSize: 24,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Container(
-            width: 60,
-            height: 3,
+            width: 40,
+            height: 2,
             color: const Color(0xFFD4AF37),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           const Text(
             'New York City\'s premium black-car service — trusted by executives,\ncelebrities, and travelers who refuse to compromise.',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 16, color: Colors.white70, height: 1.6),
+            style: TextStyle(fontSize: 13, color: Colors.white70, height: 1.5),
           ),
-          const SizedBox(height: 48),
+          const SizedBox(height: 36),
           isMobile
               ? GridView.builder(
                   shrinkWrap: true,
@@ -6119,10 +6119,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
 
   Widget _buildStatCard(Map<String, String> stat, bool isMobile) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.07),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         border:
             Border.all(color: const Color(0xFFD4AF37).withOpacity(0.35), width: 1),
       ),
@@ -6132,26 +6132,26 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           Text(
             stat['number']!,
             style: const TextStyle(
-              fontSize: 34,
+              fontSize: 24,
               fontWeight: FontWeight.bold,
               color: Color(0xFFD4AF37),
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           Text(
             stat['label']!,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              fontSize: 15,
+              fontSize: 12,
               fontWeight: FontWeight.w600,
               color: Colors.white,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Text(
             stat['sub']!,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.55)),
+            style: TextStyle(fontSize: 10, color: Colors.white.withOpacity(0.55)),
           ),
         ],
       ),
