@@ -1,11 +1,11 @@
 {
-    "name": "luxury_taxi_app",
-    "short_name": "luxury_taxi_app",
+    "name": "Vanelux — Luxury Transportation NYC",
+    "short_name": "Vanelux",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#0B3254",
+    "theme_color": "#0B3254",
+    "description": "NYC's premier luxury black-car service. Airport transfers, corporate events, weddings & more.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

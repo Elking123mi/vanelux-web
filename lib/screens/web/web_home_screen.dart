@@ -2959,7 +2959,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const VaneluxLogo(size: 36, dark: true, showText: true),
+                          const VaneluxLogo(size: 26, dark: true, showText: true),
                         ],
                       ),
                     ),
@@ -4374,7 +4374,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                     },
                   ),
                   const SizedBox(width: 8),
-                  const VaneluxLogo(size: 32, dark: false, showText: true),
+                  const VaneluxLogo(size: 24, dark: false, showText: true),
                   const Spacer(),
                   if (_isCheckingAuth)
                     const SizedBox(
@@ -4510,7 +4510,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
             return Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const VaneluxLogo(size: 40, dark: false, showText: true),
+                const VaneluxLogo(size: 28, dark: false, showText: true),
                 const SizedBox(width: 32),
                 Expanded(
                   child: isNarrow
@@ -4685,7 +4685,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
         children: [
-          const VaneluxLogo(size: 32, dark: false, showText: false),
+          const VaneluxLogo(size: 24, dark: false, showText: false),
           const Spacer(),
           ...actions,
         ],
