@@ -534,288 +534,227 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     try {
       return await showDialog<User>(
         context: context,
+        barrierColor: Colors.black.withOpacity(0.6),
         builder: (dialogContext) {
           bool isLoading = false;
           String? errorMessage;
           bool isDriverMode = false;
+          bool obscurePassword = true;
+
+          // ── helpers ────────────────────────────────────────────────
+          InputDecoration _fieldDeco(String label, {IconData? icon}) {
+            return InputDecoration(
+              labelText: label,
+              labelStyle: const TextStyle(fontSize: 13, color: Color(0xFF666666)),
+              prefixIcon: icon != null ? Icon(icon, size: 18, color: const Color(0xFF999999)) : null,
+              filled: true,
+              fillColor: const Color(0xFFF6F7FA),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Color(0xFFE0E0E0), width: 1.5),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Color(0xFF0B3254), width: 1.5),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+            );
+          }
+
           return StatefulBuilder(
             builder: (context, setDialogState) {
-              return AlertDialog(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-                title: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Sign in to VaneLux',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF0B3254),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Client / Driver toggle
-                    Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF0F2F5),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.all(4),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () => setDialogState(() {
-                                isDriverMode = false;
-                                errorMessage = null;
-                              }),
+              return Dialog(
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 420),
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Header
+                        Row(children: [
+                          Container(
+                            width: 36, height: 36,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: const Color(0xFFD4AF37), width: 1.5),
+                              color: const Color(0xFF0B3254),
+                            ),
+                            child: const Center(child: Text('V',
+                              style: TextStyle(color: Color(0xFFD4AF37), fontSize: 16, fontWeight: FontWeight.w800))),
+                          ),
+                          const SizedBox(width: 10),
+                          const Text('VANELUX',
+                            style: TextStyle(color: Color(0xFFD4AF37), fontSize: 13, fontWeight: FontWeight.w800, letterSpacing: 2)),
+                          const Spacer(),
+                          IconButton(
+                            icon: const Icon(Icons.close, size: 20, color: Color(0xFF999999)),
+                            onPressed: () => Navigator.of(dialogContext).pop(),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                          ),
+                        ]),
+                        const SizedBox(height: 24),
+                        const Text('Welcome', style: TextStyle(
+                          fontSize: 26, fontWeight: FontWeight.w700, color: Color(0xFF0B3254))),
+                        const SizedBox(height: 4),
+                        Text(isDriverMode ? 'Sign in to your driver account.' : 'Log in to continue to Vanelux.',
+                          style: const TextStyle(fontSize: 14, color: Color(0xFF888888))),
+                        const SizedBox(height: 20),
+
+                        // Client / Driver toggle (pill)
+                        Container(
+                          height: 40,
+                          padding: const EdgeInsets.all(3),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF0F2F5),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(children: [
+                            Expanded(child: GestureDetector(
+                              onTap: () => setDialogState(() { isDriverMode = false; errorMessage = null; }),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),
-                                padding: const EdgeInsets.symmetric(vertical: 10),
                                 decoration: BoxDecoration(
-                                  color: !isDriverMode
-                                      ? const Color(0xFF0B3254)
-                                      : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(9),
-                                  boxShadow: !isDriverMode
-                                      ? [const BoxShadow(color: Colors.black12, blurRadius: 4)]
-                                      : null,
+                                  color: !isDriverMode ? const Color(0xFF0B3254) : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.person_outline,
-                                      size: 16,
-                                      color: !isDriverMode ? Colors.white : Colors.grey,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      'Client',
-                                      style: TextStyle(
-                                        color: !isDriverMode ? Colors.white : Colors.grey,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                child: Center(child: Text('Client',
+                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600,
+                                    color: !isDriverMode ? Colors.white : const Color(0xFF888888)))),
                               ),
+                            )),
+                            Expanded(child: GestureDetector(
+                              onTap: () => setDialogState(() { isDriverMode = true; errorMessage = null; }),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                decoration: BoxDecoration(
+                                  color: isDriverMode ? const Color(0xFFD4AF37) : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Center(child: Text('Driver',
+                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600,
+                                    color: isDriverMode ? const Color(0xFF0B3254) : const Color(0xFF888888)))),
+                              ),
+                            )),
+                          ]),
+                        ),
+
+                        const SizedBox(height: 20),
+                        TextField(
+                          controller: emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          style: const TextStyle(fontSize: 14),
+                          decoration: _fieldDeco('Email address', icon: Icons.email_outlined),
+                        ),
+                        const SizedBox(height: 14),
+                        StatefulBuilder(builder: (_, setSuffix) => TextField(
+                          controller: passwordController,
+                          obscureText: obscurePassword,
+                          style: const TextStyle(fontSize: 14),
+                          decoration: _fieldDeco('Password', icon: Icons.lock_outline).copyWith(
+                            suffixIcon: IconButton(
+                              icon: Icon(obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                                size: 18, color: const Color(0xFF999999)),
+                              onPressed: () => setDialogState(() => obscurePassword = !obscurePassword),
                             ),
                           ),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () => setDialogState(() {
-                                isDriverMode = true;
-                                errorMessage = null;
-                              }),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
-                                padding: const EdgeInsets.symmetric(vertical: 10),
-                                decoration: BoxDecoration(
-                                  color: isDriverMode
-                                      ? const Color(0xFFD4AF37)
-                                      : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(9),
-                                  boxShadow: isDriverMode
-                                      ? [const BoxShadow(color: Colors.black12, blurRadius: 4)]
-                                      : null,
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.directions_car_outlined,
-                                      size: 16,
-                                      color: isDriverMode ? Colors.white : Colors.grey,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      'Driver',
-                                      style: TextStyle(
-                                        color: isDriverMode ? Colors.white : Colors.grey,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                        )),
+
+                        if (errorMessage != null) ...[
+                          const SizedBox(height: 10),
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withOpacity(0.07),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.red.withOpacity(0.25)),
                             ),
+                            child: Text(errorMessage!, style: const TextStyle(color: Colors.red, fontSize: 13)),
                           ),
                         ],
-                      ),
-                    ),
-                  ],
-                ),
-                content: SizedBox(
-                  width: 460,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        isDriverMode
-                            ? 'Sign in to your driver account to manage trips and earnings.'
-                            : 'Enter your credentials to access personalized bookings.',
-                        style: const TextStyle(fontSize: 14, color: Colors.black54),
-                      ),
-                      const SizedBox(height: 20),
-                      TextField(
-                        controller: emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(
-                          labelText: 'Email',
-                          border: const OutlineInputBorder(),
-                          prefixIcon: const Icon(Icons.email_outlined),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: isDriverMode
-                                  ? const Color(0xFFD4AF37)
-                                  : const Color(0xFF0B3254),
-                              width: 2,
+
+                        const SizedBox(height: 20),
+                        SizedBox(
+                          height: 48,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: isDriverMode ? const Color(0xFFD4AF37) : const Color(0xFF0B3254),
+                              foregroundColor: isDriverMode ? const Color(0xFF0B3254) : Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                             ),
+                            onPressed: isLoading ? null : () async {
+                              final email = emailController.text.trim();
+                              final password = passwordController.text;
+                              if (email.isEmpty || password.isEmpty) {
+                                setDialogState(() => errorMessage = 'Please enter your email and password.');
+                                return;
+                              }
+                              setDialogState(() { isLoading = true; errorMessage = null; });
+                              if (isDriverMode) {
+                                try {
+                                  final Driver driver = await AuthService.loginDriver(email, password);
+                                  if (!dialogContext.mounted) return;
+                                  Navigator.of(dialogContext).pop();
+                                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => DriverDashboardWeb(driver: driver)));
+                                } catch (e) {
+                                  setDialogState(() { errorMessage = 'Driver sign-in failed. Check your credentials.'; isLoading = false; });
+                                }
+                              } else {
+                                try {
+                                  final user = await AuthService.login(email, password);
+                                  if (!dialogContext.mounted) return;
+                                  Navigator.of(dialogContext).pop(user);
+                                } catch (e) {
+                                  setDialogState(() { errorMessage = 'Sign-in failed. Please verify your credentials.'; isLoading = false; });
+                                }
+                              }
+                            },
+                            child: isLoading
+                                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                                : const Text('Continue', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      TextField(
-                        controller: passwordController,
-                        obscureText: true,
-                        decoration: InputDecoration(
-                          labelText: 'Password',
-                          border: const OutlineInputBorder(),
-                          prefixIcon: const Icon(Icons.lock_outline),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: isDriverMode
-                                  ? const Color(0xFFD4AF37)
-                                  : const Color(0xFF0B3254),
-                              width: 2,
-                            ),
+
+                        const SizedBox(height: 20),
+                        Row(children: [
+                          Expanded(child: Divider(color: Colors.grey[300])),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: Text('OR', style: TextStyle(color: Colors.grey[400], fontSize: 11, fontWeight: FontWeight.w600)),
                           ),
-                        ),
-                      ),
-                      if (errorMessage != null) ...[
-                        const SizedBox(height: 12),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.red.withOpacity(0.08),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.red.withOpacity(0.3)),
+                          Expanded(child: Divider(color: Colors.grey[300])),
+                        ]),
+                        const SizedBox(height: 16),
+
+                        _authSocialBtn(Icons.apple, 'Continue with Apple', () {}),
+                        const SizedBox(height: 8),
+                        _authSocialBtn(Icons.g_mobiledata, 'Continue with Google', () {}),
+                        const SizedBox(height: 8),
+                        _authSocialBtn(Icons.facebook, 'Continue with Facebook', () {}),
+
+                        const SizedBox(height: 20),
+                        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                          const Text("Don't have an account? ", style: TextStyle(fontSize: 13, color: Color(0xFF888888))),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.of(dialogContext).pop();
+                              _navigateToSignup();
+                            },
+                            child: const Text('Sign up',
+                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF0B3254),
+                                decoration: TextDecoration.underline)),
                           ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.error_outline, color: Colors.red, size: 16),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  errorMessage!,
-                                  style: const TextStyle(color: Colors.red, fontSize: 13),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        ]),
                       ],
-                    ],
+                    ),
                   ),
                 ),
-                actions: [
-                  TextButton(
-                    onPressed: isLoading
-                        ? null
-                        : () {
-                            Navigator.of(dialogContext).pop();
-                          },
-                    child: const Text('Cancel'),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isDriverMode
-                          ? const Color(0xFFD4AF37)
-                          : const Color(0xFF0B3254),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    onPressed: isLoading
-                        ? null
-                        : () async {
-                            final email = emailController.text.trim();
-                            final password = passwordController.text;
-
-                            if (email.isEmpty || password.isEmpty) {
-                              setDialogState(() {
-                                errorMessage =
-                                    'Please provide both email and password.';
-                              });
-                              return;
-                            }
-
-                            setDialogState(() {
-                              isLoading = true;
-                              errorMessage = null;
-                            });
-
-                            if (isDriverMode) {
-                              // ─── Driver login ───
-                              try {
-                                final Driver driver =
-                                    await AuthService.loginDriver(
-                                  email,
-                                  password,
-                                );
-                                if (!dialogContext.mounted) return;
-                                Navigator.of(dialogContext).pop();
-                                // Navigate to driver dashboard
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        DriverDashboardWeb(driver: driver),
-                                  ),
-                                );
-                              } catch (e) {
-                                setDialogState(() {
-                                  errorMessage =
-                                      'Driver sign-in failed. Please check your credentials.';
-                                  isLoading = false;
-                                });
-                              }
-                            } else {
-                              // ─── Client login ───
-                              try {
-                                final user = await AuthService.login(
-                                  email,
-                                  password,
-                                );
-                                if (!dialogContext.mounted) return;
-                                Navigator.of(dialogContext).pop(user);
-                              } catch (e) {
-                                setDialogState(() {
-                                  errorMessage =
-                                      'We could not sign you in. Please verify your credentials.';
-                                  isLoading = false;
-                                });
-                              }
-                            }
-                          },
-                    child: isLoading
-                        ? const SizedBox(
-                            height: 18,
-                            width: 18,
-                            child: CircularProgressIndicator(
-                                strokeWidth: 2, color: Colors.white),
-                          )
-                        : Text(isDriverMode ? 'Driver Sign In' : 'Sign In'),
-                  ),
-                ],
               );
             },
           );
@@ -827,6 +766,23 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     }
   }
 
+  Widget _authSocialBtn(IconData icon, String label, VoidCallback onTap) {
+    return OutlinedButton(
+      onPressed: onTap,
+      style: OutlinedButton.styleFrom(
+        foregroundColor: const Color(0xFF1A1A1A),
+        side: const BorderSide(color: Color(0xFFDDDDDD), width: 1.5),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        padding: const EdgeInsets.symmetric(vertical: 12),
+      ),
+      child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Icon(icon, size: 18),
+        const SizedBox(width: 8),
+        Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+      ]),
+    );
+  }
+
   Future<User?> _showSignupDialog() async {
     final nameController = TextEditingController();
     final emailController = TextEditingController();
@@ -835,188 +791,213 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     try {
       return await showDialog<User>(
         context: context,
+        barrierColor: Colors.black.withOpacity(0.6),
         builder: (dialogContext) {
           bool isLoading = false;
           String? errorMessage;
           bool acceptTerms = false;
+          bool obscurePassword = true;
+
+          InputDecoration _fieldDeco(String label, {IconData? icon}) {
+            return InputDecoration(
+              labelText: label,
+              labelStyle: const TextStyle(fontSize: 13, color: Color(0xFF666666)),
+              prefixIcon: icon != null ? Icon(icon, size: 18, color: const Color(0xFF999999)) : null,
+              filled: true,
+              fillColor: const Color(0xFFF6F7FA),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Color(0xFFE0E0E0), width: 1.5),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Color(0xFF0B3254), width: 1.5),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+            );
+          }
+
           return StatefulBuilder(
             builder: (context, setDialogState) {
-              return AlertDialog(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                title: const Text('Create your VaneLux account'),
-                content: SizedBox(
-                  width: 480,
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text(
-                          'Unlock exclusive offers and manage all your rides in one place.',
-                          style: TextStyle(fontSize: 14, color: Colors.black54),
-                        ),
-                        const SizedBox(height: 20),
-                        TextField(
-                          controller: nameController,
-                          decoration: const InputDecoration(
-                            labelText: 'Full name',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        TextField(
-                          controller: emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          decoration: const InputDecoration(
-                            labelText: 'Email',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        TextField(
-                          controller: phoneController,
-                          keyboardType: TextInputType.phone,
-                          decoration: const InputDecoration(
-                            labelText: 'Phone number',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        TextField(
-                          controller: passwordController,
-                          obscureText: true,
-                          decoration: const InputDecoration(
-                            labelText: 'Create password',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Checkbox(
-                              value: acceptTerms,
-                              onChanged: isLoading
-                                  ? null
-                                  : (value) {
-                                      setDialogState(() {
-                                        acceptTerms = value ?? false;
-                                      });
-                                    },
+              return Dialog(
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 420),
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Header
+                          Row(children: [
+                            Container(
+                              width: 36, height: 36,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(color: const Color(0xFFD4AF37), width: 1.5),
+                                color: const Color(0xFF0B3254),
+                              ),
+                              child: const Center(child: Text('V',
+                                style: TextStyle(color: Color(0xFFD4AF37), fontSize: 16, fontWeight: FontWeight.w800))),
                             ),
-                            const Expanded(
-                              child: Text(
-                                'I agree to the VaneLux terms of service and privacy policy.',
-                                style: TextStyle(fontSize: 13),
+                            const SizedBox(width: 10),
+                            const Text('VANELUX',
+                              style: TextStyle(color: Color(0xFFD4AF37), fontSize: 13, fontWeight: FontWeight.w800, letterSpacing: 2)),
+                            const Spacer(),
+                            IconButton(
+                              icon: const Icon(Icons.close, size: 20, color: Color(0xFF999999)),
+                              onPressed: () => Navigator.of(dialogContext).pop(),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                            ),
+                          ]),
+                          const SizedBox(height: 24),
+                          const Text('Create account', style: TextStyle(
+                            fontSize: 26, fontWeight: FontWeight.w700, color: Color(0xFF0B3254))),
+                          const SizedBox(height: 4),
+                          const Text('Join Vanelux for a premium ride experience.',
+                            style: TextStyle(fontSize: 14, color: Color(0xFF888888))),
+                          const SizedBox(height: 20),
+
+                          TextField(
+                            controller: nameController,
+                            style: const TextStyle(fontSize: 14),
+                            decoration: _fieldDeco('Full name', icon: Icons.person_outline),
+                          ),
+                          const SizedBox(height: 14),
+                          TextField(
+                            controller: emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            style: const TextStyle(fontSize: 14),
+                            decoration: _fieldDeco('Email address', icon: Icons.email_outlined),
+                          ),
+                          const SizedBox(height: 14),
+                          TextField(
+                            controller: phoneController,
+                            keyboardType: TextInputType.phone,
+                            style: const TextStyle(fontSize: 14),
+                            decoration: _fieldDeco('Phone number', icon: Icons.phone_outlined),
+                          ),
+                          const SizedBox(height: 14),
+                          TextField(
+                            controller: passwordController,
+                            obscureText: obscurePassword,
+                            style: const TextStyle(fontSize: 14),
+                            decoration: _fieldDeco('Create password', icon: Icons.lock_outline).copyWith(
+                              suffixIcon: IconButton(
+                                icon: Icon(obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                                  size: 18, color: const Color(0xFF999999)),
+                                onPressed: () => setDialogState(() => obscurePassword = !obscurePassword),
                               ),
                             ),
+                          ),
+                          const SizedBox(height: 14),
+
+                          // Terms checkbox
+                          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            SizedBox(
+                              width: 20, height: 20,
+                              child: Checkbox(
+                                value: acceptTerms,
+                                onChanged: isLoading ? null : (v) => setDialogState(() => acceptTerms = v ?? false),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                                activeColor: const Color(0xFF0B3254),
+                                side: const BorderSide(color: Color(0xFFCCCCCC), width: 1.5),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Expanded(child: Text(
+                              'I agree to the Vanelux terms of service and privacy policy.',
+                              style: TextStyle(fontSize: 12, color: Color(0xFF666666), height: 1.4),
+                            )),
+                          ]),
+
+                          if (errorMessage != null) ...[
+                            const SizedBox(height: 10),
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.red.withOpacity(0.07),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.red.withOpacity(0.25)),
+                              ),
+                              child: Text(errorMessage!, style: const TextStyle(color: Colors.red, fontSize: 13)),
+                            ),
                           ],
-                        ),
-                        if (errorMessage != null) ...[
-                          const SizedBox(height: 12),
-                          Text(
-                            errorMessage!,
-                            style: const TextStyle(
-                              color: Colors.red,
-                              fontSize: 13,
+
+                          const SizedBox(height: 20),
+                          SizedBox(
+                            height: 48,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF0B3254),
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              ),
+                              onPressed: isLoading ? null : () async {
+                                final name = nameController.text.trim();
+                                final email = emailController.text.trim();
+                                final phone = phoneController.text.trim();
+                                final password = passwordController.text;
+                                if (name.isEmpty || email.isEmpty || phone.isEmpty || password.isEmpty) {
+                                  setDialogState(() => errorMessage = 'Please fill in all required fields.');
+                                  return;
+                                }
+                                if (!acceptTerms) {
+                                  setDialogState(() => errorMessage = 'Please accept the terms to continue.');
+                                  return;
+                                }
+                                setDialogState(() { isLoading = true; errorMessage = null; });
+                                try {
+                                  final user = await AuthService.register(
+                                    name: name, email: email, phone: phone, password: password);
+                                  if (!dialogContext.mounted) return;
+                                  Navigator.of(dialogContext).pop(user);
+                                } catch (e) {
+                                  setDialogState(() {
+                                    final errorText = e.toString();
+                                    if (errorText.contains('Ya existe un usuario')) {
+                                      errorMessage = 'This email is already registered. Please log in.';
+                                    } else if (errorText.contains('timeout') || errorText.contains('connection')) {
+                                      errorMessage = 'Connection error. Check your internet and try again.';
+                                    } else if (errorText.contains('Exception:')) {
+                                      errorMessage = errorText.replaceAll('Exception:', '').trim();
+                                    } else {
+                                      errorMessage = 'Could not create account. Please try again.';
+                                    }
+                                    isLoading = false;
+                                  });
+                                }
+                              },
+                              child: isLoading
+                                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                                  : const Text('Create account', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
                             ),
                           ),
+
+                          const SizedBox(height: 16),
+                          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                            const Text('Already have an account? ', style: TextStyle(fontSize: 13, color: Color(0xFF888888))),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.of(dialogContext).pop();
+                                _showLoginDialog();
+                              },
+                              child: const Text('Log in',
+                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF0B3254),
+                                  decoration: TextDecoration.underline)),
+                            ),
+                          ]),
                         ],
-                      ],
+                      ),
                     ),
                   ),
                 ),
-                actions: [
-                  TextButton(
-                    onPressed: isLoading
-                        ? null
-                        : () {
-                            Navigator.of(dialogContext).pop();
-                          },
-                    child: const Text('Cancel'),
-                  ),
-                  ElevatedButton(
-                    onPressed: isLoading
-                        ? null
-                        : () async {
-                            final name = nameController.text.trim();
-                            final email = emailController.text.trim();
-                            final phone = phoneController.text.trim();
-                            final password = passwordController.text;
-
-                            if (name.isEmpty ||
-                                email.isEmpty ||
-                                phone.isEmpty ||
-                                password.isEmpty) {
-                              setDialogState(() {
-                                errorMessage =
-                                    'Please fill in all required fields.';
-                              });
-                              return;
-                            }
-
-                            if (!acceptTerms) {
-                              setDialogState(() {
-                                errorMessage =
-                                    'Please accept the terms to create your account.';
-                              });
-                              return;
-                            }
-
-                            setDialogState(() {
-                              isLoading = true;
-                              errorMessage = null;
-                            });
-
-                            try {
-                              final user = await AuthService.register(
-                                name: name,
-                                email: email,
-                                phone: phone,
-                                password: password,
-                              );
-                              if (!dialogContext.mounted) {
-                                return;
-                              }
-                              Navigator.of(dialogContext).pop(user);
-                            } catch (e) {
-                              setDialogState(() {
-                                // Mostrar el error específico del backend
-                                final errorText = e.toString();
-                                if (errorText.contains(
-                                  'Ya existe un usuario',
-                                )) {
-                                  errorMessage =
-                                      'This email is already registered. Please login instead.';
-                                } else if (errorText.contains('timeout') ||
-                                    errorText.contains('connection')) {
-                                  errorMessage =
-                                      'Connection timeout. Please check your internet and try again.';
-                                } else if (errorText.contains('Exception:')) {
-                                  // Extraer el mensaje después de "Exception: "
-                                  errorMessage = errorText
-                                      .replaceAll('Exception:', '')
-                                      .trim();
-                                } else {
-                                  errorMessage =
-                                      'We could not create your account. Please try again later.';
-                                }
-                                isLoading = false;
-                              });
-                              // Log del error para debugging
-                              print('Registration error: $e');
-                            }
-                          },
-                    child: isLoading
-                        ? const SizedBox(
-                            height: 18,
-                            width: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('Create account'),
-                  ),
-                ],
               );
             },
           );
@@ -3059,6 +3040,12 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                   key: _servicesKey,
                   child: _buildServicesSection(context),
                 ),
+
+                // Airport Transfer Feature Section
+                _buildAirportSection(context),
+
+                // City Routes Section
+                _buildCityRoutesSection(context),
 
                 // Fleet Section
                 Container(key: _fleetKey, child: _buildFleetSection(context)),
@@ -5136,550 +5123,569 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     );
   }
 
+  // ── Airport Transfer Feature Section ──────────────────────────────────────
+  Widget _buildAirportSection(BuildContext context) {
+    final double w = MediaQuery.of(context).size.width;
+    final bool isCompact = w < 900;
+
+    final List<Map<String, dynamic>> features = [
+      {
+        'icon': Icons.attach_money_outlined,
+        'title': 'Competitive rates',
+        'body': 'Transparent all-inclusive pricing with no hidden fees or surge charges.',
+      },
+      {
+        'icon': Icons.flight_land_outlined,
+        'title': 'Seamless airport travel',
+        'body': 'We track your flight and wait up to 60 min free for delays at no extra cost.',
+      },
+      {
+        'icon': Icons.route_outlined,
+        'title': 'Travel on your terms',
+        'body': 'Choose your preferred vehicle class and pick-up time for total flexibility.',
+      },
+    ];
+
+    Widget featureCol(Map<String, dynamic> f) => Expanded(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: isCompact ? 0 : 20),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Container(
+            width: 44, height: 44,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: const Color(0xFF0B3254),
+            ),
+            child: Icon(f['icon'] as IconData, color: const Color(0xFFD4AF37), size: 20),
+          ),
+          const SizedBox(height: 14),
+          Text(f['title'] as String,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF0B3254))),
+          const SizedBox(height: 6),
+          Text(f['body'] as String,
+            style: TextStyle(fontSize: 13, color: Colors.grey[600], height: 1.5)),
+        ]),
+      ),
+    );
+
+    final textColumn = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0B3254).withOpacity(0.08),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: const Text('AIRPORT TRANSFER',
+            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800,
+              color: Color(0xFF0B3254), letterSpacing: 1.5)),
+        ),
+        const SizedBox(height: 20),
+        Text(
+          'Airport transfer\nin the New York area',
+          style: TextStyle(
+            fontSize: isCompact ? 28 : 36,
+            fontWeight: FontWeight.w800,
+            color: const Color(0xFF0B3254),
+            height: 1.2,
+          ),
+        ),
+        const SizedBox(height: 20),
+        Text(
+          'Start your journey stress-free. Our professional chauffeurs meet you at arrivals, assist with luggage, and whisk you to your destination in premium comfort — from JFK, LGA, EWR and all metro-area airports.',
+          style: TextStyle(fontSize: isCompact ? 14 : 16, color: Colors.grey[600], height: 1.65),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'Whether you\'re heading into Manhattan, the Hamptons, or anywhere else in the tri-state area, Vanelux delivers the most reliable airport ride you\'ve ever taken.',
+          style: TextStyle(fontSize: isCompact ? 13 : 15, color: Colors.grey[500], height: 1.6),
+        ),
+        const SizedBox(height: 32),
+        ElevatedButton(
+          onPressed: () => Navigator.push(context,
+            MaterialPageRoute(builder: (_) => const ServiceDetailScreen(serviceType: 'Airport Transfer'))),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF0B3254),
+            foregroundColor: Colors.white,
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+          child: const Text('Book Airport Transfer',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+        ),
+      ],
+    );
+
+    final imageColumn = ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        height: isCompact ? 260 : 420,
+        color: const Color(0xFF0B3254),
+        child: Stack(fit: StackFit.expand, children: [
+          Image.asset('assets/images/cadillac-scalade.png',
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => Container(
+              color: const Color(0xFF0D2B45),
+              child: Center(child: Icon(Icons.flight_takeoff,
+                size: 80, color: Colors.white.withOpacity(0.15))),
+            )),
+          Container(decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Colors.transparent, const Color(0xFF0B3254).withOpacity(0.55)],
+            ),
+          )),
+          Positioned(
+            bottom: 20, left: 20,
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              const Text('Serving all NYC metro airports',
+                style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
+              const SizedBox(height: 4),
+              Text('JFK · LGA · EWR · HPN · SWF',
+                style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 12)),
+            ]),
+          ),
+        ]),
+      ),
+    );
+
+    return Container(
+      color: const Color(0xFFF9FAFB),
+      padding: EdgeInsets.symmetric(
+        vertical: isCompact ? 56 : 88,
+        horizontal: isCompact ? 20 : 60,
+      ),
+      child: Column(children: [
+        // Top split layout
+        isCompact
+            ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                textColumn,
+                const SizedBox(height: 32),
+                imageColumn,
+              ])
+            : Row(children: [
+                Expanded(flex: 5, child: textColumn),
+                const SizedBox(width: 60),
+                Expanded(flex: 5, child: imageColumn),
+              ]),
+        const SizedBox(height: 56),
+        // Feature columns
+        isCompact
+            ? Column(children: features.map((f) => Padding(
+                padding: const EdgeInsets.only(bottom: 28),
+                child: featureCol(f))).toList())
+            : Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: features.map(featureCol).toList()),
+      ]),
+    );
+  }
+
+  // ── City Routes Section ────────────────────────────────────────────────────
+  Widget _buildCityRoutesSection(BuildContext context) {
+    final double w = MediaQuery.of(context).size.width;
+    final bool isCompact = w < 900;
+
+    final List<Map<String, dynamic>> cities = [
+      {'name': 'New York', 'sub': '12 routes', 'color': const Color(0xFF1A3A5C), 'icon': Icons.location_city},
+      {'name': 'Miami', 'sub': '8 routes', 'color': const Color(0xFF0E5952), 'icon': Icons.beach_access},
+      {'name': 'Los Angeles', 'sub': '6 routes', 'color': const Color(0xFF5C3A1A), 'icon': Icons.wb_sunny_outlined},
+      {'name': 'Chicago', 'sub': '5 routes', 'color': const Color(0xFF2A2A4A), 'icon': Icons.apartment},
+    ];
+
+    final List<Map<String, String>> routes = [
+      {'from': 'New York', 'to': 'JFK Airport', 'duration': '45 min', 'distance': '15 mi'},
+      {'from': 'Manhattan', 'to': 'Newark Airport', 'duration': '35 min', 'distance': '18 mi'},
+      {'from': 'Brooklyn', 'to': 'LaGuardia Airport', 'duration': '30 min', 'distance': '12 mi'},
+      {'from': 'New York', 'to': 'The Hamptons', 'duration': '2 hrs', 'distance': '98 mi'},
+      {'from': 'Manhattan', 'to': 'Princeton, NJ', 'duration': '1 hr 15 min', 'distance': '57 mi'},
+      {'from': 'New York', 'to': 'Philadelphia', 'duration': '2 hrs', 'distance': '95 mi'},
+    ];
+
+    Widget cityCard(Map<String, dynamic> city) => Container(
+      width: isCompact ? 160 : 200,
+      height: isCompact ? 120 : 150,
+      margin: const EdgeInsets.only(right: 16),
+      decoration: BoxDecoration(
+        color: city['color'] as Color,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Stack(children: [
+        Positioned(bottom: 16, left: 16, child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(city['name'] as String,
+              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w800)),
+            const SizedBox(height: 2),
+            Text(city['sub'] as String,
+              style: TextStyle(color: Colors.white.withOpacity(0.65), fontSize: 12)),
+          ],
+        )),
+        Positioned(top: 14, right: 14, child: Icon(city['icon'] as IconData,
+          color: Colors.white.withOpacity(0.2), size: 44)),
+      ]),
+    );
+
+    Widget routeRow(Map<String, String> r, bool isLast) => Column(children: [
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        child: Row(children: [
+          Expanded(child: Row(children: [
+            Container(width: 8, height: 8,
+              decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFFD4AF37))),
+            const SizedBox(width: 10),
+            Text(r['from']!, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF0B3254))),
+            const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Icon(Icons.arrow_right_alt, color: Color(0xFFD4AF37), size: 18)),
+            Text(r['to']!, style: TextStyle(fontSize: 14, color: Colors.grey[700])),
+          ])),
+          const SizedBox(width: 16),
+          Text('${r['duration']} · ${r['distance']}',
+            style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+          const SizedBox(width: 16),
+          GestureDetector(
+            onTap: _navigateToSignup,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0B3254),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: const Text('Book', style: TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w600)),
+            ),
+          ),
+        ]),
+      ),
+      if (!isLast) Divider(color: Colors.grey[200], height: 1),
+    ]);
+
+    return Container(
+      color: Colors.white,
+      padding: EdgeInsets.symmetric(
+        vertical: isCompact ? 48 : 80,
+        horizontal: isCompact ? 20 : 60,
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        // Header
+        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+              decoration: BoxDecoration(
+                color: const Color(0xFFD4AF37).withOpacity(0.12),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Text('CITY ROUTES', style: TextStyle(
+                fontSize: 11, fontWeight: FontWeight.w800, color: Color(0xFFD4AF37), letterSpacing: 1.5)),
+            ),
+            const SizedBox(height: 12),
+            Text('Top destinations', style: TextStyle(
+              fontSize: isCompact ? 26 : 36,
+              fontWeight: FontWeight.w800,
+              color: const Color(0xFF0B3254),
+            )),
+          ]),
+        ]),
+        const SizedBox(height: 28),
+
+        // City cards horizontal scroll
+        SizedBox(
+          height: isCompact ? 120 : 150,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(children: cities.map(cityCard).toList()),
+          ),
+        ),
+        const SizedBox(height: 40),
+
+        // Top Routes list
+        Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8F9FB),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFE8EAED)),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Padding(
+                padding: EdgeInsets.only(top: 20, bottom: 8),
+                child: Text('Popular routes',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFF0B3254))),
+              ),
+              const Divider(height: 1),
+              ...routes.asMap().entries.map((e) => routeRow(e.value, e.key == routes.length - 1)),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ]),
+    );
+  }
+
   Widget _buildFleetSection(BuildContext context) {
     final double width = MediaQuery.of(context).size.width;
     final bool isCompact = width < 900;
 
-    final vehicles = [
+    // ── Fleet categories (Blacklane-style) ──────────────────────────────────
+    final List<Map<String, dynamic>> fleetCategories = [
       {
-        'name': 'Mercedes S-Class',
-        'subtitle': 'Mercedes S550, BMW 750 or similar',
-        'description': 'Luxury sedan perfect for executive transport',
-        'capacity': 'max. 3',
-        'luggage': 'max. 3',
+        'category': 'First Class',
+        'tagline': 'Mercedes S-Class, BMW 7 Series or similar',
+        'description': 'Premium sedans built for executive comfort and prestige.',
+        'capacity': 'up to 3',
+        'luggage': 'up to 3',
         'image': 'assets/images/mercdes-s-class.png',
-        'category': 'First Class',
+        'vehicles': ['Mercedes S-Class', 'BMW 7 Series', 'Audi A8'],
+        'highlight': false,
       },
       {
-        'name': 'BMW 7 Series',
-        'subtitle': 'Premium comfort with advanced technology',
-        'description': 'Premium comfort with advanced technology',
-        'capacity': 'max. 3',
-        'luggage': 'max. 3',
-        'image': 'assets/images/bmw 7 series.jpg',
-        'category': 'First Class',
-      },
-      {
-        'name': 'Audi A8',
-        'subtitle': 'Sophisticated design meets performance',
-        'description': 'Sophisticated design meets cutting-edge performance',
-        'capacity': 'max. 3',
-        'luggage': 'max. 3',
-        'image': 'assets/images/audi a8.jpg',
-        'category': 'First Class',
-      },
-      {
-        'name': 'Cadillac Escalade',
-        'subtitle': 'Spacious luxury SUV',
-        'description': 'Spacious SUV for families and groups',
-        'capacity': 'max. 6',
-        'luggage': 'max. 6',
+        'category': 'Business SUV',
+        'tagline': 'Cadillac Escalade, Chevy Suburban or similar',
+        'description': 'Spacious luxury SUVs for groups, events and airport runs.',
+        'capacity': 'up to 6',
+        'luggage': 'up to 6',
         'image': 'assets/images/cadillac-scalade.png',
-        'category': 'SUV',
+        'vehicles': ['Cadillac Escalade', 'Suburban', 'Suburban RTS'],
+        'highlight': true,
       },
       {
-        'name': 'Suburban',
-        'subtitle': 'Comfortable group transportation',
-        'description': 'Comfortable group transportation',
-        'capacity': 'max. 7',
-        'luggage': 'max. 7',
-        'image': 'assets/images/suburban.png',
-        'category': 'SUV',
-      },
-      {
-        'name': 'Suburban RTS',
-        'subtitle': 'Extended SUV for special events',
-        'description': 'Extended SUV for special events',
-        'capacity': 'max. 7',
-        'luggage': 'max. 7',
-        'image': 'assets/images/suburban rts.png',
-        'category': 'SUV',
-      },
-      {
-        'name': 'Mercedes Sprinter',
-        'subtitle': 'Luxury van for group transportation',
-        'description': 'Luxury van for group transportation',
-        'capacity': 'max. 14',
-        'luggage': 'max. 14',
+        'category': 'Business Van',
+        'tagline': 'Mercedes Sprinter or similar',
+        'description': 'Luxury vans ideal for larger groups and VIP events.',
+        'capacity': 'up to 14',
+        'luggage': 'up to 14',
         'image': 'assets/images/mercedez-sprinter.png',
-        'category': 'VAN',
+        'vehicles': ['Mercedes Sprinter'],
+        'highlight': false,
       },
     ];
 
-    final currentVehicle = vehicles[_currentVehicleIndex];
+    Widget _fleetCard(Map<String, dynamic> cat) {
+      final bool hi = cat['highlight'] as bool;
+      return AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: isCompact ? width * 0.82 : 340,
+        margin: EdgeInsets.only(right: isCompact ? 16 : 24),
+        decoration: BoxDecoration(
+          color: hi ? const Color(0xFF0B3254) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: hi ? Colors.transparent : const Color(0xFFE8E8E8),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(hi ? 0.18 : 0.07),
+              blurRadius: 24,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Vehicle image
+            ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16), topRight: Radius.circular(16)),
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: Image.asset(
+                  cat['image'] as String,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    color: const Color(0xFF1A3A5C),
+                    child: Center(child: Icon(Icons.directions_car,
+                      size: 72, color: Colors.white.withOpacity(0.3))),
+                  ),
+                ),
+              ),
+            ),
+
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Category label
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: hi ? const Color(0xFFD4AF37).withOpacity(0.15) : const Color(0xFF0B3254).withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      (cat['category'] as String).toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.5,
+                        color: hi ? const Color(0xFFD4AF37) : const Color(0xFF0B3254),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  Text(cat['tagline'] as String,
+                    style: TextStyle(
+                      fontSize: 15, fontWeight: FontWeight.w700,
+                      color: hi ? Colors.white : const Color(0xFF0B3254),
+                      height: 1.3,
+                    )),
+                  const SizedBox(height: 8),
+                  Text(cat['description'] as String,
+                    style: TextStyle(
+                      fontSize: 13, height: 1.5,
+                      color: hi ? Colors.white.withOpacity(0.65) : Colors.grey[600],
+                    )),
+                  const SizedBox(height: 18),
+
+                  // Capacity & Luggage badges
+                  Row(children: [
+                    _fleetBadge(Icons.people_outline, cat['capacity'] as String, hi),
+                    const SizedBox(width: 12),
+                    _fleetBadge(Icons.luggage_outlined, cat['luggage'] as String, hi),
+                  ]),
+                  const SizedBox(height: 20),
+
+                  // Models list
+                  Wrap(spacing: 6, runSpacing: 6,
+                    children: (cat['vehicles'] as List<String>).map((v) => Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: hi ? Colors.white.withOpacity(0.1) : Colors.grey[100],
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(
+                          color: hi ? Colors.white.withOpacity(0.15) : Colors.grey.shade200),
+                      ),
+                      child: Text(v, style: TextStyle(
+                        fontSize: 11, fontWeight: FontWeight.w500,
+                        color: hi ? Colors.white.withOpacity(0.8) : Colors.grey[700],
+                      )),
+                    )).toList()),
+                  const SizedBox(height: 22),
+
+                  // Book button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 44,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const FleetScreen()));
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: hi ? const Color(0xFFD4AF37) : const Color(0xFF0B3254),
+                        foregroundColor: hi ? const Color(0xFF0B3254) : Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      child: Text(
+                        'Book ${cat['category']}',
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     return Container(
-      padding: EdgeInsets.symmetric(
-        vertical: isCompact ? 48 : 80,
-        horizontal: 20,
+      padding: EdgeInsets.only(
+        top: isCompact ? 48 : 80,
+        bottom: isCompact ? 48 : 80,
       ),
       color: Colors.white,
       child: Column(
         children: [
+          // Section label
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             decoration: BoxDecoration(
               color: const Color(0xFF0B3254),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: const Text(
-              'OUR FLEET',
+            child: const Text('OUR FLEET',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold,
+                color: Color(0xFFD4AF37), letterSpacing: 2)),
+          ),
+          const SizedBox(height: 24),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              'Comfort, privacy and luxury.',
+              textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: isCompact ? 28 : 42,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFFFFD700),
-                letterSpacing: 2,
+                color: const Color(0xFF0B3254),
               ),
             ),
           ),
-          const SizedBox(height: 30),
-          const Text(
-            'Comfort, privacy and luxury.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 42,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF0B3254),
-            ),
-          ),
-          const SizedBox(height: 16),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 40),
+          const SizedBox(height: 12),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: isCompact ? 20 : 80),
             child: Text(
-              'Experience the ultimate private chauffeur service. Encounter every destination in our top of the line vehicles, where high end luxury meets safe, private and reliable journeys; just what the upscale modern day passenger needs',
+              'Experience the ultimate private chauffeur service. Top-of-the-line vehicles for every occasion.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16, color: Colors.grey, height: 1.6),
+              style: TextStyle(fontSize: isCompact ? 14 : 16, color: Colors.grey[600], height: 1.6),
             ),
           ),
-          const SizedBox(height: 60),
+          const SizedBox(height: 48),
 
-          // Carrusel de vehículos - Responsive
-          isCompact
-              ? Column(
-                  children: [
-                    // Imagen del vehículo en móvil
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 500),
-                      child: Container(
-                        key: ValueKey(_currentVehicleIndex),
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Column(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(20),
-                              child: Image.asset(
-                                currentVehicle['image']!,
-                                height: 250,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    height: 250,
-                                    width: double.infinity,
-                                    color: Colors.grey[200],
-                                    child: const Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.directions_car,
-                                          size: 80,
-                                          color: Colors.grey,
-                                        ),
-                                        SizedBox(height: 12),
-                                        Text(
-                                          'Premium Vehicle',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                            Text(
-                              currentVehicle['category']!,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF0B3254),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              currentVehicle['name']!,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF0B3254),
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                              ),
-                              child: Text(
-                                currentVehicle['subtitle']!,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.people,
-                                      size: 18,
-                                      color: Color(0xFF0B3254),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      currentVehicle['capacity']!,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        color: Color(0xFF0B3254),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(width: 30),
-                                Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.luggage,
-                                      size: 18,
-                                      color: Color(0xFF0B3254),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      currentVehicle['luggage']!,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        color: Color(0xFF0B3254),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 30),
-                    // Botones de navegación en móvil
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          onPressed: () {
-                            setState(() {
-                              _currentVehicleIndex =
-                                  (_currentVehicleIndex - 1 + vehicles.length) %
-                                  vehicles.length;
-                            });
-                          },
-                          icon: Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.arrow_back_ios_new,
-                              color: Color(0xFF0B3254),
-                              size: 18,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 30),
-                        IconButton(
-                          onPressed: () {
-                            setState(() {
-                              _currentVehicleIndex =
-                                  (_currentVehicleIndex + 1) % vehicles.length;
-                            });
-                          },
-                          icon: Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.arrow_forward_ios,
-                              color: Color(0xFF0B3254),
-                              size: 18,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                )
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Botón anterior en desktop
-                    IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _currentVehicleIndex =
-                              (_currentVehicleIndex - 1 + vehicles.length) %
-                              vehicles.length;
-                        });
-                      },
-                      icon: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 10,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.arrow_back_ios_new,
-                          color: Color(0xFF0B3254),
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 40),
-
-                    // Imagen del vehículo en desktop
-                    Expanded(
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 500),
-                        child: Container(
-                          key: ValueKey(_currentVehicleIndex),
-                          constraints: const BoxConstraints(maxWidth: 800),
-                          child: Column(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(20),
-                                child: Image.asset(
-                                  currentVehicle['image']!,
-                                  height: 400,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Container(
-                                      height: 400,
-                                      color: Colors.grey[200],
-                                      child: const Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.directions_car,
-                                            size: 100,
-                                            color: Colors.grey,
-                                          ),
-                                          SizedBox(height: 20),
-                                          Text(
-                                            'Premium Vehicle',
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                              const SizedBox(height: 40),
-                              Text(
-                                currentVehicle['category']!,
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF0B3254),
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              Text(
-                                currentVehicle['name']!,
-                                style: const TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF0B3254),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                currentVehicle['subtitle']!,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                              const SizedBox(height: 30),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.people,
-                                        size: 20,
-                                        color: Color(0xFF0B3254),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        currentVehicle['capacity']!,
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                          color: Color(0xFF0B3254),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(width: 40),
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.luggage,
-                                        size: 20,
-                                        color: Color(0xFF0B3254),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        currentVehicle['luggage']!,
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                          color: Color(0xFF0B3254),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(width: 40),
-                    // Botón siguiente en desktop
-                    IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _currentVehicleIndex =
-                              (_currentVehicleIndex + 1) % vehicles.length;
-                        });
-                      },
-                      icon: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 10,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.arrow_forward_ios,
-                          color: Color(0xFF0B3254),
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+          // Cards — horizontal scroll
+          SizedBox(
+            height: isCompact ? 560 : 600,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.symmetric(horizontal: isCompact ? 16 : 40),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: fleetCategories.map((cat) => _fleetCard(cat)).toList(),
+              ),
+            ),
+          ),
 
           const SizedBox(height: 40),
 
-          // Indicadores de punto
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(
-              vehicles.length,
-              (index) => Container(
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                width: _currentVehicleIndex == index ? 30 : 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: _currentVehicleIndex == index
-                      ? const Color(0xFFFFD700)
-                      : Colors.grey[300],
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 60),
-
-          ElevatedButton(
+          // View full fleet CTA
+          OutlinedButton.icon(
             onPressed: () {
-              Navigator.of(
-                context,
-              ).push(MaterialPageRoute(builder: (_) => const FleetScreen()));
+              Navigator.of(context).push(MaterialPageRoute(builder: (_) => const FleetScreen()));
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF0B3254),
-              foregroundColor: const Color(0xFFFFD700),
-              padding: EdgeInsets.symmetric(
-                horizontal: isCompact ? 32 : 50,
-                vertical: isCompact ? 16 : 20,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
-              ),
-            ),
-            child: Text(
-              'VIEW FULL FLEET',
-              style: TextStyle(
-                fontSize: isCompact ? 14 : 16,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.5,
-              ),
+            icon: const Icon(Icons.directions_car_outlined, size: 18),
+            label: const Text('VIEW FULL FLEET',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 1)),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFF0B3254),
+              side: const BorderSide(color: Color(0xFF0B3254), width: 1.5),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             ),
           ),
         ],
       ),
     );
+  }
+
+  Widget _fleetBadge(IconData icon, String label, bool dark) {
+    return Row(mainAxisSize: MainAxisSize.min, children: [
+      Icon(icon, size: 15, color: dark ? Colors.white.withOpacity(0.7) : Colors.grey[600]),
+      const SizedBox(width: 5),
+      Text(label, style: TextStyle(
+        fontSize: 12, fontWeight: FontWeight.w600,
+        color: dark ? Colors.white.withOpacity(0.8) : Colors.grey[700],
+      )),
+    ]);
   }
 
   Widget _buildAboutSection(BuildContext context) {
