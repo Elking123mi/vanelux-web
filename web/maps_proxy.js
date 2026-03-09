@@ -267,5 +267,61 @@
         );
       });
     },
+    getRouteWithTolls: function (key, origin, destination) {
+      return withSdk(key, function (resolve, reject) {
+        var directionsService = new global.google.maps.DirectionsService();
+        
+        directionsService.route(
+          {
+            origin: origin,
+            destination: destination,
+            travelMode: global.google.maps.TravelMode.DRIVING,
+            unitSystem: global.google.maps.UnitSystem.IMPERIAL,
+          },
+          function (result, status) {
+            if (status === 'OK' && result.routes && result.routes.length > 0) {
+              var route = result.routes[0];
+              var leg = route.legs[0];
+              
+              // Extract toll info from route (if available)
+              var tollInfo = [];
+              if (route.fare) {
+                // Some regions provide fare info including tolls
+                tollInfo.push({
+                  value: route.fare.value || 0,
+                  currency: route.fare.currency || 'USD',
+                  text: route.fare.text || ''
+                });
+              }
+              
+              // Check for toll roads in steps
+              var hasTolls = false;
+              if (leg.steps) {
+                leg.steps.forEach(function(step) {
+                  if (step.instructions && 
+                      (step.instructions.toLowerCase().includes('toll') || 
+                       step.instructions.toLowerCase().includes('turnpike') ||
+                       step.instructions.toLowerCase().includes('express'))) {
+                    hasTolls = true;
+                  }
+                });
+              }
+              
+              resolve({
+                distance: leg.distance.text,
+                distance_value: leg.distance.value,
+                duration: leg.duration.text,
+                duration_value: leg.duration.value,
+                has_tolls: hasTolls,
+                toll_info: tollInfo,
+                polyline: route.overview_polyline ? route.overview_polyline.points : null
+              });
+            } else {
+              reject(new Error('Google Directions error: ' + status));
+            }
+          }
+        );
+      });
+    },
   };
 })(window);

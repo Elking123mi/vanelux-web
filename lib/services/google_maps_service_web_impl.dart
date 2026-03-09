@@ -20,9 +20,11 @@ Future<void> _ensureSdkLoaded() async {
   }
 
   final completer = js_util.promiseToFuture<void>(
-    js_util.callMethod(_requireBridge(), 'ensureSdk', <dynamic>[
-      AppConfig.googleMapsApiKey,
-    ]),
+    js_util.callMethod(
+      _requireBridge(),
+      'ensureSdk',
+      <dynamic>[AppConfig.googleMapsApiKey],
+    ),
   );
 
   _ensureSdkCache['future'] = completer;
@@ -35,16 +37,16 @@ Future<Map<String, dynamic>> getLocationFromCoordinates(
 ) async {
   await _ensureSdkLoaded();
   final result = await js_util.promiseToFuture<dynamic>(
-    js_util.callMethod(_requireBridge(), 'reverseGeocode', <dynamic>[
-      AppConfig.googleMapsApiKey,
-      latitude,
-      longitude,
-    ]),
+    js_util.callMethod(
+      _requireBridge(),
+      'reverseGeocode',
+      <dynamic>[AppConfig.googleMapsApiKey, latitude, longitude],
+    ),
   );
 
   final dartified = js_util.dartify(result);
   if (dartified is Map) {
-    return _convertMap(dartified as Map<dynamic, dynamic>);
+    return _convertMap(dartified);
   }
   return <String, dynamic>{};
 }
@@ -52,17 +54,18 @@ Future<Map<String, dynamic>> getLocationFromCoordinates(
 Future<List<Map<String, dynamic>>> searchPlaces(String query) async {
   await _ensureSdkLoaded();
   final result = await js_util.promiseToFuture<dynamic>(
-    js_util.callMethod(_requireBridge(), 'searchPlaces', <dynamic>[
-      AppConfig.googleMapsApiKey,
-      query,
-    ]),
+    js_util.callMethod(
+      _requireBridge(),
+      'searchPlaces',
+      <dynamic>[AppConfig.googleMapsApiKey, query],
+    ),
   );
 
   final dartified = js_util.dartify(result);
   if (dartified is! List) {
     return [];
   }
-
+  
   return dartified.map((dynamic item) {
     if (item is Map) {
       return _convertMap(item);
@@ -76,11 +79,11 @@ Map<String, dynamic> _convertMap(Map<dynamic, dynamic> map) {
   map.forEach((key, value) {
     final stringKey = key.toString();
     if (value is Map) {
-      result[stringKey] = _convertMap(value as Map<dynamic, dynamic>);
+      result[stringKey] = _convertMap(value);
     } else if (value is List) {
       result[stringKey] = value.map((item) {
         if (item is Map) {
-          return _convertMap(item as Map<dynamic, dynamic>);
+          return _convertMap(item);
         }
         return item;
       }).toList();
@@ -97,16 +100,16 @@ Future<Map<String, dynamic>> getDistanceMatrix(
 ) async {
   await _ensureSdkLoaded();
   final result = await js_util.promiseToFuture<dynamic>(
-    js_util.callMethod(_requireBridge(), 'distanceMatrix', <dynamic>[
-      AppConfig.googleMapsApiKey,
-      origin,
-      destination,
-    ]),
+    js_util.callMethod(
+      _requireBridge(),
+      'distanceMatrix',
+      <dynamic>[AppConfig.googleMapsApiKey, origin, destination],
+    ),
   );
 
   final dartified = js_util.dartify(result);
   if (dartified is Map) {
-    return _convertMap(dartified as Map<dynamic, dynamic>);
+    return _convertMap(dartified);
   }
   return <String, dynamic>{};
 }
@@ -114,15 +117,37 @@ Future<Map<String, dynamic>> getDistanceMatrix(
 Future<Map<String, dynamic>> getPlaceDetails(String placeId) async {
   await _ensureSdkLoaded();
   final result = await js_util.promiseToFuture<dynamic>(
-    js_util.callMethod(_requireBridge(), 'placeDetails', <dynamic>[
-      AppConfig.googleMapsApiKey,
-      placeId,
-    ]),
+    js_util.callMethod(
+      _requireBridge(),
+      'placeDetails',
+      <dynamic>[AppConfig.googleMapsApiKey, placeId],
+    ),
   );
 
   final dartified = js_util.dartify(result);
   if (dartified is Map) {
-    return _convertMap(dartified as Map<dynamic, dynamic>);
+    return _convertMap(dartified);
+  }
+  return <String, dynamic>{};
+}
+
+/// Get route information including toll detection
+Future<Map<String, dynamic>> getRouteWithTolls(
+  String origin,
+  String destination,
+) async {
+  await _ensureSdkLoaded();
+  final result = await js_util.promiseToFuture<dynamic>(
+    js_util.callMethod(
+      _requireBridge(),
+      'getRouteWithTolls',
+      <dynamic>[AppConfig.googleMapsApiKey, origin, destination],
+    ),
+  );
+
+  final dartified = js_util.dartify(result);
+  if (dartified is Map) {
+    return _convertMap(dartified);
   }
   return <String, dynamic>{};
 }

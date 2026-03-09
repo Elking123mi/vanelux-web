@@ -22,6 +22,7 @@ class PriceEstimate {
   final double? baseRate;
   final double? perMileRate;
   final bool isFlat;
+  final double tollCost; // Added toll cost
 
   const PriceEstimate({
     required this.routeType,
@@ -32,6 +33,7 @@ class PriceEstimate {
     this.baseRate,
     this.perMileRate,
     this.isFlat = false,
+    this.tollCost = 0.0, // Default no tolls
   });
 }
 
@@ -265,6 +267,7 @@ class PricingService {
     required double distanceMiles,
     required String vehicleName,
     bool isReturnTrip = false,
+    double tollCost = 0.0, // Toll cost from TollService
   }) {
     final tier = getVehicleTier(vehicleName);
     final routeType = detectRouteType(
@@ -274,6 +277,7 @@ class PricingService {
       dropoffLng,
     );
     final effectiveMiles = distanceMiles * (isReturnTrip ? 2 : 1);
+    final effectiveTolls = tollCost * (isReturnTrip ? 2 : 1);
 
     // ── Airport flat rates ──
     if (_airportFlatRates.containsKey(routeType)) {
@@ -283,9 +287,10 @@ class PricingService {
         routeType: routeType,
         routeLabel: getRouteLabel(routeType),
         tier: tier,
-        totalPrice: totalFlat,
+        totalPrice: totalFlat + effectiveTolls,
         distanceMiles: effectiveMiles,
         isFlat: true,
+        tollCost: effectiveTolls,
       );
     }
 
@@ -296,7 +301,7 @@ class PricingService {
       final extraMiles = (effectiveMiles > _localBaseIncludedMiles)
           ? effectiveMiles - _localBaseIncludedMiles
           : 0.0;
-      final total = base + (extraMiles * extraRate);
+      final total = base + (extraMiles * extraRate) + effectiveTolls;
       return PriceEstimate(
         routeType: routeType,
         routeLabel: getRouteLabel(routeType),
@@ -305,12 +310,13 @@ class PricingService {
         distanceMiles: effectiveMiles,
         baseRate: base,
         perMileRate: extraRate,
+        tollCost: effectiveTolls,
       );
     }
 
     // ── Outside city ──
     final rate = _outsideCityRate[tier] ?? 2.75;
-    final total = effectiveMiles * rate;
+    final total = (effectiveMiles * rate) + effectiveTolls;
     return PriceEstimate(
       routeType: routeType,
       routeLabel: getRouteLabel(routeType),
@@ -318,6 +324,7 @@ class PricingService {
       totalPrice: total,
       distanceMiles: effectiveMiles,
       perMileRate: rate,
+      tollCost: effectiveTolls,
     );
   }
 
@@ -329,6 +336,7 @@ class PricingService {
     required double dropoffLng,
     required double distanceMiles,
     bool isReturnTrip = false,
+    double tollCost = 0.0,
   }) {
     final Map<VehicleTier, PriceEstimate> results = {};
     // Use representative vehicle names for each tier
@@ -349,6 +357,7 @@ class PricingService {
         distanceMiles: distanceMiles,
         vehicleName: entry.value,
         isReturnTrip: isReturnTrip,
+        tollCost: tollCost,
       );
     }
     return results;

@@ -1284,10 +1284,7 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
                           color: Color(0xFFFFD700),
                         ),
                       ),
-                      Text(
-                        '\$$pricePerMile/mi',
-                        style: TextStyle(fontSize: 11, color: Colors.grey[600]),
-                      ),
+                      // Precio por milla oculto al cliente
                     ],
                   ),
                 ],

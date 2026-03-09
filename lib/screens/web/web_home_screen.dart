@@ -542,7 +542,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           bool obscurePassword = true;
 
           // ── helpers ────────────────────────────────────────────────
-          InputDecoration _fieldDeco(String label, {IconData? icon}) {
+          InputDecoration fieldDeco(String label, {IconData? icon}) {
             return InputDecoration(
               labelText: label,
               labelStyle: const TextStyle(fontSize: 13, color: Color(0xFF666666)),
@@ -649,14 +649,14 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                           controller: emailController,
                           keyboardType: TextInputType.emailAddress,
                           style: const TextStyle(fontSize: 14),
-                          decoration: _fieldDeco('Email address', icon: Icons.email_outlined),
+                          decoration: fieldDeco('Email address', icon: Icons.email_outlined),
                         ),
                         const SizedBox(height: 14),
                         StatefulBuilder(builder: (_, setSuffix) => TextField(
                           controller: passwordController,
                           obscureText: obscurePassword,
                           style: const TextStyle(fontSize: 14),
-                          decoration: _fieldDeco('Password', icon: Icons.lock_outline).copyWith(
+                          decoration: fieldDeco('Password', icon: Icons.lock_outline).copyWith(
                             suffixIcon: IconButton(
                               icon: Icon(obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
                                 size: 18, color: const Color(0xFF999999)),
@@ -798,7 +798,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           bool acceptTerms = false;
           bool obscurePassword = true;
 
-          InputDecoration _fieldDeco(String label, {IconData? icon}) {
+          InputDecoration fieldDeco(String label, {IconData? icon}) {
             return InputDecoration(
               labelText: label,
               labelStyle: const TextStyle(fontSize: 13, color: Color(0xFF666666)),
@@ -866,28 +866,28 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                           TextField(
                             controller: nameController,
                             style: const TextStyle(fontSize: 14),
-                            decoration: _fieldDeco('Full name', icon: Icons.person_outline),
+                            decoration: fieldDeco('Full name', icon: Icons.person_outline),
                           ),
                           const SizedBox(height: 14),
                           TextField(
                             controller: emailController,
                             keyboardType: TextInputType.emailAddress,
                             style: const TextStyle(fontSize: 14),
-                            decoration: _fieldDeco('Email address', icon: Icons.email_outlined),
+                            decoration: fieldDeco('Email address', icon: Icons.email_outlined),
                           ),
                           const SizedBox(height: 14),
                           TextField(
                             controller: phoneController,
                             keyboardType: TextInputType.phone,
                             style: const TextStyle(fontSize: 14),
-                            decoration: _fieldDeco('Phone number', icon: Icons.phone_outlined),
+                            decoration: fieldDeco('Phone number', icon: Icons.phone_outlined),
                           ),
                           const SizedBox(height: 14),
                           TextField(
                             controller: passwordController,
                             obscureText: obscurePassword,
                             style: const TextStyle(fontSize: 14),
-                            decoration: _fieldDeco('Create password', icon: Icons.lock_outline).copyWith(
+                            decoration: fieldDeco('Create password', icon: Icons.lock_outline).copyWith(
                               suffixIcon: IconButton(
                                 icon: Icon(obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
                                   size: 18, color: const Color(0xFF999999)),
@@ -2485,16 +2485,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                         color: const Color(0xFFD4AF37),
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      option.ratePerMile > 0
-                          ? '\$${option.ratePerMile.toStringAsFixed(2)} / mile'
-                          : 'Flat rate',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: isCompact ? 12 : 14,
-                      ),
-                    ),
+                    // Precio por milla oculto al cliente (se calcula internamente)
                   ],
                 ),
               ),
@@ -5465,7 +5456,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       },
     ];
 
-    Widget _fleetCard(Map<String, dynamic> cat) {
+    Widget fleetCard(Map<String, dynamic> cat) {
       final bool hi = cat['highlight'] as bool;
       return AnimatedContainer(
         duration: const Duration(milliseconds: 200),
@@ -5650,7 +5641,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
               padding: EdgeInsets.symmetric(horizontal: isCompact ? 16 : 40),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: fleetCategories.map((cat) => _fleetCard(cat)).toList(),
+                children: fleetCategories.map((cat) => fleetCard(cat)).toList(),
               ),
             ),
           ),
