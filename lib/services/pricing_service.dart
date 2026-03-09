@@ -107,13 +107,21 @@ class PricingService {
 
   static const double _localBaseIncludedMiles = 5.0;
 
-  // ─── Outside city per-mile rates ──────────────────────────
+  // ─── Outside city: Base fare + per-mile rates ─────────────
+  static const Map<VehicleTier, double> _outsideCityBaseFare = {
+    VehicleTier.sedan: 120.0,
+    VehicleTier.suv: 140.0,
+    VehicleTier.escalade: 160.0,
+    VehicleTier.sprinter: 200.0,
+    VehicleTier.miniCoach: 250.0,
+  };
+
   static const Map<VehicleTier, double> _outsideCityRate = {
-    VehicleTier.sedan: 2.75,
-    VehicleTier.suv: 3.50,
-    VehicleTier.escalade: 4.25,
-    VehicleTier.sprinter: 5.50,
-    VehicleTier.miniCoach: 7.00,
+    VehicleTier.sedan: 3.75,
+    VehicleTier.suv: 4.10,
+    VehicleTier.escalade: 4.75,
+    VehicleTier.sprinter: 7.75,
+    VehicleTier.miniCoach: 9.75,
   };
 
   // ─── Vehicle name → Tier mapping ──────────────────────────
@@ -315,14 +323,16 @@ class PricingService {
     }
 
     // ── Outside city ──
-    final rate = _outsideCityRate[tier] ?? 2.75;
-    final total = (effectiveMiles * rate) + effectiveTolls;
+    final baseFare = _outsideCityBaseFare[tier] ?? 120.0;
+    final rate = _outsideCityRate[tier] ?? 3.75;
+    final total = baseFare + (effectiveMiles * rate) + effectiveTolls;
     return PriceEstimate(
       routeType: routeType,
       routeLabel: getRouteLabel(routeType),
       tier: tier,
       totalPrice: total,
       distanceMiles: effectiveMiles,
+      baseRate: baseFare,
       perMileRate: rate,
       tollCost: effectiveTolls,
     );
