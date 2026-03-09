@@ -627,6 +627,7 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
       color: Colors.white,
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           _buildStepCircle(0, 'Location'),
           _buildStepLine(0),
@@ -642,43 +643,41 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
     final isActive = step == _currentStep;
     final isCompleted = step < _currentStep;
 
-    return Expanded(
-      child: Column(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isCompleted
-                  ? const Color(0xFFFFD700)
-                  : isActive
-                  ? const Color(0xFF1A1A2E)
-                  : Colors.grey[300],
-            ),
-            child: Center(
-              child: isCompleted
-                  ? const Icon(Icons.check, color: Colors.white, size: 20)
-                  : Text(
-                      '${step + 1}',
-                      style: TextStyle(
-                        color: isActive ? Colors.white : Colors.grey[600],
-                        fontWeight: FontWeight.bold,
-                      ),
+    return Column(
+      children: [
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: isCompleted
+                ? const Color(0xFFFFD700)
+                : isActive
+                ? const Color(0xFF1A1A2E)
+                : Colors.grey[300],
+          ),
+          child: Center(
+            child: isCompleted
+                ? const Icon(Icons.check, color: Colors.white, size: 20)
+                : Text(
+                    '${step + 1}',
+                    style: TextStyle(
+                      color: isActive ? Colors.white : Colors.grey[600],
+                      fontWeight: FontWeight.bold,
                     ),
-            ),
+                  ),
           ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: isActive ? const Color(0xFF1A1A2E) : Colors.grey[600],
-              fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-            ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            color: isActive ? const Color(0xFF1A1A2E) : Colors.grey[600],
+            fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
