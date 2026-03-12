@@ -1,0 +1,202 @@
+import 'dart:convert';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:http/http.dart' as http;
+import 'auth_service.dart';
+
+class OAuthService {
+  // Google Sign-In configuration
+  static final GoogleSignIn _googleSignIn = GoogleSignIn(
+    clientId: kIsWeb
+        ? '579087046563-ofmak1mol3fo8evutbrrp33i63muv5bf.apps.googleusercontent.com'
+        : null, // Android/iOS uses google-services.json/GoogleService-Info.plist
+    scopes: [
+      'email',
+      'profile',
+    ],
+  );
+
+  static const String _apiBaseUrl =
+      'https://web-production-700fe.up.railway.app/api/v1';
+
+  /// Sign in with Google
+  static Future<Map<String, dynamic>?> signInWithGoogle() async {
+    try {
+      print('🔵 Starting Google Sign-In...');
+
+      // Trigger Google Sign-In flow
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+
+      if (googleUser == null) {
+        print('❌ User cancelled Google Sign-In');
+        return null; // User cancelled
+      }
+
+      print('✅ Google Sign-In successful: ${googleUser.email}');
+
+      // Get authentication details
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      final String? idToken = googleAuth.idToken;
+      final String? accessToken = googleAuth.accessToken;
+
+      if (idToken == null) {
+        throw Exception('Failed to get ID token from Google');
+      }
+
+      print('📤 Sending ID token to backend...');
+
+      // Send to backend for verification and user creation
+      final response = await http.post(
+        Uri.parse('$_apiBaseUrl/auth/google'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'id_token': idToken,
+          'access_token': accessToken,
+          'email': googleUser.email,
+          'name': googleUser.displayName,
+          'photo_url': googleUser.photoUrl,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        print('✅ Backend authentication successful');
+
+        // Save tokens using AuthService
+        await AuthService.saveAuthToken(data['access_token']);
+        if (data['refresh_token'] != null) {
+          await AuthService.saveRefreshToken(data['refresh_token']);
+        }
+
+        return {
+          'success': true,
+          'user': data['user'],
+          'access_token': data['access_token'],
+          'provider': 'google',
+        };
+      } else {
+        throw Exception(
+            'Backend authentication failed: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      print('❌ Google Sign-In error: $e');
+      return {
+        'success': false,
+        'error': e.toString(),
+      };
+    }
+  }
+
+  /// Sign in with Facebook
+  static Future<Map<String, dynamic>?> signInWithFacebook() async {
+    try {
+      print('🔵 Starting Facebook Sign-In...');
+
+      // Trigger Facebook login
+      final LoginResult result = await FacebookAuth.instance.login(
+        permissions: ['email', 'public_profile'],
+      );
+
+      if (result.status != LoginStatus.success) {
+        print('❌ Facebook Sign-In failed: ${result.status}');
+        return null;
+      }
+
+      print('✅ Facebook Sign-In successful');
+
+      // Get user data
+      final userData = await FacebookAuth.instance.getUserData(
+        fields: 'name,email,picture.width(200)',
+      );
+
+      final String? accessToken = result.accessToken?.tokenString;
+
+      if (accessToken == null) {
+        throw Exception('Failed to get access token from Facebook');
+      }
+
+      print('📤 Sending access token to backend...');
+
+      // Send to backend
+      final response = await http.post(
+        Uri.parse('$_apiBaseUrl/auth/facebook'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'access_token': accessToken,
+          'email': userData['email'],
+          'name': userData['name'],
+          'photo_url': userData['picture']?['data']?['url'],
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        print('✅ Backend authentication successful');
+
+        // Save tokens
+        await AuthService.saveAuthToken(data['access_token']);
+        if (data['refresh_token'] != null) {
+          await AuthService.saveRefreshToken(data['refresh_token']);
+        }
+
+        return {
+          'success': true,
+          'user': data['user'],
+          'access_token': data['access_token'],
+          'provider': 'facebook',
+        };
+      } else {
+        throw Exception(
+            'Backend authentication failed: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      print('❌ Facebook Sign-In error: $e');
+      return {
+        'success': false,
+        'error': e.toString(),
+      };
+    }
+  }
+
+  /// Sign out from all providers
+  static Future<void> signOut() async {
+    try {
+      // Sign out from Google
+      if (await _googleSignIn.isSignedIn()) {
+        await _googleSignIn.signOut();
+        print('✅ Signed out from Google');
+      }
+
+      // Sign out from Facebook
+      await FacebookAuth.instance.logOut();
+      print('✅ Signed out from Facebook');
+
+      // Clear local auth tokens
+      await AuthService.clearTokens();
+    } catch (e) {
+      print('❌ Sign out error: $e');
+    }
+  }
+
+  /// Check if user is signed in with any OAuth provider
+  static Future<bool> isSignedIn() async {
+    final bool googleSignedIn = await _googleSignIn.isSignedIn();
+    final AccessToken? fbToken = await FacebookAuth.instance.accessToken;
+    return googleSignedIn || fbToken != null;
+  }
+
+  /// Get current OAuth provider
+  static Future<String?> getCurrentProvider() async {
+    if (await _googleSignIn.isSignedIn()) {
+      return 'google';
+    }
+    final AccessToken? fbToken = await FacebookAuth.instance.accessToken;
+    if (fbToken != null) {
+      return 'facebook';
+    }
+    return null;
+  }
+}
