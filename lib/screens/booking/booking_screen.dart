@@ -117,7 +117,7 @@ class _BookingScreenState extends State<BookingScreen> {
     if (_pickupController.text.isEmpty || _destinationController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Por favor completa todos los campos'),
+          content: Text('Please complete all fields'),
           backgroundColor: Colors.red,
         ),
       );
@@ -131,7 +131,7 @@ class _BookingScreenState extends State<BookingScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Por favor selecciona ubicaciones válidas de las sugerencias',
+            'Please select valid locations from suggestions',
           ),
           backgroundColor: Colors.red,
         ),
@@ -170,7 +170,7 @@ class _BookingScreenState extends State<BookingScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error al solicitar viaje: ${e.toString()}'),
+            content: Text('Error requesting trip: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -194,17 +194,17 @@ class _BookingScreenState extends State<BookingScreen> {
           children: [
             Icon(Icons.check_circle, color: Colors.green, size: 30),
             SizedBox(width: 10),
-            Text('¡Viaje Solicitado!'),
+            Text('Trip Requested!'),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Tu viaje ha sido solicitado exitosamente.'),
+            Text('Your trip has been requested successfully.'),
             const SizedBox(height: 10),
-            Text('ID del viaje: $tripId'),
+            Text('Trip ID: $tripId'),
             const SizedBox(height: 10),
-            const Text('Un conductor se asignará en breve.'),
+            const Text('A driver will be assigned shortly.'),
           ],
         ),
         actions: [
@@ -226,7 +226,7 @@ class _BookingScreenState extends State<BookingScreen> {
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
         title: const Text(
-          'Solicitar Viaje',
+          'Request Trip',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         backgroundColor: const Color(0xFF1A1A2E),
@@ -483,7 +483,7 @@ class _BookingScreenState extends State<BookingScreen> {
                 child: _isBooking
                     ? const CircularProgressIndicator(color: Color(0xFF1A1A2E))
                     : const Text(
-                        'Solicitar Viaje',
+                        'Request Trip',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,

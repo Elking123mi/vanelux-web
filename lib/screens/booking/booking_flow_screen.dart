@@ -119,7 +119,7 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
           return;
         }
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Por favor selecciona un vehículo')),
+          const SnackBar(content: Text('Please select a vehicle')),
         );
         return;
       }
@@ -332,7 +332,7 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
           content: Text(
             synced
                 ? 'Booking saved and synced with VaneLux.'
-                : 'Reserva guardada sin conexión. Se sincronizará cuando haya internet.',
+                : 'Booking saved offline. It will sync when online.',
           ),
           backgroundColor: synced ? Colors.green : Colors.orange,
           duration: const Duration(seconds: 4),
@@ -913,7 +913,7 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
               child: _buildTripTypeOption(
                 icon: FontAwesomeIcons.bolt,
                 title: 'Now',
-                subtitle: 'Viaje inmediato',
+                subtitle: 'Immediate trip',
                 isSelected: !_isScheduled,
                 onTap: () {
                   setState(() {
@@ -929,7 +929,7 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
               child: _buildTripTypeOption(
                 icon: FontAwesomeIcons.calendar,
                 title: 'Schedule',
-                subtitle: 'Reserva futura',
+                subtitle: 'Future booking',
                 isSelected: _isScheduled,
                 onTap: () {
                   setState(() {
@@ -1331,7 +1331,7 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Confirma tu reserva',
+            'Confirm your booking',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,

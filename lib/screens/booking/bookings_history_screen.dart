@@ -73,16 +73,18 @@ class _BookingsHistoryScreenState extends State<BookingsHistoryScreen> {
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : _bookings.isEmpty
-            ? const Center(child: Text('Aún no tienes reservas guardadas.'))
-            : ListView.separated(
-                padding: const EdgeInsets.all(16),
-                itemBuilder: (context, index) {
-                  final booking = _bookings[index];
-                  return _BookingCard(booking: booking);
-                },
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
-                itemCount: _bookings.length,
-              ),
+                ? const Center(
+                    child: Text('You don\'t have any saved bookings yet.'),
+                  )
+                : ListView.separated(
+                    padding: const EdgeInsets.all(16),
+                    itemBuilder: (context, index) {
+                      final booking = _bookings[index];
+                      return _BookingCard(booking: booking);
+                    },
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemCount: _bookings.length,
+                  ),
       ),
     );
   }
@@ -96,19 +98,15 @@ class _BookingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final createdAtString = booking['createdAt'] as String?;
-    final createdAt = createdAtString != null
-        ? DateTime.tryParse(createdAtString)
-        : null;
+    final createdAt = createdAtString != null ? DateTime.tryParse(createdAtString) : null;
     final scheduledAtString = booking['scheduledAt'] as String?;
-    final scheduledAt = scheduledAtString != null
-        ? DateTime.tryParse(scheduledAtString)
-        : null;
+    final scheduledAt = scheduledAtString != null ? DateTime.tryParse(scheduledAtString) : null;
     final price = (booking['price'] as num?)?.toDouble();
     final distanceLabel = booking['distanceText'] as String? ?? '';
     final durationLabel = booking['durationText'] as String? ?? '';
     final isScheduled = booking['isScheduled'] == true;
 
-    String _formatDate(DateTime? date) {
+    String formatDate(DateTime? date) {
       if (date == null) {
         return 'Fecha no disponible';
       }
@@ -158,20 +156,12 @@ class _BookingCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          const Icon(
-                            Icons.arrow_downward,
-                            size: 16,
-                            color: Colors.grey,
-                          ),
+                          const Icon(Icons.arrow_downward, size: 16, color: Colors.grey),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              booking['destinationAddress'] as String? ??
-                                  'Sin destino',
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Colors.black87,
-                              ),
+                              booking['destinationAddress'] as String? ?? 'Sin destino',
+                              style: const TextStyle(fontSize: 14, color: Colors.black87),
                             ),
                           ),
                         ],
@@ -210,10 +200,7 @@ class _BookingCard extends StatelessWidget {
                 ),
                 Chip(
                   avatar: const Icon(Icons.local_offer, size: 16),
-                  label: Text(
-                    (booking['serviceType'] as String? ?? 'servicio')
-                        .toUpperCase(),
-                  ),
+                  label: Text((booking['serviceType'] as String? ?? 'servicio').toUpperCase()),
                 ),
                 Chip(
                   avatar: Icon(
@@ -226,14 +213,14 @@ class _BookingCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'Creada: ${_formatDate(createdAt)}',
+              'Creada: ${formatDate(createdAt)}',
               style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
             if (scheduledAt != null)
               Padding(
                 padding: const EdgeInsets.only(top: 4),
                 child: Text(
-                  'Programada para: ${_formatDate(scheduledAt)}',
+                  'Programada para: ${formatDate(scheduledAt)}',
                   style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
               ),
@@ -243,4 +230,3 @@ class _BookingCard extends StatelessWidget {
     );
   }
 }
-

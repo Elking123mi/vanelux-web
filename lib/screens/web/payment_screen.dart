@@ -202,7 +202,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       if (_nameController.text.trim().isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Por favor ingrese su nombre completo'),
+            content: Text('Please enter your full name'),
             backgroundColor: Colors.red,
           ),
         );
@@ -258,10 +258,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
       };
 
       final result = await BookingService.createBooking(bookingPayload);
-      final bookingId = result?['id'] ?? result?['booking']?['id'];
+      final bookingId = result['id'] ?? result['booking']?['id'];
 
       if (bookingId == null) {
-        throw Exception('No se recibió ID de reserva');
+        throw Exception('Booking ID was not received');
       }
 
       setState(() {
@@ -304,7 +304,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('✅ Listo para pagar. Ingrese los datos de su tarjeta.'),
+          content: Text('✅ Ready to pay. Enter your card details.'),
           backgroundColor: Colors.green,
         ),
       );
@@ -327,7 +327,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       if (_nameController.text.trim().isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Por favor ingrese su nombre completo'),
+            content: Text('Please enter your full name'),
             backgroundColor: Colors.red,
           ),
         );
@@ -398,8 +398,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
       final price = bookingPayload['price'];
       if (price == null ||
           price is! num ||
-          (price as num).isNaN ||
-          (price as num).isInfinite ||
+          (price).isNaN ||
+          (price).isInfinite ||
           price < 0) {
         throw Exception('Invalid price value: $price. Cannot create booking.');
       }
@@ -513,10 +513,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
       print('📥 Resultado del booking: $result');
 
-      final bookingId = result?['id'] ?? result?['booking']?['id'];
+      final bookingId = result['id'] ?? result['booking']?['id'];
 
       if (bookingId == null) {
-        throw Exception('No se recibió ID de reserva del servidor');
+        throw Exception('Booking ID was not received from server');
       }
 
       print('✅ Booking creado exitosamente: $bookingId');

@@ -13,7 +13,6 @@ import '../../models/assistant_message.dart';
 import '../../models/driver.dart';
 import '../../models/user.dart';
 import '../../providers/locale_provider.dart';
-import '../../providers/notification_provider.dart';
 import '../../services/auth_service.dart';
 import '../../services/google_maps_service.dart';
 import '../../services/openai_assistant_service.dart';
@@ -1297,8 +1296,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         SnackBar(
           content: Text(
             isPickup
-                ? 'No se pudieron obtener los detalles de la dirección de origen seleccionada.'
-                : 'No se pudieron obtener los detalles de la dirección de destino seleccionada.',
+                ? 'Could not get details of the selected origin address.'
+                : 'Could not get details of the selected destination address.',
           ),
           backgroundColor: Colors.red,
         ),
@@ -1371,8 +1370,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         SnackBar(
           content: Text(
             isPickup
-                ? 'Error al obtener detalles del origen: ${error.toString().replaceFirst('Exception: ', '')}'
-                : 'Error al obtener detalles del destino: ${error.toString().replaceFirst('Exception: ', '')}',
+                ? 'Error getting origin details: ${error.toString().replaceFirst('Exception: ', '')}'
+                : 'Error getting destination details: ${error.toString().replaceFirst('Exception: ', '')}',
           ),
           backgroundColor: Colors.red,
         ),
@@ -1570,7 +1569,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
 
   String _formatDateTime(DateTime? dateTime) {
     if (dateTime == null) {
-      return 'Selecciona fecha y hora';
+      return 'Select date and time';
     }
     final String month = dateTime.month.toString().padLeft(2, '0');
     final String day = dateTime.day.toString().padLeft(2, '0');
@@ -1935,7 +1934,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                     ),
                     const SizedBox(width: 8),
                     const Text(
-                      'Añadir viaje de regreso',
+                      'Add return trip',
                       style: TextStyle(
                         color: Color(0xFF0B3254),
                         fontWeight: FontWeight.w500,
@@ -2023,7 +2022,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                           const SizedBox(width: 12),
                         ],
                         const Text(
-                          'OBTENER PRECIOS',
+                          'GET PRICES',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
@@ -2038,7 +2037,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                 ),
                 const SizedBox(height: 12),
                 const Text(
-                  'Mostramos tarifas estimadas en segundos. Nuestros especialistas confirmarán tu reserva de inmediato.',
+                  'We show estimated rates in seconds. Our specialists will confirm your reservation immediately.',
                   style: TextStyle(fontSize: 12, color: Color(0xFF5F6B7A)),
                 ),
               ],
@@ -4648,7 +4647,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text(
-                  'Selecciona un servicio y completa tu reserva desde esta página.',
+                  'Select a service and complete your booking from this page.',
                 ),
               ),
             );

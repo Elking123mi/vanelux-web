@@ -6,47 +6,47 @@ class AppUtils {
   // Validaciones
   static String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
-      return 'El email es requerido';
+      return 'Email is required';
     }
     if (!value.isValidEmail) {
-      return 'Ingresa un email válido';
+      return 'Enter a valid email';
     }
     return null;
   }
 
   static String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'La contraseña es requerida';
+      return 'Password is required';
     }
     if (!value.isValidPassword) {
-      return 'La contraseña debe tener al menos ${AppConstants.minPasswordLength} caracteres';
+      return 'Password must be at least ${AppConstants.minPasswordLength} characters';
     }
     return null;
   }
 
   static String? validateName(String? value) {
     if (value == null || value.isEmpty) {
-      return 'El nombre es requerido';
+      return 'Name is required';
     }
     if (!value.isValidName) {
-      return 'Ingresa un nombre válido';
+      return 'Enter a valid name';
     }
     return null;
   }
 
   static String? validatePhone(String? value) {
     if (value == null || value.isEmpty) {
-      return 'El teléfono es requerido';
+      return 'Phone is required';
     }
     if (!value.isValidPhone) {
-      return 'Ingresa un teléfono válido';
+      return 'Enter a valid phone';
     }
     return null;
   }
 
   static String? validateRequired(String? value, String fieldName) {
     if (value == null || value.isEmpty) {
-      return '$fieldName es requerido';
+      return '$fieldName is required';
     }
     return null;
   }

@@ -15,14 +15,14 @@ class BookingScreen extends StatefulWidget {
 class _BookingScreenState extends State<BookingScreen> {
   final TextEditingController _pickupController = TextEditingController();
   final TextEditingController _dropoffController = TextEditingController();
-  bool _isLoading = false;
-
+  final bool _isLoading = false;
+  
   // Para autocompletado
   List<dynamic> _pickupSuggestions = [];
   List<dynamic> _dropoffSuggestions = [];
   bool _showPickupSuggestions = false;
   bool _showDropoffSuggestions = false;
-
+  
   // Coordenadas seleccionadas
   double? _pickupLat;
   double? _pickupLng;
@@ -74,7 +74,7 @@ class _BookingScreenState extends State<BookingScreen> {
   Future<void> _selectPickupPlace(dynamic suggestion) async {
     final placeId = suggestion['place_id'];
     final description = suggestion['description'] ?? '';
-
+    
     setState(() {
       _pickupController.text = description;
       _showPickupSuggestions = false;
@@ -83,7 +83,7 @@ class _BookingScreenState extends State<BookingScreen> {
 
     try {
       final details = await GoogleMapsService.getPlaceDetails(placeId);
-      if (details != null && details['geometry'] != null) {
+      if (details['geometry'] != null) {
         final location = details['geometry']['location'];
         setState(() {
           _pickupLat = location['lat'] as double;
@@ -98,7 +98,7 @@ class _BookingScreenState extends State<BookingScreen> {
   Future<void> _selectDropoffPlace(dynamic suggestion) async {
     final placeId = suggestion['place_id'];
     final description = suggestion['description'] ?? '';
-
+    
     setState(() {
       _dropoffController.text = description;
       _showDropoffSuggestions = false;
@@ -107,7 +107,7 @@ class _BookingScreenState extends State<BookingScreen> {
 
     try {
       final details = await GoogleMapsService.getPlaceDetails(placeId);
-      if (details != null && details['geometry'] != null) {
+      if (details['geometry'] != null) {
         final location = details['geometry']['location'];
         setState(() {
           _dropoffLat = location['lat'] as double;
@@ -122,21 +122,14 @@ class _BookingScreenState extends State<BookingScreen> {
   void _continueToTripDetails() {
     if (_pickupController.text.isEmpty || _dropoffController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor completa las ubicaciones')),
+        const SnackBar(content: Text('Please complete the locations')),
       );
       return;
     }
 
-    if (_pickupLat == null ||
-        _pickupLng == null ||
-        _dropoffLat == null ||
-        _dropoffLng == null) {
+    if (_pickupLat == null || _pickupLng == null || _dropoffLat == null || _dropoffLng == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Por favor selecciona ubicaciones válidas de las sugerencias',
-          ),
-        ),
+        const SnackBar(content: Text('Please select valid locations from suggestions')),
       );
       return;
     }
@@ -161,27 +154,19 @@ class _BookingScreenState extends State<BookingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Book a Ride',
-          style: TextStyle(color: VaneLuxColors.white),
-        ),
+        title: const Text('Book a Ride', style: TextStyle(color: VaneLuxColors.white)),
         backgroundColor: VaneLuxColors.primaryBlue,
         iconTheme: const IconThemeData(color: VaneLuxColors.white),
       ),
       body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: VaneLuxColors.gold),
-            )
+          ? const Center(child: CircularProgressIndicator(color: VaneLuxColors.gold))
           : SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Pickup Location
-                  const Text(
-                    'Pickup Location',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
+                  const Text('Pickup Location', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   Column(
                     children: [
@@ -189,20 +174,11 @@ class _BookingScreenState extends State<BookingScreen> {
                         controller: _pickupController,
                         decoration: InputDecoration(
                           hintText: 'Enter pickup address',
-                          prefixIcon: const Icon(
-                            Icons.location_on,
-                            color: VaneLuxColors.success,
-                          ),
+                          prefixIcon: const Icon(Icons.location_on, color: VaneLuxColors.success),
                           suffixIcon: _pickupPlaceId != null
-                              ? const Icon(
-                                  Icons.check_circle,
-                                  color: Colors.green,
-                                  size: 20,
-                                )
+                              ? const Icon(Icons.check_circle, color: Colors.green, size: 20)
                               : null,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         ),
                         onChanged: (value) {
                           setState(() {
@@ -213,8 +189,7 @@ class _BookingScreenState extends State<BookingScreen> {
                           _searchPickupPlaces(value);
                         },
                       ),
-                      if (_showPickupSuggestions &&
-                          _pickupSuggestions.isNotEmpty)
+                      if (_showPickupSuggestions && _pickupSuggestions.isNotEmpty)
                         Container(
                           margin: const EdgeInsets.only(top: 4),
                           decoration: BoxDecoration(
@@ -233,23 +208,14 @@ class _BookingScreenState extends State<BookingScreen> {
                             shrinkWrap: true,
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             itemCount: _pickupSuggestions.length,
-                            separatorBuilder: (context, index) =>
-                                const Divider(height: 1),
+                            separatorBuilder: (context, index) => const Divider(height: 1),
                             itemBuilder: (context, index) {
                               final suggestion = _pickupSuggestions[index];
-                              final description =
-                                  suggestion['description'] ?? '';
+                              final description = suggestion['description'] ?? '';
                               return ListTile(
                                 dense: true,
-                                leading: const Icon(
-                                  Icons.location_on,
-                                  color: VaneLuxColors.success,
-                                  size: 20,
-                                ),
-                                title: Text(
-                                  description,
-                                  style: const TextStyle(fontSize: 14),
-                                ),
+                                leading: const Icon(Icons.location_on, color: VaneLuxColors.success, size: 20),
+                                title: Text(description, style: const TextStyle(fontSize: 14)),
                                 onTap: () => _selectPickupPlace(suggestion),
                               );
                             },
@@ -257,14 +223,11 @@ class _BookingScreenState extends State<BookingScreen> {
                         ),
                     ],
                   ),
-
+                  
                   const SizedBox(height: 20),
-
+                  
                   // Dropoff Location
-                  const Text(
-                    'Dropoff Location',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
+                  const Text('Dropoff Location', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   Column(
                     children: [
@@ -272,20 +235,11 @@ class _BookingScreenState extends State<BookingScreen> {
                         controller: _dropoffController,
                         decoration: InputDecoration(
                           hintText: 'Enter destination address',
-                          prefixIcon: const Icon(
-                            Icons.flag,
-                            color: VaneLuxColors.error,
-                          ),
+                          prefixIcon: const Icon(Icons.flag, color: VaneLuxColors.error),
                           suffixIcon: _dropoffPlaceId != null
-                              ? const Icon(
-                                  Icons.check_circle,
-                                  color: Colors.green,
-                                  size: 20,
-                                )
+                              ? const Icon(Icons.check_circle, color: Colors.green, size: 20)
                               : null,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         ),
                         onChanged: (value) {
                           setState(() {
@@ -296,8 +250,7 @@ class _BookingScreenState extends State<BookingScreen> {
                           _searchDropoffPlaces(value);
                         },
                       ),
-                      if (_showDropoffSuggestions &&
-                          _dropoffSuggestions.isNotEmpty)
+                      if (_showDropoffSuggestions && _dropoffSuggestions.isNotEmpty)
                         Container(
                           margin: const EdgeInsets.only(top: 4),
                           decoration: BoxDecoration(
@@ -316,23 +269,14 @@ class _BookingScreenState extends State<BookingScreen> {
                             shrinkWrap: true,
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             itemCount: _dropoffSuggestions.length,
-                            separatorBuilder: (context, index) =>
-                                const Divider(height: 1),
+                            separatorBuilder: (context, index) => const Divider(height: 1),
                             itemBuilder: (context, index) {
                               final suggestion = _dropoffSuggestions[index];
-                              final description =
-                                  suggestion['description'] ?? '';
+                              final description = suggestion['description'] ?? '';
                               return ListTile(
                                 dense: true,
-                                leading: const Icon(
-                                  Icons.flag,
-                                  color: VaneLuxColors.error,
-                                  size: 20,
-                                ),
-                                title: Text(
-                                  description,
-                                  style: const TextStyle(fontSize: 14),
-                                ),
+                                leading: const Icon(Icons.flag, color: VaneLuxColors.error, size: 20),
+                                title: Text(description, style: const TextStyle(fontSize: 14)),
                                 onTap: () => _selectDropoffPlace(suggestion),
                               );
                             },
@@ -340,9 +284,9 @@ class _BookingScreenState extends State<BookingScreen> {
                         ),
                     ],
                   ),
-
+                  
                   const SizedBox(height: 40),
-
+                  
                   // Botón Continuar
                   SizedBox(
                     width: double.infinity,
@@ -351,9 +295,7 @@ class _BookingScreenState extends State<BookingScreen> {
                       onPressed: _continueToTripDetails,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: VaneLuxColors.gold,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                       ),
                       child: const Text(
                         'Continuar',
@@ -365,9 +307,9 @@ class _BookingScreenState extends State<BookingScreen> {
                       ),
                     ),
                   ),
-                ],
-              ),
-            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -416,7 +358,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
     try {
       // Cargar vehículos
       final vehicles = await VaneLuxApiService.getVehicles();
-
+      
       // Calcular distancia usando Google Maps
       final distanceData = await GoogleMapsService.getDistanceMatrix(
         '${widget.pickupLat},${widget.pickupLng}',
@@ -429,20 +371,20 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
           if (vehicles.isNotEmpty) {
             _selectedVehicle = vehicles.first['name'] ?? '';
           }
-
+          
           // Extraer distancia y duración
           if (distanceData['distance'] != null) {
             final distanceMeters = distanceData['distance']['value'] as int;
             _distanceMiles = distanceMeters * 0.000621371; // metros a millas
             _distance = '${_distanceMiles!.toStringAsFixed(2)} mi';
           }
-
+          
           if (distanceData['duration'] != null) {
             final durationSeconds = distanceData['duration']['value'] as int;
             final minutes = (durationSeconds / 60).round();
             _duration = '$minutes min';
           }
-
+          
           _isLoading = false;
           _calculatePrice();
         });
@@ -464,13 +406,17 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
 
   void _calculatePrice() {
     if (_distanceMiles == null) return;
-
+    
     // Tarifas base por milla según tipo de vehículo
-    final rates = {'Sedan': 2.50, 'SUV': 3.50, 'Luxury': 5.00};
-
+    final rates = {
+      'Sedan': 2.50,
+      'SUV': 3.50,
+      'Luxury': 5.00,
+    };
+    
     final rate = rates[_selectedVehicle] ?? 2.50;
     final baseFare = 5.0; // Tarifa base
-
+    
     setState(() {
       _estimatedPrice = baseFare + (_distanceMiles! * rate);
     });
@@ -496,7 +442,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('¡Reserva creada exitosamente!'),
+            content: Text('Booking created successfully!'),
             backgroundColor: VaneLuxColors.success,
           ),
         );
@@ -507,7 +453,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error al reservar: $e'),
+            content: Text('Error booking: $e'),
             backgroundColor: VaneLuxColors.error,
           ),
         );
@@ -519,17 +465,12 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Detalles del Viaje',
-          style: TextStyle(color: VaneLuxColors.white),
-        ),
+        title: const Text('Trip Details', style: TextStyle(color: VaneLuxColors.white)),
         backgroundColor: VaneLuxColors.primaryBlue,
         iconTheme: const IconThemeData(color: VaneLuxColors.white),
       ),
       body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: VaneLuxColors.gold),
-            )
+          ? const Center(child: CircularProgressIndicator(color: VaneLuxColors.gold))
           : SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -553,10 +494,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                       children: [
                         Row(
                           children: [
-                            const Icon(
-                              Icons.location_on,
-                              color: VaneLuxColors.success,
-                            ),
+                            const Icon(Icons.location_on, color: VaneLuxColors.success),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
@@ -582,9 +520,9 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                       ],
                     ),
                   ),
-
+                  
                   const SizedBox(height: 20),
-
+                  
                   // Distancia y Duración
                   Row(
                     children: [
@@ -597,11 +535,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                           ),
                           child: Column(
                             children: [
-                              const Icon(
-                                Icons.straighten,
-                                color: VaneLuxColors.primaryBlue,
-                                size: 30,
-                              ),
+                              const Icon(Icons.straighten, color: VaneLuxColors.primaryBlue, size: 30),
                               const SizedBox(height: 8),
                               Text(
                                 _distance ?? '-- mi',
@@ -611,10 +545,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                                   color: VaneLuxColors.primaryBlue,
                                 ),
                               ),
-                              const Text(
-                                'Distancia',
-                                style: TextStyle(fontSize: 12),
-                              ),
+                              const Text('Distancia', style: TextStyle(fontSize: 12)),
                             ],
                           ),
                         ),
@@ -629,11 +560,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                           ),
                           child: Column(
                             children: [
-                              const Icon(
-                                Icons.access_time,
-                                color: VaneLuxColors.gold,
-                                size: 30,
-                              ),
+                              const Icon(Icons.access_time, color: VaneLuxColors.gold, size: 30),
                               const SizedBox(height: 8),
                               Text(
                                 _duration ?? '-- min',
@@ -643,26 +570,23 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                                   color: VaneLuxColors.gold,
                                 ),
                               ),
-                              const Text(
-                                'Duración',
-                                style: TextStyle(fontSize: 12),
-                              ),
+                              const Text('Duración', style: TextStyle(fontSize: 12)),
                             ],
                           ),
                         ),
                       ),
                     ],
                   ),
-
+                  
                   const SizedBox(height: 30),
-
+                  
                   // Selección de Vehículo
                   const Text(
                     'Selecciona tu Vehículo',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
-
+                  
                   ..._vehicles.map((vehicle) {
                     final isSelected = vehicle['name'] == _selectedVehicle;
                     return GestureDetector(
@@ -676,13 +600,9 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                         margin: const EdgeInsets.only(bottom: 12),
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: isSelected
-                              ? VaneLuxColors.gold.withOpacity(0.1)
-                              : Colors.white,
+                          color: isSelected ? VaneLuxColors.gold.withOpacity(0.1) : Colors.white,
                           border: Border.all(
-                            color: isSelected
-                                ? VaneLuxColors.gold
-                                : Colors.grey.shade300,
+                            color: isSelected ? VaneLuxColors.gold : Colors.grey.shade300,
                             width: isSelected ? 2 : 1,
                           ),
                           borderRadius: BorderRadius.circular(12),
@@ -691,9 +611,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                           children: [
                             Icon(
                               Icons.directions_car,
-                              color: isSelected
-                                  ? VaneLuxColors.gold
-                                  : Colors.grey,
+                              color: isSelected ? VaneLuxColors.gold : Colors.grey,
                               size: 30,
                             ),
                             const SizedBox(width: 16),
@@ -719,18 +637,15 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                               ),
                             ),
                             if (isSelected)
-                              const Icon(
-                                Icons.check_circle,
-                                color: VaneLuxColors.gold,
-                              ),
+                              const Icon(Icons.check_circle, color: VaneLuxColors.gold),
                           ],
                         ),
                       ),
                     );
-                  }).toList(),
-
+                  }),
+                  
                   const SizedBox(height: 30),
-
+                  
                   // Precio Estimado
                   Container(
                     padding: const EdgeInsets.all(20),
@@ -762,9 +677,9 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                       ],
                     ),
                   ),
-
+                  
                   const SizedBox(height: 30),
-
+                  
                   // Fecha y Hora
                   Row(
                     children: [
@@ -772,10 +687,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Fecha',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
+                            const Text('Fecha', style: TextStyle(fontWeight: FontWeight.bold)),
                             const SizedBox(height: 8),
                             GestureDetector(
                               onTap: () async {
@@ -783,9 +695,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                                   context: context,
                                   initialDate: _selectedDate,
                                   firstDate: DateTime.now(),
-                                  lastDate: DateTime.now().add(
-                                    const Duration(days: 365),
-                                  ),
+                                  lastDate: DateTime.now().add(const Duration(days: 365)),
                                 );
                                 if (date != null) {
                                   setState(() => _selectedDate = date);
@@ -794,21 +704,14 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                               child: Container(
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: Colors.grey.shade300,
-                                  ),
+                                  border: Border.all(color: Colors.grey.shade300),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Row(
                                   children: [
-                                    const Icon(
-                                      Icons.calendar_today,
-                                      color: VaneLuxColors.gold,
-                                    ),
+                                    const Icon(Icons.calendar_today, color: VaneLuxColors.gold),
                                     const SizedBox(width: 8),
-                                    Text(
-                                      '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
-                                    ),
+                                    Text('${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}'),
                                   ],
                                 ),
                               ),
@@ -821,10 +724,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Hora',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
+                            const Text('Hora', style: TextStyle(fontWeight: FontWeight.bold)),
                             const SizedBox(height: 8),
                             GestureDetector(
                               onTap: () async {
@@ -839,17 +739,12 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                               child: Container(
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: Colors.grey.shade300,
-                                  ),
+                                  border: Border.all(color: Colors.grey.shade300),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Row(
                                   children: [
-                                    const Icon(
-                                      Icons.access_time,
-                                      color: VaneLuxColors.gold,
-                                    ),
+                                    const Icon(Icons.access_time, color: VaneLuxColors.gold),
                                     const SizedBox(width: 8),
                                     Text(_selectedTime.format(context)),
                                   ],
@@ -861,9 +756,9 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                       ),
                     ],
                   ),
-
+                  
                   const SizedBox(height: 30),
-
+                  
                   // Botón Confirmar
                   SizedBox(
                     width: double.infinity,
@@ -877,7 +772,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                         ),
                       ),
                       child: const Text(
-                        'Confirmar Reserva',
+                        'Confirm Booking',
                         style: TextStyle(
                           color: VaneLuxColors.primaryBlue,
                           fontSize: 18,
@@ -901,10 +796,7 @@ class TripsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Trip History',
-          style: TextStyle(color: VaneLuxColors.white),
-        ),
+        title: const Text('Trip History', style: TextStyle(color: VaneLuxColors.white)),
         backgroundColor: VaneLuxColors.primaryBlue,
         iconTheme: const IconThemeData(color: VaneLuxColors.white),
       ),
@@ -921,10 +813,7 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Profile',
-          style: TextStyle(color: VaneLuxColors.white),
-        ),
+        title: const Text('Profile', style: TextStyle(color: VaneLuxColors.white)),
         backgroundColor: VaneLuxColors.primaryBlue,
         iconTheme: const IconThemeData(color: VaneLuxColors.white),
       ),
@@ -979,9 +868,7 @@ class ProfileScreen extends StatelessWidget {
                   if (context.mounted) {
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => const LoginScreen(),
-                      ),
+                      MaterialPageRoute(builder: (context) => const LoginScreen()),
                     );
                   }
                 },
