@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../services/auth_service.dart';
+import '../../services/oauth_service.dart';
 import '../../utils/constants.dart' as config;
 import '../../utils/app_strings.dart';
 import '../home/home_screen.dart';
@@ -33,6 +34,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 	bool _obscurePassword = true;
 	bool _obscureConfirmPassword = true;
 	bool _isLoading = false;
+	bool _isLoadingSocial = false;
 	bool _acceptTerms = false;
 
 	@override
@@ -574,15 +576,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 																			FontAwesomeIcons.google,
 																			'Google',
 																			Colors.red,
-																			() {
-																				ScaffoldMessenger.of(context).showSnackBar(
-																					const SnackBar(
-																						content: Text(
-																							'Google registration coming soon',
-																						),
-																					),
-																				);
-																			},
+																			_isLoadingSocial ? null : _handleGoogleSignIn,
 																		),
 																	),
 																	const SizedBox(width: 16),
@@ -591,15 +585,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 																			FontAwesomeIcons.facebookF,
 																			'Facebook',
 																			const Color(0xFF1877F2),
-																			() {
-																				ScaffoldMessenger.of(context).showSnackBar(
-																					const SnackBar(
-																						content: Text(
-																							'Facebook registration coming soon',
-																						),
-																					),
-																				);
-																			},
+																			_isLoadingSocial ? null : _handleFacebookSignIn,
 																		),
 																	),
 																],
@@ -647,11 +633,99 @@ class _RegisterScreenState extends State<RegisterScreen> {
 		);
 	}
 
+	Future<void> _handleGoogleSignIn() async {
+		setState(() {
+			_isLoadingSocial = true;
+		});
+
+		try {
+			final result = await OAuthService.signInWithGoogle();
+			
+			if (result != null && result['success'] == true && mounted) {
+				ScaffoldMessenger.of(context).showSnackBar(
+					const SnackBar(
+						content: Text('Google Sign-In Successful!'),
+						backgroundColor: Colors.green,
+					),
+				);
+				Navigator.of(context).pushReplacement(
+					MaterialPageRoute(builder: (context) => const HomeScreen()),
+				);
+			} else if (mounted && result != null) {
+				ScaffoldMessenger.of(context).showSnackBar(
+					SnackBar(
+						content: Text('Google Sign-In Failed: ${result['error'] ?? 'Unknown error'}'),
+						backgroundColor: Colors.red,
+					),
+				);
+			}
+		} catch (e) {
+			if (mounted) {
+				ScaffoldMessenger.of(context).showSnackBar(
+					SnackBar(
+						content: Text('Google Sign-In Error: ${e.toString()}'),
+						backgroundColor: Colors.red,
+					),
+				);
+			}
+		} finally {
+			if (mounted) {
+				setState(() {
+					_isLoadingSocial = false;
+				});
+			}
+		}
+	}
+
+	Future<void> _handleFacebookSignIn() async {
+		setState(() {
+			_isLoadingSocial = true;
+		});
+
+		try {
+			final result = await OAuthService.signInWithFacebook();
+			
+			if (result != null && result['success'] == true && mounted) {
+				ScaffoldMessenger.of(context).showSnackBar(
+					const SnackBar(
+						content: Text('Facebook Sign-In Successful!'),
+						backgroundColor: Colors.green,
+					),
+				);
+				Navigator.of(context).pushReplacement(
+					MaterialPageRoute(builder: (context) => const HomeScreen()),
+				);
+			} else if (mounted && result != null) {
+				ScaffoldMessenger.of(context).showSnackBar(
+					SnackBar(
+						content: Text('Facebook Sign-In Failed: ${result['error'] ?? 'Unknown error'}'),
+						backgroundColor: Colors.red,
+					),
+				);
+			}
+		} catch (e) {
+			if (mounted) {
+				ScaffoldMessenger.of(context).showSnackBar(
+					SnackBar(
+						content: Text('Facebook Sign-In Error: ${e.toString()}'),
+						backgroundColor: Colors.red,
+					),
+				);
+			}
+		} finally {
+			if (mounted) {
+				setState(() {
+					_isLoadingSocial = false;
+				});
+			}
+		}
+	}
+
 	Widget _buildSocialButton(
 		IconData icon,
 		String label,
 		Color color,
-		VoidCallback onPressed,
+		VoidCallback? onPressed,
 	) {
 		return Container(
 			height: 50,
@@ -660,29 +734,40 @@ class _RegisterScreenState extends State<RegisterScreen> {
 				borderRadius: BorderRadius.circular(15.0),
 				border: Border.all(color: Colors.white.withOpacity(0.2)),
 			),
-			child: TextButton(
-				onPressed: onPressed,
-				style: TextButton.styleFrom(
-					shape: RoundedRectangleBorder(
-						borderRadius: BorderRadius.circular(15.0),
-					),
-				),
-				child: Row(
-					mainAxisAlignment: MainAxisAlignment.center,
-					children: [
-						Icon(icon, color: color, size: 20),
-						const SizedBox(width: 8),
-						Text(
-							label,
-							style: const TextStyle(
-								color: Colors.white,
-								fontSize: 14,
-								fontWeight: FontWeight.w600,
+			child: _isLoadingSocial
+					? const Center(
+							child: SizedBox(
+								width: 20,
+								height: 20,
+								child: CircularProgressIndicator(
+									strokeWidth: 2,
+									valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+								),
+							),
+						)
+					: TextButton(
+							onPressed: onPressed,
+							style: TextButton.styleFrom(
+								shape: RoundedRectangleBorder(
+									borderRadius: BorderRadius.circular(15.0),
+								),
+							),
+							child: Row(
+								mainAxisAlignment: MainAxisAlignment.center,
+								children: [
+									Icon(icon, color: color, size: 20),
+									const SizedBox(width: 8),
+									Text(
+										label,
+										style: const TextStyle(
+											color: Colors.white,
+											fontSize: 14,
+											fontWeight: FontWeight.w600,
+										),
+									),
+								],
 							),
 						),
-					],
-				),
-			),
 		);
 	}
 }
