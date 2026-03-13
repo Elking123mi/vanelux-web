@@ -9,7 +9,7 @@ class OAuthService {
   // Google Sign-In configuration
   static final GoogleSignIn _googleSignIn = GoogleSignIn(
     clientId: kIsWeb
-        ? '579087046563-ofmak1mol3fo8evutbrrp33i63muv5bf.apps.googleusercontent.com'
+        ? '579087046563-ofmak1mol3fo8evutbtrp33i63muv5bf.apps.googleusercontent.com'
         : null, // Android/iOS uses google-services.json/GoogleService-Info.plist
     scopes: [
       'email',
