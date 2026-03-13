@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../services/auth_service.dart';
+import '../../services/oauth_service.dart';
 import '../../utils/app_strings.dart';
 import '../home/home_screen.dart';
 import 'driver_login_screen.dart';
@@ -18,6 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _isLoadingSocial = false;
   bool _obscurePassword = true;
 
   @override
@@ -64,6 +66,94 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         setState(() {
           _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    setState(() {
+      _isLoadingSocial = true;
+    });
+
+    try {
+      final result = await OAuthService.signInWithGoogle();
+      
+      if (result != null && result['success'] == true && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Google Sign-In Successful!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      } else if (mounted && result != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Google Sign-In Failed: ${result['error'] ?? 'Unknown error'}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Google Sign-In Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingSocial = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _handleFacebookSignIn() async {
+    setState(() {
+      _isLoadingSocial = true;
+    });
+
+    try {
+      final result = await OAuthService.signInWithFacebook();
+      
+      if (result != null && result['success'] == true && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Facebook Sign-In Successful!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      } else if (mounted && result != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Facebook Sign-In Failed: ${result['error'] ?? 'Unknown error'}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Facebook Sign-In Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingSocial = false;
         });
       }
     }
@@ -363,15 +453,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             children: [
                               _buildSocialButton(
                                 icon: FontAwesomeIcons.google,
-                                onPressed: () {
-                                  // TODO: Google login
-                                },
+                                onPressed: _isLoadingSocial ? null : _handleGoogleSignIn,
                               ),
                               _buildSocialButton(
                                 icon: FontAwesomeIcons.facebook,
-                                onPressed: () {
-                                  // TODO: Facebook login
-                                },
+                                onPressed: _isLoadingSocial ? null : _handleFacebookSignIn,
                               ),
                               _buildSocialButton(
                                 icon: FontAwesomeIcons.apple,
@@ -421,11 +507,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                           SizedBox(height: fieldSpacing),
-                          Wrap(
-                            alignment: WrapAlignment.center,
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            spacing: 4,
-                            runSpacing: 8,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
                                 AppConstants.dontHaveAccount,
@@ -433,6 +516,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   color: Colors.white.withOpacity(0.7),
                                 ),
                               ),
+                              const SizedBox(width: 4),
                               TextButton(
                                 onPressed: () {
                                   Navigator.of(context).push(
@@ -468,7 +552,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildSocialButton({
     required IconData icon,
-    required VoidCallback onPressed,
+    required VoidCallback? onPressed,
   }) {
     return Container(
       width: 60,
@@ -478,10 +562,21 @@ class _LoginScreenState extends State<LoginScreen> {
         color: Colors.white.withOpacity(0.1),
         border: Border.all(color: Colors.white.withOpacity(0.2)),
       ),
-      child: IconButton(
-        onPressed: onPressed,
-        icon: FaIcon(icon, color: Colors.white, size: 24),
-      ),
+      child: _isLoadingSocial
+          ? const Center(
+              child: SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              ),
+            )
+          : IconButton(
+              onPressed: onPressed,
+              icon: FaIcon(icon, color: Colors.white, size: 24),
+            ),
     );
   }
 }
