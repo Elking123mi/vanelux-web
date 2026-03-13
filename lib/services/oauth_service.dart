@@ -42,23 +42,27 @@ class OAuthService {
       final String? idToken = googleAuth.idToken;
       final String? accessToken = googleAuth.accessToken;
 
-      if (idToken == null) {
-        throw Exception('Failed to get ID token from Google');
+      if (idToken == null && accessToken == null) {
+        throw Exception('Failed to get token from Google');
       }
 
-      print('📤 Sending ID token to backend...');
+      print('📤 Sending token to backend (idToken: ${idToken != null}, accessToken: ${accessToken != null})...');
+
+      // Build payload - use whichever token is available
+      // On web (GIS), signIn() returns accessToken but not idToken
+      final Map<String, dynamic> payload = {
+        'email': googleUser.email,
+        'name': googleUser.displayName,
+        'photo_url': googleUser.photoUrl,
+      };
+      if (idToken != null) payload['id_token'] = idToken;
+      if (accessToken != null) payload['access_token'] = accessToken;
 
       // Send to backend for verification and user creation
       final response = await http.post(
         Uri.parse('$_apiBaseUrl/auth/google'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'id_token': idToken,
-          'access_token': accessToken,
-          'email': googleUser.email,
-          'name': googleUser.displayName,
-          'photo_url': googleUser.photoUrl,
-        }),
+        body: jsonEncode(payload),
       );
 
       if (response.statusCode == 200) {
