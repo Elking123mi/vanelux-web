@@ -734,9 +734,41 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
 
                         _authSocialBtn(Icons.apple, 'Continue with Apple', () {}),
                         const SizedBox(height: 8),
-                        _authSocialBtn(Icons.g_mobiledata, 'Continue with Google', () {}),
+                        _authSocialBtn(Icons.g_mobiledata, 'Continue with Google', () async {
+                          setDialogState(() { isLoading = true; errorMessage = null; });
+                          try {
+                            final result = await OAuthService.signInWithGoogle();
+                            if (result != null && result['success'] == true && dialogContext.mounted) {
+                              final userData = result['user'];
+                              final user = userData != null ? User.fromJson(userData as Map<String, dynamic>) : null;
+                              Navigator.of(dialogContext).pop(user);
+                            } else if (dialogContext.mounted) {
+                              setDialogState(() { errorMessage = 'Google sign-in failed. Please try again.'; isLoading = false; });
+                            }
+                          } catch (e) {
+                            if (dialogContext.mounted) {
+                              setDialogState(() { errorMessage = 'Google sign-in error: ${e.toString()}'; isLoading = false; });
+                            }
+                          }
+                        }),
                         const SizedBox(height: 8),
-                        _authSocialBtn(Icons.facebook, 'Continue with Facebook', () {}),
+                        _authSocialBtn(Icons.facebook, 'Continue with Facebook', () async {
+                          setDialogState(() { isLoading = true; errorMessage = null; });
+                          try {
+                            final result = await OAuthService.signInWithFacebook();
+                            if (result != null && result['success'] == true && dialogContext.mounted) {
+                              final userData = result['user'];
+                              final user = userData != null ? User.fromJson(userData as Map<String, dynamic>) : null;
+                              Navigator.of(dialogContext).pop(user);
+                            } else if (dialogContext.mounted) {
+                              setDialogState(() { errorMessage = 'Facebook sign-in failed. Please try again.'; isLoading = false; });
+                            }
+                          } catch (e) {
+                            if (dialogContext.mounted) {
+                              setDialogState(() { errorMessage = 'Facebook sign-in error: ${e.toString()}'; isLoading = false; });
+                            }
+                          }
+                        }),
 
                         const SizedBox(height: 20),
                         Row(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -1007,7 +1039,9 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                                   try {
                                     final result = await OAuthService.signInWithGoogle();
                                     if (result != null && result['success'] == true && dialogContext.mounted) {
-                                      Navigator.of(dialogContext).pop(result['user']);
+                                      final userData = result['user'];
+                                      final user = userData != null ? User.fromJson(userData as Map<String, dynamic>) : null;
+                                      Navigator.of(dialogContext).pop(user);
                                     } else if (dialogContext.mounted) {
                                       setDialogState(() {
                                         errorMessage = 'Google sign-in failed. Please try again.';
@@ -1040,7 +1074,9 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                                   try {
                                     final result = await OAuthService.signInWithFacebook();
                                     if (result != null && result['success'] == true && dialogContext.mounted) {
-                                      Navigator.of(dialogContext).pop(result['user']);
+                                      final userData = result['user'];
+                                      final user = userData != null ? User.fromJson(userData as Map<String, dynamic>) : null;
+                                      Navigator.of(dialogContext).pop(user);
                                     } else if (dialogContext.mounted) {
                                       setDialogState(() {
                                         errorMessage = 'Facebook sign-in failed. Please try again.';
