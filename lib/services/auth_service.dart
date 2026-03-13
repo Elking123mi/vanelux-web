@@ -165,6 +165,20 @@ class AuthService {
     await _storage.delete(key: _refreshTokenKey);
   }
 
+  // Save complete OAuth session (token + user data) so session persists across reloads
+  static Future<void> saveOAuthSession({
+    required String accessToken,
+    String? refreshToken,
+    required Map<String, dynamic> userData,
+  }) async {
+    await _storage.write(key: _accessTokenKey, value: accessToken);
+    if (refreshToken != null) {
+      await _storage.write(key: _refreshTokenKey, value: refreshToken);
+    }
+    final user = User.fromJson(userData);
+    await _persistUser(user, UserRole.passenger);
+  }
+
   // Save driver data
   static Future<void> _saveDriverData(Map<String, dynamic> driverData) async {
     final prefs = await SharedPreferences.getInstance();

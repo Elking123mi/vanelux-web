@@ -69,11 +69,12 @@ class OAuthService {
         final data = jsonDecode(response.body);
         print('✅ Backend authentication successful');
 
-        // Save tokens using AuthService
-        await AuthService.saveAuthToken(data['access_token']);
-        if (data['refresh_token'] != null) {
-          await AuthService.saveRefreshToken(data['refresh_token']);
-        }
+        // Save full session (token + user) so it persists across reloads
+        await AuthService.saveOAuthSession(
+          accessToken: data['access_token'],
+          refreshToken: data['refresh_token'],
+          userData: Map<String, dynamic>.from(data['user']),
+        );
 
         return {
           'success': true,
@@ -140,11 +141,12 @@ class OAuthService {
         final data = jsonDecode(response.body);
         print('✅ Backend authentication successful');
 
-        // Save tokens
-        await AuthService.saveAuthToken(data['access_token']);
-        if (data['refresh_token'] != null) {
-          await AuthService.saveRefreshToken(data['refresh_token']);
-        }
+        // Save full session (token + user) so it persists across reloads
+        await AuthService.saveOAuthSession(
+          accessToken: data['access_token'],
+          refreshToken: data['refresh_token'],
+          userData: Map<String, dynamic>.from(data['user']),
+        );
 
         return {
           'success': true,
