@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config/app_config.dart';
@@ -12,9 +13,12 @@ import 'central_backend_service.dart';
 enum UserRole { passenger, driver, admin }
 
 class AuthService {
+  static final FlutterSecureStorage _storage = const FlutterSecureStorage();
   static const String _userKey = 'user_data';
   static const String _driverKey = 'driver_data';
   static const String _userRoleKey = 'user_role';
+  static const String _accessTokenKey = 'central_access_token';
+  static const String _refreshTokenKey = 'central_refresh_token';
   static const String demoDriverEmail = 'driver.demo@vanelux.com';
   static const String demoDriverPassword = 'Driver#2024';
 
@@ -143,6 +147,22 @@ class AuthService {
   // Obtener token
   static Future<String?> getToken() async {
     return CentralBackendService.getValidAccessToken();
+  }
+
+  // Save auth token (for OAuth)
+  static Future<void> saveAuthToken(String token) async {
+    await _storage.write(key: _accessTokenKey, value: token);
+  }
+
+  // Save refresh token (for OAuth)
+  static Future<void> saveRefreshToken(String token) async {
+    await _storage.write(key: _refreshTokenKey, value: token);
+  }
+
+  // Clear all tokens (for logout)
+  static Future<void> clearTokens() async {
+    await _storage.delete(key: _accessTokenKey);
+    await _storage.delete(key: _refreshTokenKey);
   }
 
   // Save driver data
