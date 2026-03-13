@@ -14,6 +14,7 @@ import '../../models/driver.dart';
 import '../../models/user.dart';
 import '../../providers/locale_provider.dart';
 import '../../services/auth_service.dart';
+import '../../services/oauth_service.dart';
 import '../../services/google_maps_service.dart';
 import '../../services/openai_assistant_service.dart';
 import '../../services/pricing_service.dart';
@@ -979,6 +980,85 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                             ),
                           ),
 
+                          const SizedBox(height: 16),
+                          // Divider
+                          Row(children: [
+                            Expanded(child: Container(height: 1, color: const Color(0xFFE0E0E0))),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 12),
+                              child: Text('Or sign up with', style: TextStyle(fontSize: 13, color: Color(0xFF888888))),
+                            ),
+                            Expanded(child: Container(height: 1, color: const Color(0xFFE0E0E0))),
+                          ]),
+                          const SizedBox(height: 16),
+                          // OAuth Buttons
+                          Row(children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                icon: Image.network('https://www.google.com/favicon.ico', width: 16, height: 16),
+                                label: const Text('Google', style: TextStyle(fontSize: 13, color: Color(0xFF333333))),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  side: const BorderSide(color: Color(0xFFDDDDDD)),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                ),
+                                onPressed: isLoading ? null : () async {
+                                  setDialogState(() { isLoading = true; errorMessage = null; });
+                                  try {
+                                    final result = await OAuthService.signInWithGoogle();
+                                    if (result != null && result['success'] == true && dialogContext.mounted) {
+                                      Navigator.of(dialogContext).pop(result['user']);
+                                    } else if (dialogContext.mounted) {
+                                      setDialogState(() {
+                                        errorMessage = 'Google sign-in failed. Please try again.';
+                                        isLoading = false;
+                                      });
+                                    }
+                                  } catch (e) {
+                                    if (dialogContext.mounted) {
+                                      setDialogState(() {
+                                        errorMessage = 'Google sign-in error: ${e.toString()}';
+                                        isLoading = false;
+                                      });
+                                    }
+                                  }
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                icon: const Icon(Icons.facebook, color: Color(0xFF1877F2), size: 18),
+                                label: const Text('Facebook', style: TextStyle(fontSize: 13, color: Color(0xFF333333))),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  side: const BorderSide(color: Color(0xFFDDDDDD)),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                ),
+                                onPressed: isLoading ? null : () async {
+                                  setDialogState(() { isLoading = true; errorMessage = null; });
+                                  try {
+                                    final result = await OAuthService.signInWithFacebook();
+                                    if (result != null && result['success'] == true && dialogContext.mounted) {
+                                      Navigator.of(dialogContext).pop(result['user']);
+                                    } else if (dialogContext.mounted) {
+                                      setDialogState(() {
+                                        errorMessage = 'Facebook sign-in failed. Please try again.';
+                                        isLoading = false;
+                                      });
+                                    }
+                                  } catch (e) {
+                                    if (dialogContext.mounted) {
+                                      setDialogState(() {
+                                        errorMessage = 'Facebook sign-in error: ${e.toString()}';
+                                        isLoading = false;
+                                      });
+                                    }
+                                  }
+                                },
+                              ),
+                            ),
+                          ]),
                           const SizedBox(height: 16),
                           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                             const Text('Already have an account? ', style: TextStyle(fontSize: 13, color: Color(0xFF888888))),
