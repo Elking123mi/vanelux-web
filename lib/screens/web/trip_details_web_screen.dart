@@ -41,6 +41,7 @@ class _VehicleOption {
   final String imageUrl;
   final double basePrice;
   final double perMileRate;
+  final bool isTestVehicle;
 
   const _VehicleOption({
     required this.name,
@@ -50,6 +51,7 @@ class _VehicleOption {
     required this.imageUrl,
     required this.basePrice,
     required this.perMileRate,
+    this.isTestVehicle = false,
   });
 }
 
@@ -134,6 +136,17 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
           'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=400&q=80',
       basePrice: 0.50,
       perMileRate: 0.50,
+    ),
+    _VehicleOption(
+      name: 'TEST VEHICLE',
+      description: '⚠️ Payment test only — charges exactly \$0.50',
+      passengers: 1,
+      luggage: 0,
+      imageUrl:
+          'https://images.unsplash.com/photo-1581579438747-1dc8d17bbce4?auto=format&fit=crop&w=400&q=80',
+      basePrice: 0.50,
+      perMileRate: 0.0,
+      isTestVehicle: true,
     ),
   ];
 
@@ -235,6 +248,7 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
   }
 
   double _calculateTotalPrice(_VehicleOption vehicle) {
+    if (vehicle.isTestVehicle) return 0.50;
     if (_distanceMiles == null) return 0.0;
     try {
       final estimate = PricingService.calculatePrice(
@@ -948,10 +962,12 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
         margin: const EdgeInsets.only(bottom: 20),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: vehicle.isTestVehicle ? const Color(0xFFFFF8E1) : Colors.white,
           border: Border.all(
-            color: isSelected ? const Color(0xFF4CAF50) : Colors.grey[300]!,
-            width: isSelected ? 2 : 1,
+            color: vehicle.isTestVehicle
+                ? Colors.orange
+                : isSelected ? const Color(0xFF4CAF50) : Colors.grey[300]!,
+            width: vehicle.isTestVehicle ? 2 : isSelected ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
