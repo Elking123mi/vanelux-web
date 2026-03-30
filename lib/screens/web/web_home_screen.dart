@@ -3675,6 +3675,88 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         ),
       );
     }
+    // ── TEST CARD ($0.50) ─────────────────────────────────────────
+    cards.add(
+      GestureDetector(
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PaymentScreen(
+              pickupAddress: _chatPickupController.text,
+              destinationAddress: _chatDropoffController.text,
+              pickupLat: _chatPickupPlace!.latitude,
+              pickupLng: _chatPickupPlace!.longitude,
+              destinationLat: _chatDropoffPlace!.latitude,
+              destinationLng: _chatDropoffPlace!.longitude,
+              selectedDateTime: DateTime.now().add(const Duration(hours: 1)),
+              vehicleName: 'TEST VEHICLE',
+              totalPrice: 0.50,
+              distanceMiles: _chatDistanceMiles,
+              duration: '5 min',
+              extraServices: const {},
+            ),
+          ),
+        ),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFF8E1),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.orange.shade300, width: 1.5),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.orange.withOpacity(0.1),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.science, size: 18, color: Colors.orange),
+              ),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'TEST VEHICLE',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.orange),
+                    ),
+                    Text(
+                      'Payment test only • \$0.50',
+                      style: TextStyle(fontSize: 10, color: Colors.orange),
+                    ),
+                  ],
+                ),
+              ),
+              const Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '\$0.50',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.orange),
+                  ),
+                  Text('Test', style: TextStyle(fontSize: 9, color: Colors.orange)),
+                ],
+              ),
+              const SizedBox(width: 6),
+              const Icon(Icons.chevron_right, size: 18, color: Colors.orange),
+            ],
+          ),
+        ),
+      ),
+    );
+
     return cards;
   }
 
