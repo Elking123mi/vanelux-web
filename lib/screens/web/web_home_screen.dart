@@ -1037,21 +1037,21 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                                 onPressed: isLoading ? null : () async {
                                   setDialogState(() { isLoading = true; errorMessage = null; });
                                   try {
-                                    final result = await OAuthService.signInWithGoogle();
+                                    final result = await OAuthService.signUpWithGoogle();
                                     if (result != null && result['success'] == true && dialogContext.mounted) {
                                       final userData = result['user'];
                                       final user = userData != null ? User.fromJson(userData as Map<String, dynamic>) : null;
                                       Navigator.of(dialogContext).pop(user);
                                     } else if (dialogContext.mounted) {
                                       setDialogState(() {
-                                        errorMessage = 'Google sign-in failed. Please try again.';
+                                        errorMessage = result?['error'] ?? 'Google sign-up failed. Please try again.';
                                         isLoading = false;
                                       });
                                     }
                                   } catch (e) {
                                     if (dialogContext.mounted) {
                                       setDialogState(() {
-                                        errorMessage = 'Google sign-in error: ${e.toString()}';
+                                        errorMessage = 'Google sign-up error: ${e.toString()}';
                                         isLoading = false;
                                       });
                                     }

@@ -639,12 +639,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
 		});
 
 		try {
-			final result = await OAuthService.signInWithGoogle();
+			final result = await OAuthService.signUpWithGoogle();
 			
 			if (result != null && result['success'] == true && mounted) {
 				ScaffoldMessenger.of(context).showSnackBar(
 					const SnackBar(
-						content: Text('Google Sign-In Successful!'),
+						content: Text('Cuenta creada con Google exitosamente!'),
 						backgroundColor: Colors.green,
 					),
 				);
@@ -654,7 +654,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 			} else if (mounted && result != null) {
 				ScaffoldMessenger.of(context).showSnackBar(
 					SnackBar(
-						content: Text('Google Sign-In Failed: ${result['error'] ?? 'Unknown error'}'),
+						content: Text(result['error'] ?? 'Google sign-up failed. Please try again.'),
 						backgroundColor: Colors.red,
 					),
 				);

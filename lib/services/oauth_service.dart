@@ -167,6 +167,72 @@ class OAuthService {
     }
   }
 
+  /// Sign up with Google — rejects with 409 if the account already exists.
+  /// Use this for Sign Up flows (uses /auth/google/signup endpoint).
+  /// For Login flows use [signInWithGoogle] instead.
+  static Future<Map<String, dynamic>?> signUpWithGoogle() async {
+    try {
+      print('🔵 Starting Google Sign-Up...');
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        print('❌ User cancelled Google Sign-Up');
+        return null;
+      }
+      print('✅ Google Sign-Up auth: ${googleUser.email}');
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final String? idToken = googleAuth.idToken;
+      final String? accessToken = googleAuth.accessToken;
+      if (idToken == null && accessToken == null) {
+        throw Exception('Failed to get token from Google');
+      }
+      final Map<String, dynamic> payload = {
+        'email': googleUser.email,
+        'name': googleUser.displayName,
+        'photo_url': googleUser.photoUrl,
+      };
+      if (idToken != null) payload['id_token'] = idToken;
+      if (accessToken != null) payload['access_token'] = accessToken;
+
+      final response = await http.post(
+        Uri.parse('$_apiBaseUrl/auth/google/signup'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(payload),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        print('✅ Backend sign-up successful');
+        await AuthService.saveOAuthSession(
+          accessToken: data['access_token'],
+          refreshToken: data['refresh_token'],
+          userData: Map<String, dynamic>.from(data['user']),
+        );
+        return {
+          'success': true,
+          'user': data['user'],
+          'access_token': data['access_token'],
+          'provider': 'google',
+        };
+      } else if (response.statusCode == 409) {
+        Map<String, dynamic> body = {};
+        try { body = jsonDecode(response.body); } catch (_) {}
+        return {
+          'success': false,
+          'error': body['detail'] ?? 'Ya existe una cuenta con este correo. Por favor inicia sesión.',
+        };
+      } else {
+        throw Exception(
+            'Backend sign-up failed: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      print('❌ Google Sign-Up error: $e');
+      return {
+        'success': false,
+        'error': e.toString(),
+      };
+    }
+  }
+
   /// Sign out from all providers
   static Future<void> signOut() async {
     try {
