@@ -1712,7 +1712,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                   ),
                 ),
                 const SizedBox(height: 15),
-                const Text(
+                Text(
                   'Need a custom duration? We can accommodate any timeframe for your specific needs.',
                   style: TextStyle(
                     fontSize: isMobile ? 14 : 15,
