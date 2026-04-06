@@ -1196,12 +1196,12 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       final oneWayMiles = distanceValue / 1609.344;
       final totalMiles = oneWayMiles * (isReturnTrip ? 2 : 1);
 
-      // Fetch real toll cost from Google Routes API
+      // Fetch real toll cost from TollGuru API
       double tollCost = 0.0;
       try {
         final tollData = await GoogleMapsService.getRouteWithTolls(
-          '${originPlace.latitude},${originPlace.longitude}',
-          '${destinationPlace.latitude},${destinationPlace.longitude}',
+          origin,
+          destination,
         );
         tollCost = (tollData['toll_cost'] as num?)?.toDouble() ?? 0.0;
         print('💰 Toll cost for quote: \$$tollCost');

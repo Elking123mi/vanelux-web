@@ -143,13 +143,31 @@ Future<Map<String, dynamic>> getRouteWithTolls(
     }
 
     final data = jsonDecode(response.body) as Map<String, dynamic>;
-    final route = (data['route'] as Map<String, dynamic>?);
-    final costs = route?['costs'] as Map<String, dynamic>?;
-    final licensePlate = (costs?['licensePlate'] as num?)?.toDouble();
-    final cash = (costs?['cash'] as num?)?.toDouble();
-    final tollCost = licensePlate ?? cash ?? 0.0;
+    final routes = data['routes'] as List<dynamic>?;
+    if (routes == null || routes.isEmpty) {
+      return {'has_tolls': false, 'toll_cost': 0.0};
+    }
 
-    return {'has_tolls': tollCost > 0, 'toll_cost': tollCost};
+    final route = routes.first as Map<String, dynamic>;
+    final costs = route['costs'] as Map<String, dynamic>?;
+
+    double parseCost(dynamic value) {
+      if (value is num) return value.toDouble();
+      if (value is String) return double.tryParse(value) ?? 0.0;
+      return 0.0;
+    }
+
+    double tollCost = 0.0;
+    if (costs != null) {
+      tollCost = parseCost(costs['licensePlate']);
+      if (tollCost <= 0) tollCost = parseCost(costs['tag']);
+      if (tollCost <= 0) tollCost = parseCost(costs['cash']);
+      if (tollCost <= 0) tollCost = parseCost(costs['prepaidCard']);
+    }
+
+    final tolls = route['tolls'] as List<dynamic>?;
+    final hasTolls = tollCost > 0 || (tolls != null && tolls.isNotEmpty);
+    return {'has_tolls': hasTolls, 'toll_cost': tollCost};
   } catch (e) {
     return {'has_tolls': false, 'toll_cost': 0.0};
   }

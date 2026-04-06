@@ -201,11 +201,11 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
           );
         });
 
-        // Fetch real toll cost from Google Routes API
+        // Fetch real toll cost from TollGuru API
         try {
           final tollData = await GoogleMapsService.getRouteWithTolls(
-            '${widget.pickupLat},${widget.pickupLng}',
-            '${widget.destinationLat},${widget.destinationLng}',
+            widget.pickupAddress,
+            widget.destinationAddress,
           );
           setState(() {
             _tollCost = (tollData['toll_cost'] as num?)?.toDouble() ?? 0.0;
