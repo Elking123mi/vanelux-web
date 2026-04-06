@@ -1089,9 +1089,19 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
                     'Base: \$${vehicle.basePrice.toStringAsFixed(2)} • ${_distanceMiles?.toStringAsFixed(0) ?? "0"} mi',
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
-                  Text(
+                  if (_tollCost > 0)
+                    Text(
+                      'Tolls detected: \$${_tollCost.toStringAsFixed(2)}',
+                      style: const TextStyle(fontSize: 12, color: Color(0xFFD97706)),
+                    )
+                  else
+                    const Text(
+                      'No tolls detected',
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  const Text(
                     'Fees & taxes included',
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                 ],
               ),
@@ -1300,6 +1310,16 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
                 'Base service (${_distanceMiles?.toStringAsFixed(0) ?? "0"} mi): \$${vehicle.basePrice.toStringAsFixed(2)}',
                 style: const TextStyle(fontSize: 12, color: Colors.grey),
               ),
+              if (_tollCost > 0)
+                Text(
+                  'Tolls (detected by route): \$${_tollCost.toStringAsFixed(2)}',
+                  style: const TextStyle(fontSize: 12, color: Color(0xFFD97706), fontWeight: FontWeight.w600),
+                )
+              else
+                const Text(
+                  'Tolls: None detected',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
               Text(
                 'Credit card fee (4%): \$${(totalPrice * 0.04).toStringAsFixed(2)}',
                 style: const TextStyle(fontSize: 12, color: Colors.grey),
