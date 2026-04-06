@@ -268,43 +268,31 @@
       });
     },
     getRouteWithTolls: function (key, origin, destination) {
-      return fetch('https://routes.googleapis.com/directions/v2:computeRoutes', {
+      var tollGuruKey = window._tollGuruApiKey || '';
+      if (!tollGuruKey) {
+        return Promise.resolve({ has_tolls: false, toll_cost: 0.0 });
+      }
+      return fetch('https://apis.tollguru.com/toll/v2/origin-destination-waypoints', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Goog-Api-Key': key,
-          'X-Goog-FieldMask': 'routes.travelAdvisory.tollInfo,routes.distanceMeters,routes.duration',
+          'x-api-key': tollGuruKey,
         },
         body: JSON.stringify({
-          origin: { address: origin },
-          destination: { address: destination },
-          travelMode: 'DRIVE',
-          extraComputations: ['TOLLS'],
-          routeModifiers: {
-            vehicleInfo: { emissionType: 'GASOLINE' },
-          },
+          from: { address: origin },
+          to: { address: destination },
+          vehicleType: '2AxlesAuto',
+          departure_time: new Date().toISOString(),
         }),
       })
       .then(function (response) { return response.json(); })
       .then(function (data) {
-        if (!data.routes || !data.routes.length) {
-          return { has_tolls: false, toll_cost: 0.0 };
-        }
-        var route = data.routes[0];
-        var tollInfo = route.travelAdvisory && route.travelAdvisory.tollInfo;
-        var estimatedPrice = tollInfo && tollInfo.estimatedPrice;
-        var hasTolls = !!(estimatedPrice && estimatedPrice.length > 0);
-        var tollCost = 0.0;
-        if (hasTolls) {
-          var price = estimatedPrice[0];
-          var units = parseFloat(price.units || '0');
-          var nanos = (price.nanos || 0) / 1e9;
-          tollCost = units + nanos;
-        }
-        return { has_tolls: hasTolls, toll_cost: tollCost };
+        var costs = data.route && data.route.costs;
+        var tollCost = (costs && (costs.licensePlate || costs.cash)) || 0.0;
+        return { has_tolls: tollCost > 0, toll_cost: tollCost };
       })
       .catch(function (err) {
-        console.warn('Routes API toll fetch failed, defaulting to 0:', err);
+        console.warn('TollGuru fetch failed:', err);
         return { has_tolls: false, toll_cost: 0.0 };
       });
     },

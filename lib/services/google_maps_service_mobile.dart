@@ -121,24 +121,20 @@ Future<Map<String, dynamic>> getRouteWithTolls(
   String destination,
 ) async {
   try {
+    final apiKey = AppConfig.tollGuruApiKey;
+    if (apiKey.isEmpty) return {'has_tolls': false, 'toll_cost': 0.0};
+
     final response = await http.post(
-      Uri.parse(
-        'https://routes.googleapis.com/directions/v2:computeRoutes',
-      ),
+      Uri.parse('https://apis.tollguru.com/toll/v2/origin-destination-waypoints'),
       headers: {
         'Content-Type': 'application/json',
-        'X-Goog-Api-Key': AppConfig.googleMapsApiKey,
-        'X-Goog-FieldMask':
-            'routes.travelAdvisory.tollInfo,routes.distanceMeters,routes.duration',
+        'x-api-key': apiKey,
       },
       body: jsonEncode({
-        'origin': {'address': origin},
-        'destination': {'address': destination},
-        'travelMode': 'DRIVE',
-        'extraComputations': ['TOLLS'],
-        'routeModifiers': {
-          'vehicleInfo': {'emissionType': 'GASOLINE'},
-        },
+        'from': {'address': origin},
+        'to': {'address': destination},
+        'vehicleType': '2AxlesAuto',
+        'departure_time': DateTime.now().toUtc().toIso8601String(),
       }),
     );
 
@@ -147,24 +143,13 @@ Future<Map<String, dynamic>> getRouteWithTolls(
     }
 
     final data = jsonDecode(response.body) as Map<String, dynamic>;
-    final routes = data['routes'] as List<dynamic>?;
-    if (routes == null || routes.isEmpty) {
-      return {'has_tolls': false, 'toll_cost': 0.0};
-    }
+    final route = (data['route'] as Map<String, dynamic>?);
+    final costs = route?['costs'] as Map<String, dynamic>?;
+    final licensePlate = (costs?['licensePlate'] as num?)?.toDouble();
+    final cash = (costs?['cash'] as num?)?.toDouble();
+    final tollCost = licensePlate ?? cash ?? 0.0;
 
-    final route = routes.first as Map<String, dynamic>;
-    final travelAdvisory = route['travelAdvisory'] as Map<String, dynamic>?;
-    final tollInfo = travelAdvisory?['tollInfo'] as Map<String, dynamic>?;
-    final estimatedPrice = tollInfo?['estimatedPrice'] as List<dynamic>?;
-
-    if (estimatedPrice == null || estimatedPrice.isEmpty) {
-      return {'has_tolls': false, 'toll_cost': 0.0};
-    }
-
-    final price = estimatedPrice.first as Map<String, dynamic>;
-    final units = double.tryParse(price['units']?.toString() ?? '0') ?? 0.0;
-    final nanos = ((price['nanos'] as num?) ?? 0) / 1e9;
-    return {'has_tolls': true, 'toll_cost': units + nanos};
+    return {'has_tolls': tollCost > 0, 'toll_cost': tollCost};
   } catch (e) {
     return {'has_tolls': false, 'toll_cost': 0.0};
   }

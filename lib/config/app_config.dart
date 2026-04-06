@@ -56,6 +56,12 @@ class AppConfig {
     defaultValue: '',
   );
 
+  // TollGuru API Key (configurar en Netlify como TOLLGURU_API_KEY)
+  static const String tollGuruApiKey = String.fromEnvironment(
+    'TOLLGURU_API_KEY',
+    defaultValue: '',
+  );
+
   // Environment Configuration
   static const bool isProduction = true;
   static const bool enableLogging = true;
