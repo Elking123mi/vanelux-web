@@ -616,12 +616,50 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     }
   }
 
+  bool _isMobileLayout(BuildContext context) {
+    return MediaQuery.of(context).size.width < 900;
+  }
+
+  bool _isTabletLayout(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    return width >= 900 && width < 1240;
+  }
+
+  double _sectionPadding(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    if (width < 900) return 18;
+    if (width < 1240) return 36;
+    return 80;
+  }
+
+  void _goHome() {
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+      return;
+    }
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) => const WebHomeScreen()),
+    );
+  }
+
+  void _navigateToBooking({String? packageName}) {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => WebHomeScreen(
+          initialServiceType: _mapServiceTypeForBooking(),
+          selectedPackage: packageName,
+          isServiceLocked: packageName != null,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final serviceInfo = _getServiceInfo();
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF6F8FB),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -643,33 +681,111 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   }
 
   Widget _buildNavBar(BuildContext context) {
+    final isMobile = _isMobileLayout(context);
+    final pad = _sectionPadding(context);
+
+    if (isMobile) {
+      return Container(
+        height: 76,
+        padding: EdgeInsets.symmetric(horizontal: pad),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 14),
+          ],
+        ),
+        child: Row(
+          children: [
+            InkWell(
+              onTap: _goHome,
+              child: const Text(
+                'VANELUX',
+                style: TextStyle(
+                  fontSize: 34,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF0B3254),
+                  letterSpacing: 1.5,
+                ),
+              ),
+            ),
+            const Spacer(),
+            IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.phone_outlined, color: Color(0xFF0B3254)),
+              tooltip: '+1 917 599-5522',
+            ),
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.menu, color: Color(0xFF0B3254)),
+              onSelected: (value) {
+                if (value == 'HOME') {
+                  _goHome();
+                } else if (value == 'FLEET') {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const FleetScreen(),
+                    ),
+                  );
+                } else {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          ServiceDetailScreen(serviceType: value),
+                    ),
+                  );
+                }
+              },
+              itemBuilder: (context) => const [
+                PopupMenuItem(value: 'HOME', child: Text('Home')),
+                PopupMenuItem(value: 'FLEET', child: Text('Fleet')),
+                PopupMenuDivider(),
+                PopupMenuItem(
+                  value: 'Airport Transfer',
+                  child: Text('Airport Transfer'),
+                ),
+                PopupMenuItem(
+                  value: 'Point to Point',
+                  child: Text('Point to Point'),
+                ),
+                PopupMenuItem(
+                  value: 'Hourly Service',
+                  child: Text('Hourly Service'),
+                ),
+                PopupMenuItem(value: 'Corporate', child: Text('Corporate')),
+                PopupMenuItem(value: 'Events', child: Text('Events')),
+                PopupMenuItem(value: 'Tours', child: Text('Tours')),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
     return Container(
       height: 88,
-      padding: const EdgeInsets.symmetric(horizontal: 40),
+      padding: EdgeInsets.symmetric(horizontal: pad),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10),
+          BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 14),
         ],
       ),
       child: Row(
         children: [
-          // Logo
           InkWell(
-            onTap: () => Navigator.of(context).pop(),
+            onTap: _goHome,
             child: const Text(
               'VANELUX',
               style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
+                fontSize: 34,
+                fontWeight: FontWeight.w700,
                 color: Color(0xFF0B3254),
-                letterSpacing: 2,
+                letterSpacing: 1.5,
               ),
             ),
           ),
           const Spacer(),
-          // Nav items
-          _buildNavItem('HOME', () => Navigator.of(context).pop()),
+          _buildNavItem('HOME', _goHome),
           const SizedBox(width: 30),
           _buildServicesMenu(context),
           const SizedBox(width: 30),
@@ -681,7 +797,6 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           const SizedBox(width: 30),
           _buildNavItem('ABOUT', () => Navigator.of(context).pop()),
           const SizedBox(width: 40),
-          // User info
           if (userName != null) ...[
             Row(
               children: [
@@ -702,6 +817,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
+                    color: Color(0xFF0B3254),
                   ),
                 ),
               ],
@@ -732,7 +848,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         child: Text(
           title,
           style: const TextStyle(
-            fontSize: 13,
+            fontSize: 13.5,
             fontWeight: FontWeight.w600,
             letterSpacing: 1,
             color: Color(0xFF0B3254),
@@ -790,10 +906,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     return PopupMenuItem<String>(
       value: title,
       onTap: () {
-        // Si ya estamos en esa página, no hacer nada
         if (widget.serviceType == title) return;
-
-        // Navegar a la nueva página de servicio
         Future.delayed(Duration.zero, () {
           Navigator.pushReplacement(
             context,
@@ -817,15 +930,20 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   }
 
   Widget _buildHeroSection(Map<String, dynamic> info) {
+    final isMobile = _isMobileLayout(context);
+    final pad = _sectionPadding(context);
+
     return Container(
-      height: 500,
+      margin: EdgeInsets.fromLTRB(pad, 20, pad, 0),
+      height: isMobile ? 440 : 560,
       decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
         image: info['image'] != null
             ? DecorationImage(
                 image: AssetImage(info['image']),
                 fit: BoxFit.cover,
                 colorFilter: ColorFilter.mode(
-                  Colors.black.withOpacity(0.5),
+                  Colors.black.withOpacity(0.44),
                   BlendMode.darken,
                 ),
               )
@@ -837,28 +955,28 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 colors: [
                   info['color'],
                   const Color(0xFF0B3254),
-                  const Color(0xFF1a4d7a),
+                  const Color(0xFF1A4D7A),
                 ],
               )
             : null,
       ),
       child: Stack(
         children: [
-          // Overlay oscuro para mejorar legibilidad del texto
-          if (info['image'] != null)
-            Container(
+          Positioned.fill(
+            child: Container(
               decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(28),
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withOpacity(0.3),
-                    Colors.black.withOpacity(0.6),
+                    Colors.black.withOpacity(0.12),
+                    Colors.black.withOpacity(0.58),
                   ],
                 ),
               ),
             ),
-          // Efectos de fondo decorativos
+          ),
           Positioned(
             top: -50,
             right: -50,
@@ -883,90 +1001,168 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
               ),
             ),
           ),
-          // Contenido principal
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(30),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.3),
-                      width: 2,
-                    ),
-                  ),
-                  child: Icon(
-                    info['icon'],
-                    size: 100,
-                    color: const Color(0xFFFFD700),
-                  ),
-                ),
-                const SizedBox(height: 30),
-                Text(
-                  info['title'],
-                  style: const TextStyle(
-                    fontSize: 56,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 1.5,
-                    shadows: [
-                      Shadow(
-                        color: Colors.black26,
-                        offset: Offset(2, 2),
-                        blurRadius: 10,
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile ? 20 : 54,
+              vertical: isMobile ? 24 : 44,
+            ),
+            child: Align(
+              alignment: isMobile ? Alignment.center : Alignment.centerLeft,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: isMobile ? 640 : 820),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: isMobile
+                      ? CrossAxisAlignment.center
+                      : CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
                       ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 15),
-                Text(
-                  info['subtitle'],
-                  style: const TextStyle(
-                    fontSize: 24,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w300,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                const SizedBox(height: 40),
-                // Botón decorativo
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 30,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFD700),
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.star, color: Color(0xFF0B3254), size: 20),
-                      SizedBox(width: 10),
-                      Text(
-                        'Premium Service',
-                        style: TextStyle(
-                          color: Color(0xFF0B3254),
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.14),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.24),
                         ),
                       ),
-                    ],
-                  ),
+                      child: const Text(
+                        'Tailored luxury mobility',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.4,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: isMobile ? 14 : 20),
+                    Row(
+                      mainAxisAlignment: isMobile
+                          ? MainAxisAlignment.center
+                          : MainAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.32),
+                            ),
+                          ),
+                          child: Icon(
+                            info['icon'],
+                            size: isMobile ? 34 : 42,
+                            color: const Color(0xFFFFD700),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        if (!isMobile)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 9,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFD700),
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            child: const Text(
+                              'Premium Service',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF0B3254),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    SizedBox(height: isMobile ? 14 : 24),
+                    Text(
+                      info['title'],
+                      textAlign: isMobile ? TextAlign.center : TextAlign.left,
+                      style: TextStyle(
+                        fontSize: isMobile ? 42 : 62,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                        height: 1.02,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      info['subtitle'],
+                      textAlign: isMobile ? TextAlign.center : TextAlign.left,
+                      style: TextStyle(
+                        fontSize: isMobile ? 19 : 25,
+                        color: Colors.white.withOpacity(0.95),
+                        height: 1.4,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    SizedBox(height: isMobile ? 24 : 34),
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      alignment: isMobile
+                          ? WrapAlignment.center
+                          : WrapAlignment.start,
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: () => _navigateToBooking(),
+                          icon: const Icon(Icons.calendar_month),
+                          label: const Text('Book this service'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFFD700),
+                            foregroundColor: const Color(0xFF0B3254),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 26,
+                              vertical: 16,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            textStyle: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        OutlinedButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => const FleetScreen(),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.directions_car_outlined),
+                          label: const Text('View fleet'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            side: BorderSide(
+                              color: Colors.white.withOpacity(0.74),
+                              width: 1.6,
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 16,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            textStyle: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ],
@@ -975,54 +1171,105 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   }
 
   Widget _buildDescriptionSection(Map<String, dynamic> info) {
+    final isMobile = _isMobileLayout(context);
+    final isTablet = _isTabletLayout(context);
+    final pad = _sectionPadding(context);
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 100),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Colors.white, Color(0xFFFAFAFA)],
-        ),
+      margin: EdgeInsets.fromLTRB(pad, 24, pad, 0),
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 18 : 34,
+        vertical: isMobile ? 28 : 42,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFD700).withOpacity(0.2),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: const Text(
-              'WHY CHOOSE US',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF0B3254),
-                letterSpacing: 2,
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            alignment: WrapAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 7,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0B3254).withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: const Text(
+                  'WHY CHOOSE US',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.6,
+                    color: Color(0xFF0B3254),
+                  ),
+                ),
               ),
-            ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 7,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFD700).withOpacity(0.22),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: const Text(
+                  'Handpicked chauffeurs',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF0B3254),
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 30),
+          SizedBox(height: isMobile ? 18 : 24),
           Text(
             info['description'],
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 22,
-              height: 1.8,
-              color: Color(0xFF444444),
+            style: TextStyle(
+              fontSize: isMobile ? 18 : 22,
+              height: 1.65,
+              color: const Color(0xFF3F4A59),
               fontWeight: FontWeight.w400,
-              letterSpacing: 0.3,
             ),
           ),
-          const SizedBox(height: 50),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          SizedBox(height: isMobile ? 22 : 30),
+          Wrap(
+            spacing: 14,
+            runSpacing: 14,
+            alignment: WrapAlignment.center,
             children: [
-              _buildStatCard('500+', 'Happy Clients'),
-              const SizedBox(width: 40),
-              _buildStatCard('24/7', 'Support'),
-              const SizedBox(width: 40),
-              _buildStatCard('100%', 'Satisfaction'),
+              _buildStatCard(
+                '500+',
+                'Happy Clients',
+                compact: isMobile || isTablet,
+              ),
+              _buildStatCard(
+                '24/7',
+                'Always Available',
+                compact: isMobile || isTablet,
+              ),
+              _buildStatCard(
+                '100%',
+                'Private Comfort',
+                compact: isMobile || isTablet,
+              ),
             ],
           ),
         ],
@@ -1030,40 +1277,45 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     );
   }
 
-  Widget _buildStatCard(String number, String label) {
+  Widget _buildStatCard(String number, String label, {bool compact = false}) {
     return Container(
-      padding: const EdgeInsets.all(25),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 5),
-          ),
-        ],
+      width: compact ? 160 : 200,
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 16 : 20,
+        vertical: compact ? 16 : 20,
       ),
-      child: Column(
-        children: [
-          Text(
-            number,
-            style: const TextStyle(
-              fontSize: 36,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF0B3254),
+      decoration: const BoxDecoration(color: Colors.white),
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: compact ? 14 : 18,
+          vertical: compact ? 16 : 20,
+        ),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFF0B3254).withOpacity(0.12)),
+          color: const Color(0xFFF9FBFF),
+        ),
+        child: Column(
+          children: [
+            Text(
+              number,
+              style: TextStyle(
+                fontSize: compact ? 30 : 34,
+                fontWeight: FontWeight.w800,
+                color: const Color(0xFF0B3254),
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-              fontWeight: FontWeight.w500,
+            const SizedBox(height: 6),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: compact ? 12 : 14,
+                color: const Color(0xFF5B6678),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -1072,137 +1324,190 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     if (!info.containsKey('detailedInfo')) return const SizedBox.shrink();
 
     final detailedInfo = info['detailedInfo'] as List;
+    final isMobile = _isMobileLayout(context);
+    final pad = _sectionPadding(context);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 80),
-      color: Colors.white,
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(15),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF0B3254),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  info['icon'],
-                  color: const Color(0xFFFFD700),
-                  size: 32,
-                ),
-              ),
-              const SizedBox(width: 20),
-              Expanded(
-                child: Text(
-                  '${info['title']} - Premium Service',
-                  style: const TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF0B3254),
-                  ),
-                ),
-              ),
-            ],
+      margin: EdgeInsets.fromLTRB(pad, 24, pad, 0),
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 18 : 30,
+        vertical: isMobile ? 28 : 34,
+      ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
-          const SizedBox(height: 40),
-          // Imagen y descripción lado a lado
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Imagen
-              if (info['image'] != null)
-                Expanded(
-                  flex: 2,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(15),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${info['title']} Experience',
+            style: const TextStyle(
+              fontSize: 32,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF0B3254),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Details designed for comfort, precision and style.',
+            style: TextStyle(fontSize: 15, color: Colors.grey[700]),
+          ),
+          const SizedBox(height: 26),
+          if (isMobile)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (info['image'] != null)
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(18),
                     child: Image.asset(
                       info['image'],
-                      height: 300,
+                      height: 220,
+                      width: double.infinity,
                       fit: BoxFit.cover,
                     ),
                   ),
-                ),
-              const SizedBox(width: 40),
-              // Descripción
-              Expanded(
-                flex: 3,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      info['subtitle'] ?? '',
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF0B3254),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      info['description'],
-                      style: const TextStyle(
-                        fontSize: 16,
-                        height: 1.8,
-                        color: Color(0xFF666666),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 50),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: detailedInfo.map((item) {
-              return Expanded(
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 10),
-                  padding: const EdgeInsets.all(25),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF0B3254),
-                    borderRadius: BorderRadius.circular(15),
+                if (info['image'] != null) const SizedBox(height: 18),
+                Text(
+                  info['subtitle'] ?? '',
+                  style: const TextStyle(
+                    fontSize: 23,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF0B3254),
                   ),
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  info['description'],
+                  style: const TextStyle(
+                    fontSize: 15,
+                    height: 1.7,
+                    color: Color(0xFF556070),
+                  ),
+                ),
+              ],
+            )
+          else
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (info['image'] != null)
+                  Expanded(
+                    flex: 2,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(18),
+                      child: Image.asset(
+                        info['image'],
+                        height: 330,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                if (info['image'] != null) const SizedBox(width: 28),
+                Expanded(
+                  flex: 3,
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(15),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          item['icon'],
-                          size: 40,
-                          color: const Color(0xFFFFD700),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
                       Text(
-                        item['title'],
+                        info['subtitle'] ?? '',
                         style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          fontSize: 26,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF0B3254),
                         ),
-                        textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 14),
                       Text(
-                        item['description'],
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white.withOpacity(0.8),
-                          height: 1.5,
+                        info['description'],
+                        style: const TextStyle(
+                          fontSize: 16,
+                          height: 1.7,
+                          color: Color(0xFF556070),
                         ),
-                        textAlign: TextAlign.center,
                       ),
                     ],
                   ),
                 ),
+              ],
+            ),
+          const SizedBox(height: 30),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final maxWidth = constraints.maxWidth;
+              final itemWidth = maxWidth < 740
+                  ? maxWidth
+                  : maxWidth < 1140
+                  ? (maxWidth - 20) / 2
+                  : (maxWidth - 40) / 3;
+
+              return Wrap(
+                spacing: 20,
+                runSpacing: 20,
+                children: detailedInfo.map((item) {
+                  return SizedBox(
+                    width: itemWidth,
+                    child: Container(
+                      padding: const EdgeInsets.all(22),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0B3254),
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.18),
+                            blurRadius: 14,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
+                              item['icon'],
+                              size: 28,
+                              color: const Color(0xFFFFD700),
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          Text(
+                            item['title'],
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            item['description'],
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white.withOpacity(0.85),
+                              height: 1.45,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
               );
-            }).toList(),
+            },
           ),
         ],
       ),
@@ -1213,169 +1518,190 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     if (!info.containsKey('packages')) return const SizedBox.shrink();
 
     final packages = info['packages'] as List;
+    final isMobile = _isMobileLayout(context);
+    final pad = _sectionPadding(context);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 80),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFFF8F9FA), Colors.white],
-        ),
+      margin: EdgeInsets.fromLTRB(pad, 24, pad, 0),
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 16 : 22,
+        vertical: isMobile ? 24 : 34,
       ),
+      decoration: const BoxDecoration(color: Color(0xFFEEF3FA)),
       child: Column(
         children: [
           Text(
             _getPackageSectionTitle(),
-            style: const TextStyle(
-              fontSize: 36,
-              fontWeight: FontWeight.bold,
+            style: TextStyle(
+              fontSize: isMobile ? 28 : 38,
+              fontWeight: FontWeight.w800,
               color: Color(0xFF0B3254),
             ),
+            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 60),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: packages.map((package) {
-              final hasBadge = package.containsKey('badge');
-              return Expanded(
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 15),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: hasBadge
-                        ? Border.all(color: const Color(0xFFFFD700), width: 3)
-                        : Border.all(color: Colors.grey.shade200, width: 1),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 30,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      if (hasBadge)
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFFFD700),
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(20),
-                              topRight: Radius.circular(20),
-                            ),
-                          ),
-                          child: Text(
-                            package['badge'],
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF0B3254),
-                              letterSpacing: 1.5,
-                            ),
-                          ),
+          SizedBox(height: isMobile ? 26 : 40),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final maxWidth = constraints.maxWidth;
+              final cardWidth = maxWidth < 760
+                  ? maxWidth
+                  : maxWidth < 1200
+                  ? (maxWidth - 22) / 2
+                  : (maxWidth - 44) / 3;
+
+              return Wrap(
+                spacing: 22,
+                runSpacing: 22,
+                children: packages.map((package) {
+                  final hasBadge = package.containsKey('badge');
+                  return SizedBox(
+                    width: cardWidth,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: hasBadge
+                              ? const Color(0xFFFFD700)
+                              : const Color(0xFFDDE4EE),
+                          width: hasBadge ? 2.2 : 1,
                         ),
-                      Padding(
-                        padding: const EdgeInsets.all(30),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              package['name'],
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF0B3254),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 18,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          if (hasBadge)
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFFFD700),
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(18),
+                                  topRight: Radius.circular(18),
+                                ),
+                              ),
+                              child: Text(
+                                package['badge'],
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 1.2,
+                                ),
                               ),
                             ),
-                            const SizedBox(height: 15),
-                            Text(
-                              package['description'],
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[600],
-                                height: 1.5,
-                              ),
-                            ),
-                            const SizedBox(height: 25),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          Padding(
+                            padding: const EdgeInsets.all(20),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  package['duration'],
+                                  package['name'],
                                   style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w800,
                                     color: Color(0xFF0B3254),
                                   ),
                                 ),
+                                const SizedBox(height: 10),
                                 Text(
-                                  package['price'],
-                                  style: const TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF0B3254),
+                                  package['description'],
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[700],
+                                    height: 1.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 6,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: const Color(
+                                          0xFF0B3254,
+                                        ).withOpacity(0.08),
+                                        borderRadius: BorderRadius.circular(
+                                          999,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        package['duration'],
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          color: Color(0xFF0B3254),
+                                        ),
+                                      ),
+                                    ),
+                                    Text(
+                                      package['price'],
+                                      style: const TextStyle(
+                                        fontSize: 30,
+                                        fontWeight: FontWeight.w800,
+                                        color: Color(0xFF0B3254),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    onPressed: () => _navigateToBooking(
+                                      packageName: package['name'],
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF0B3254),
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 14,
+                                      ),
+                                      textStyle: const TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    child: const Text('Choose package'),
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 20),
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  // Navigate to home screen with pre-selected service
-                                  Navigator.of(context).pushReplacement(
-                                    MaterialPageRoute(
-                                      builder: (context) => WebHomeScreen(
-                                        initialServiceType:
-                                            _mapServiceTypeForBooking(),
-                                        selectedPackage: package['name'],
-                                        isServiceLocked: true,
-                                      ),
-                                    ),
-                                  );
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF0B3254),
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 15,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                ),
-                                child: const Text(
-                                  'Book Now',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
+                    ),
+                  );
+                }).toList(),
               );
-            }).toList(),
+            },
           ),
-          const SizedBox(height: 60),
+          const SizedBox(height: 34),
           Container(
-            padding: const EdgeInsets.all(40),
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile ? 16 : 24,
+              vertical: isMobile ? 18 : 22,
+            ),
             decoration: BoxDecoration(
               color: const Color(0xFF0B3254),
-              borderRadius: BorderRadius.circular(15),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
                   'Custom Hourly Services',
@@ -1388,33 +1714,47 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 const SizedBox(height: 15),
                 const Text(
                   'Need a custom duration? We can accommodate any timeframe for your specific needs.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, color: Colors.white70),
+                  style: TextStyle(
+                    fontSize: isMobile ? 14 : 15,
+                    color: Colors.white70,
+                  ),
                 ),
-                const SizedBox(height: 25),
-                ElevatedButton(
-                  onPressed: () {
-                    // Regresar a la página principal
-                    Navigator.of(context).pop();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFFD700),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 50,
-                      vertical: 18,
+                const SizedBox(height: 20),
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () => _navigateToBooking(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFFD700),
+                        foregroundColor: const Color(0xFF0B3254),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 14,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text('Request custom quote'),
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+                    OutlinedButton(
+                      onPressed: _goHome,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        side: BorderSide(color: Colors.white.withOpacity(0.6)),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 14,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text('Back to booking'),
                     ),
-                  ),
-                  child: const Text(
-                    'Request Custom Quote',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF0B3254),
-                    ),
-                  ),
+                  ],
                 ),
               ],
             ),
@@ -1425,9 +1765,15 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   }
 
   Widget _buildWorldCupSection() {
+    final isMobile = _isMobileLayout(context);
+    final pad = _sectionPadding(context);
+
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 100, vertical: 60),
-      padding: const EdgeInsets.all(60),
+      margin: EdgeInsets.fromLTRB(pad, 24, pad, 0),
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 18 : 26,
+        vertical: isMobile ? 20 : 28,
+      ),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
@@ -1444,125 +1790,74 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Image.network(
-              'https://upload.wikimedia.org/wikipedia/en/thumb/e/e3/2026_FIFA_World_Cup.svg/1200px-2026_FIFA_World_Cup.svg.png',
-              height: 120,
-              errorBuilder: (context, error, stackTrace) {
-                return const Icon(
-                  Icons.sports_soccer,
-                  size: 80,
-                  color: Color(0xFFFFD700),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 30),
-          const Text(
-            'WORLD CUP 2026',
-            style: TextStyle(
-              fontSize: 48,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFFFFD700),
-              letterSpacing: 2,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Container(
-            height: 4,
-            width: 300,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFFFFD700), Colors.orange],
+          const Row(
+            children: [
+              Icon(
+                Icons.local_fire_department,
+                color: Color(0xFFFFD700),
+                size: 24,
               ),
-              borderRadius: BorderRadius.circular(2),
+              SizedBox(width: 8),
+              Text(
+                'Special Event Spotlight',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'World Cup 2026 transport concierge',
+            style: TextStyle(
+              fontSize: isMobile ? 20 : 26,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFFFFD700),
             ),
+          ),
+          const SizedBox(height: 14),
+          const Text(
+            'Reserve luxury transportation for match days, airport arrivals and private group itineraries across host cities.',
+            style: TextStyle(fontSize: 15, color: Colors.white70, height: 1.6),
           ),
           const SizedBox(height: 20),
-          const Text(
-            'USA • CANADA • MEXICO',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-              letterSpacing: 4,
-            ),
-          ),
-          const SizedBox(height: 40),
-          const Text(
-            '🏆 Official Transportation Partner 🏆',
-            style: TextStyle(
-              fontSize: 20,
-              color: Colors.white,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 20),
-          const Text(
-            'Book your luxury transportation for all World Cup 2026 matches!\nExclusive packages available for fans traveling to stadiums.',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 16, color: Colors.white70, height: 1.6),
-          ),
-          const SizedBox(height: 35),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
             children: [
               ElevatedButton.icon(
-                onPressed: () {
-                  // Regresar a la página principal
-                  Navigator.of(context).pop();
-                },
-                icon: const Icon(Icons.event, size: 24),
-                label: const Text(
-                  'VIEW WORLD CUP PACKAGES',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1,
-                  ),
-                ),
+                onPressed: () => _navigateToBooking(),
+                icon: const Icon(Icons.event),
+                label: const Text('View event packages'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFFD700),
                   foregroundColor: const Color(0xFF0B3254),
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 40,
-                    vertical: 20,
+                    horizontal: 20,
+                    vertical: 14,
                   ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  elevation: 10,
                 ),
               ),
-              const SizedBox(width: 20),
               OutlinedButton.icon(
-                onPressed: () {
-                  // Abrir el teléfono (en web no hace nada, pero en móvil funcionaría)
-                },
-                icon: const Icon(Icons.phone, size: 24),
-                label: const Text(
-                  'CALL: +1 917 599-5522',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1,
-                  ),
-                ),
+                onPressed: () {},
+                icon: const Icon(Icons.phone),
+                label: const Text('CALL: +1 917 599-5522'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Colors.white,
                   side: const BorderSide(color: Colors.white, width: 2),
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 40,
-                    vertical: 20,
+                    horizontal: 20,
+                    vertical: 14,
                   ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
               ),
@@ -1577,51 +1872,66 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     final features = info['features'] as List;
     if (features.isEmpty) return const SizedBox.shrink();
 
+    final isMobile = _isMobileLayout(context);
+    final pad = _sectionPadding(context);
+
     return Container(
-      color: const Color(0xFFF8F9FA),
-      padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 80),
+      margin: EdgeInsets.fromLTRB(pad, 24, pad, 0),
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 18 : 30,
+        vertical: isMobile ? 26 : 30,
+      ),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0B3254),
+        borderRadius: BorderRadius.circular(22),
+      ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
             'Service Features',
             style: TextStyle(
-              fontSize: 36,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF0B3254),
+              fontSize: 32,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
             ),
           ),
-          const SizedBox(height: 50),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 40,
-              mainAxisSpacing: 40,
-              childAspectRatio: 3,
-            ),
-            itemCount: features.length,
-            itemBuilder: (context, index) {
-              return Row(
-                children: [
-                  const Icon(
-                    Icons.check_circle,
-                    color: Color(0xFF28A745),
-                    size: 24,
-                  ),
-                  const SizedBox(width: 15),
-                  Expanded(
-                    child: Text(
-                      features[index],
+          const SizedBox(height: 20),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: features.map<Widget>((feature) {
+              return Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.09),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.white.withOpacity(0.16)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.check_circle,
+                      color: Color(0xFF4CD17D),
+                      size: 18,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      feature,
                       style: const TextStyle(
-                        fontSize: 16,
-                        color: Color(0xFF333333),
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               );
-            },
+            }).toList(),
           ),
         ],
       ),
@@ -1632,8 +1942,15 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     final offers = info['offers'] as List;
     if (offers.isEmpty) return const SizedBox.shrink();
 
+    final isMobile = _isMobileLayout(context);
+    final pad = _sectionPadding(context);
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 100),
+      margin: EdgeInsets.fromLTRB(pad, 24, pad, 0),
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 16 : 20,
+        vertical: isMobile ? 26 : 34,
+      ),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -1672,142 +1989,127 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
               const Text(
                 'Special Offers & Promotions',
                 style: TextStyle(
-                  fontSize: 42,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 36,
+                  fontWeight: FontWeight.w800,
                   color: Color(0xFF0B3254),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 15),
+          const SizedBox(height: 12),
           const Text(
             'Save more with our exclusive deals',
             style: TextStyle(fontSize: 20, color: Color(0xFF666666)),
           ),
-          const SizedBox(height: 60),
-          Row(
-            children: offers.map((offer) {
-              return Expanded(
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 15),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: const Color(0xFFFFD700),
-                      width: 2,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFFFFD700).withOpacity(0.2),
-                        blurRadius: 30,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      // Badge de descuento
-                      Container(
-                        padding: const EdgeInsets.symmetric(vertical: 30),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
-                          ),
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(18),
-                            topRight: Radius.circular(18),
-                          ),
+          const SizedBox(height: 26),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final maxWidth = constraints.maxWidth;
+              final cardWidth = maxWidth < 760
+                  ? maxWidth
+                  : maxWidth < 1200
+                  ? (maxWidth - 20) / 2
+                  : (maxWidth - 40) / 3;
+
+              return Wrap(
+                spacing: 20,
+                runSpacing: 20,
+                children: offers.map((offer) {
+                  return SizedBox(
+                    width: cardWidth,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: const Color(0xFFFFD700).withOpacity(0.8),
+                          width: 1.4,
                         ),
-                        child: Center(
-                          child: Text(
-                            offer['discount'],
-                            style: const TextStyle(
-                              fontSize: 40,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF0B3254),
-                              shadows: [
-                                Shadow(
-                                  color: Colors.black12,
-                                  offset: Offset(2, 2),
-                                  blurRadius: 4,
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFFFFD700).withOpacity(0.16),
+                            blurRadius: 16,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(vertical: 18),
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
+                              ),
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(15),
+                                topRight: Radius.circular(15),
+                              ),
+                            ),
+                            child: Text(
+                              offer['discount'],
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 34,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF0B3254),
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(18),
+                            child: Column(
+                              children: [
+                                Text(
+                                  offer['title'],
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFF0B3254),
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  offer['description'],
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    color: Colors.grey[700],
+                                    height: 1.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 14),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(
+                                      0xFF0B3254,
+                                    ).withOpacity(0.07),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Text(
+                                    'Code: ${offer['code']}',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFF0B3254),
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
                           ),
-                        ),
+                        ],
                       ),
-                      // Contenido
-                      Padding(
-                        padding: const EdgeInsets.all(30),
-                        child: Column(
-                          children: [
-                            Text(
-                              offer['title'],
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF0B3254),
-                                height: 1.3,
-                              ),
-                            ),
-                            const SizedBox(height: 15),
-                            Text(
-                              offer['description'],
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey[600],
-                                height: 1.5,
-                              ),
-                            ),
-                            const SizedBox(height: 25),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 12,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(
-                                  0xFF0B3254,
-                                ).withOpacity(0.05),
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color: const Color(
-                                    0xFF0B3254,
-                                  ).withOpacity(0.2),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.confirmation_number,
-                                    color: Color(0xFF0B3254),
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Text(
-                                    'Code: ${offer['code']}',
-                                    style: const TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF0B3254),
-                                      letterSpacing: 1,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                    ),
+                  );
+                }).toList(),
               );
-            }).toList(),
+            },
           ),
         ],
       ),
@@ -1818,30 +2120,48 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     final pricing = info['pricing'] as Map<String, String>;
     if (pricing.isEmpty) return const SizedBox.shrink();
 
-    // Mostrar vehículos si existen
     final hasVehicles = info.containsKey('vehicles');
+    final isMobile = _isMobileLayout(context);
+    final pad = _sectionPadding(context);
 
     return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 100),
+      margin: EdgeInsets.fromLTRB(pad, 24, pad, 0),
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 16 : 24,
+        vertical: isMobile ? 24 : 34,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
       child: Column(
         children: [
           const Text(
             'Transparent Pricing',
             style: TextStyle(
-              fontSize: 42,
-              fontWeight: FontWeight.bold,
+              fontSize: 36,
+              fontWeight: FontWeight.w800,
               color: Color(0xFF0B3254),
             ),
           ),
           const SizedBox(height: 15),
           Text(
             'No hidden fees, just premium service',
-            style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: isMobile ? 15 : 18,
+              color: Colors.grey[600],
+            ),
           ),
-          const SizedBox(height: 60),
+          const SizedBox(height: 28),
 
-          // Mostrar vehículos con imágenes si existen
           if (hasVehicles) ...[
             const Text(
               'Our Fleet',
@@ -1853,12 +2173,12 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             ),
             const SizedBox(height: 40),
             Wrap(
-              spacing: 30,
-              runSpacing: 30,
+              spacing: 16,
+              runSpacing: 16,
               alignment: WrapAlignment.center,
               children: (info['vehicles'] as List).map((vehicle) {
                 return Container(
-                  width: 280,
+                  width: isMobile ? 220 : 250,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
@@ -1916,26 +2236,18 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 );
               }).toList(),
             ),
-            const SizedBox(height: 80),
+            const SizedBox(height: 36),
           ],
 
-          // Tabla de precios
           Container(
-            padding: const EdgeInsets.all(50),
+            padding: EdgeInsets.all(isMobile ? 16 : 24),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(25),
+              color: const Color(0xFFF7FAFF),
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: const Color(0xFF0B3254).withOpacity(0.1),
-                width: 2,
+                width: 1,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF0B3254).withOpacity(0.08),
-                  blurRadius: 40,
-                  offset: const Offset(0, 15),
-                ),
-              ],
             ),
             child: Column(
               children: pricing.entries.map((entry) {
@@ -1966,19 +2278,19 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                           const SizedBox(width: 20),
                           Text(
                             entry.key,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              color: Color(0xFF333333),
-                              fontWeight: FontWeight.w500,
+                            style: TextStyle(
+                              fontSize: isMobile ? 16 : 20,
+                              color: const Color(0xFF333333),
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
                       ),
                       Text(
                         entry.value,
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
+                        style: TextStyle(
+                          fontSize: isMobile ? 18 : 24,
+                          fontWeight: FontWeight.w800,
                           color: Color(0xFF0B3254),
                         ),
                       ),
@@ -2010,9 +2322,17 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   }
 
   Widget _buildBookNowSection(Map<String, dynamic> info) {
+    final isMobile = _isMobileLayout(context);
+    final pad = _sectionPadding(context);
+
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 120),
+      margin: EdgeInsets.fromLTRB(pad, 24, pad, 0),
+      padding: EdgeInsets.symmetric(
+        vertical: isMobile ? 48 : 70,
+        horizontal: isMobile ? 18 : 30,
+      ),
       decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -2027,7 +2347,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         child: Column(
           children: [
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.1),
                 shape: BoxShape.circle,
@@ -2039,129 +2359,114 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
               ),
             ),
             const SizedBox(height: 30),
-            const Text(
+            Text(
               'Ready to Book?',
               style: TextStyle(
-                fontSize: 52,
-                fontWeight: FontWeight.bold,
+                fontSize: isMobile ? 38 : 52,
+                fontWeight: FontWeight.w800,
                 color: Colors.white,
                 letterSpacing: 1,
               ),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'Experience luxury transportation today',
+              textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 22,
+                fontSize: isMobile ? 18 : 22,
                 color: Colors.white,
                 fontWeight: FontWeight.w300,
               ),
             ),
-            const SizedBox(height: 50),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            const SizedBox(height: 28),
+            Wrap(
+              spacing: 14,
+              runSpacing: 14,
+              alignment: WrapAlignment.center,
               children: [
-                MouseRegion(
-                  cursor: SystemMouseCursors.click,
-                  child: GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 60,
-                        vertical: 25,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFFD700),
-                        borderRadius: BorderRadius.circular(35),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFFFFD700).withOpacity(0.4),
-                            blurRadius: 30,
-                            offset: const Offset(0, 15),
-                          ),
-                        ],
-                      ),
-                      child: const Row(
-                        children: [
-                          Icon(
-                            Icons.calendar_today,
-                            color: Color(0xFF0B3254),
-                            size: 24,
-                          ),
-                          SizedBox(width: 15),
-                          Text(
-                            'BOOK NOW',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF0B3254),
-                              letterSpacing: 2,
-                            ),
-                          ),
-                        ],
-                      ),
+                ElevatedButton.icon(
+                  onPressed: () => _navigateToBooking(),
+                  icon: const Icon(Icons.calendar_month),
+                  label: const Text('BOOK NOW'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFFD700),
+                    foregroundColor: const Color(0xFF0B3254),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 26,
+                      vertical: 16,
+                    ),
+                    textStyle: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.2,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
                     ),
                   ),
                 ),
-                const SizedBox(width: 25),
-                MouseRegion(
-                  cursor: SystemMouseCursors.click,
-                  child: GestureDetector(
-                    onTap: () {},
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 60,
-                        vertical: 25,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.transparent,
-                        border: Border.all(color: Colors.white, width: 2),
-                        borderRadius: BorderRadius.circular(35),
-                      ),
-                      child: const Row(
-                        children: [
-                          Icon(Icons.phone, color: Colors.white, size: 24),
-                          SizedBox(width: 15),
-                          Text(
-                            'CONTACT US',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              letterSpacing: 2,
-                            ),
-                          ),
-                        ],
-                      ),
+                OutlinedButton.icon(
+                  onPressed: () {},
+                  icon: const Icon(Icons.phone),
+                  label: const Text('CONTACT US'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    side: BorderSide(
+                      color: Colors.white.withOpacity(0.8),
+                      width: 1.6,
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 26,
+                      vertical: 16,
+                    ),
+                    textStyle: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.1,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 40),
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.phone, color: Colors.white70, size: 18),
-                SizedBox(width: 8),
-                Text(
-                  '+1 917 599-5522',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
+            const SizedBox(height: 24),
+            Wrap(
+              spacing: 24,
+              runSpacing: 10,
+              alignment: WrapAlignment.center,
+              children: const [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.phone, color: Colors.white70, size: 18),
+                    SizedBox(width: 8),
+                    Text(
+                      '+1 917 599-5522',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
-                SizedBox(width: 30),
-                Icon(Icons.access_time, color: Colors.white70, size: 18),
-                SizedBox(width: 8),
-                Text(
-                  'Available 24/7',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.access_time, color: Colors.white70, size: 18),
+                    SizedBox(width: 8),
+                    Text(
+                      'Available 24/7',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -2172,21 +2477,66 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   }
 
   Widget _buildFooter() {
+    final isMobile = _isMobileLayout(context);
+    final pad = _sectionPadding(context);
+
     return Container(
       color: const Color(0xFF0B3254),
-      padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 40),
-      child: const Column(
+      margin: EdgeInsets.only(top: 24),
+      padding: EdgeInsets.symmetric(
+        horizontal: pad,
+        vertical: isMobile ? 30 : 34,
+      ),
+      child: Column(
         children: [
-          Text(
+          Wrap(
+            spacing: 14,
+            runSpacing: 10,
+            alignment: WrapAlignment.center,
+            children: [
+              _buildFooterLink('Airport Transfer'),
+              _buildFooterLink('Point to Point'),
+              _buildFooterLink('Hourly Service'),
+              _buildFooterLink('Corporate'),
+              _buildFooterLink('Events'),
+              _buildFooterLink('Tours'),
+            ],
+          ),
+          const SizedBox(height: 16),
+          const Text(
             '© 2026 VANELUX. All rights reserved.',
             style: TextStyle(color: Colors.white70, fontSize: 14),
           ),
-          SizedBox(height: 10),
-          Text(
-            'Premium Luxury Transportation Services',
+          const SizedBox(height: 8),
+          const Text(
+            'Premium luxury transportation, redesigned for comfort and speed.',
+            textAlign: TextAlign.center,
             style: TextStyle(color: Colors.white70, fontSize: 12),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildFooterLink(String title) {
+    return GestureDetector(
+      onTap: () {
+        if (widget.serviceType == title) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ServiceDetailScreen(serviceType: title),
+          ),
+        );
+      },
+      child: Text(
+        title,
+        style: TextStyle(
+          color: Colors.white.withOpacity(0.84),
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.2,
+        ),
       ),
     );
   }
