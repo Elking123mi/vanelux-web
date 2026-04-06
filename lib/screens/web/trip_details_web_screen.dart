@@ -65,6 +65,7 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
   String? _duration;
   String? _selectedVehicleName;
   double _tollCost = 0.0;
+  bool _tollUnavailable = false;
 
   final List<_VehicleOption> _vehicles = const [
     _VehicleOption(
@@ -209,10 +210,14 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
           );
           setState(() {
             _tollCost = (tollData['toll_cost'] as num?)?.toDouble() ?? 0.0;
+            _tollUnavailable = tollData['toll_unavailable'] == true;
           });
-          print('💰 Toll cost: \$$_tollCost');
+          print('💰 Toll cost: \$$_tollCost (unavailable=$_tollUnavailable)');
         } catch (e) {
           print('⚠️ Could not fetch toll cost: $e');
+          setState(() {
+            _tollUnavailable = true;
+          });
         }
       } else {
         print('❌ distance_value or duration_value not found in response!');
@@ -1089,7 +1094,12 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
                     'Base: \$${vehicle.basePrice.toStringAsFixed(2)} • ${_distanceMiles?.toStringAsFixed(0) ?? "0"} mi',
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
-                  if (_tollCost > 0)
+                  if (_tollUnavailable)
+                    const Text(
+                      'Tolls: temporarily unavailable',
+                      style: TextStyle(fontSize: 12, color: Colors.redAccent),
+                    )
+                  else if (_tollCost > 0)
                     Text(
                       'Tolls detected: \$${_tollCost.toStringAsFixed(2)}',
                       style: const TextStyle(fontSize: 12, color: Color(0xFFD97706)),
@@ -1310,7 +1320,12 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
                 'Base service (${_distanceMiles?.toStringAsFixed(0) ?? "0"} mi): \$${vehicle.basePrice.toStringAsFixed(2)}',
                 style: const TextStyle(fontSize: 12, color: Colors.grey),
               ),
-              if (_tollCost > 0)
+              if (_tollUnavailable)
+                const Text(
+                  'Tolls: temporarily unavailable (API)',
+                  style: TextStyle(fontSize: 12, color: Colors.redAccent, fontWeight: FontWeight.w600),
+                )
+              else if (_tollCost > 0)
                 Text(
                   'Tolls (detected by route): \$${_tollCost.toStringAsFixed(2)}',
                   style: const TextStyle(fontSize: 12, color: Color(0xFFD97706), fontWeight: FontWeight.w600),

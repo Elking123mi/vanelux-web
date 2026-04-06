@@ -136,17 +136,12 @@ Future<Map<String, dynamic>> getRouteWithTolls(
   String origin,
   String destination,
 ) async {
-  final tollGuruApiKey = AppConfig.tollGuruApiKey;
-  if (tollGuruApiKey.isEmpty) {
-    return <String, dynamic>{'has_tolls': false, 'toll_cost': 0.0};
-  }
-
   await _ensureSdkLoaded();
   final result = await js_util.promiseToFuture<dynamic>(
     js_util.callMethod(
       _requireBridge(),
       'getRouteWithTolls',
-      <dynamic>[tollGuruApiKey, origin, destination],
+      <dynamic>[origin, destination],
     ),
   );
 

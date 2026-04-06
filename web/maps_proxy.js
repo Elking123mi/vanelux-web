@@ -267,52 +267,38 @@
         );
       });
     },
-    getRouteWithTolls: function (tollGuruKey, origin, destination) {
-      if (!tollGuruKey) {
-        return Promise.resolve({ has_tolls: false, toll_cost: 0.0 });
-      }
-      return fetch('https://apis.tollguru.com/toll/v2/origin-destination-waypoints', {
+    getRouteWithTolls: function (origin, destination) {
+      return fetch('/.netlify/functions/tolls', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': tollGuruKey,
         },
         body: JSON.stringify({
-          from: { address: origin },
-          to: { address: destination },
-          vehicleType: '2AxlesAuto',
-          departure_time: new Date().toISOString(),
+          origin: origin,
+          destination: destination,
         }),
       })
-      .then(function (response) { return response.json(); })
-      .then(function (data) {
-        if (data && data.error) {
-          throw new Error(data.error);
-        }
-        var routes = Array.isArray(data && data.routes) ? data.routes : [];
-        if (!routes.length) {
-          return { has_tolls: false, toll_cost: 0.0 };
-        }
-
-        var route = routes[0] || {};
-        var costs = route.costs || {};
-
-        function asNumber(value) {
-          var num = parseFloat(value || 0);
-          return Number.isFinite(num) ? num : 0;
-        }
-
-        var tollCost = asNumber(costs.licensePlate);
-        if (tollCost <= 0) tollCost = asNumber(costs.tag);
-        if (tollCost <= 0) tollCost = asNumber(costs.cash);
-        if (tollCost <= 0) tollCost = asNumber(costs.prepaidCard);
-
-        var hasTolls = tollCost > 0 || (Array.isArray(route.tolls) && route.tolls.length > 0);
-        return { has_tolls: hasTolls, toll_cost: tollCost };
+      .then(function (response) {
+        return response.json().then(function (data) {
+          if (!response.ok) {
+            return {
+              has_tolls: false,
+              toll_cost: 0.0,
+              toll_unavailable: true,
+              error: (data && data.error) || ('HTTP ' + response.status),
+            };
+          }
+          return data;
+        });
       })
       .catch(function (err) {
-        console.warn('TollGuru fetch failed:', err);
-        return { has_tolls: false, toll_cost: 0.0 };
+        console.warn('Toll server function failed:', err);
+        return {
+          has_tolls: false,
+          toll_cost: 0.0,
+          toll_unavailable: true,
+          error: String(err && err.message ? err.message : err),
+        };
       });
     },
   };
