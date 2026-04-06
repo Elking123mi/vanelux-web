@@ -267,8 +267,7 @@
         );
       });
     },
-    getRouteWithTolls: function (key, origin, destination) {
-      var tollGuruKey = window._tollGuruApiKey || '';
+    getRouteWithTolls: function (tollGuruKey, origin, destination) {
       if (!tollGuruKey) {
         return Promise.resolve({ has_tolls: false, toll_cost: 0.0 });
       }
@@ -287,8 +286,11 @@
       })
       .then(function (response) { return response.json(); })
       .then(function (data) {
+        if (data && data.error) {
+          throw new Error(data.error);
+        }
         var costs = data.route && data.route.costs;
-        var tollCost = (costs && (costs.licensePlate || costs.cash)) || 0.0;
+        var tollCost = (costs && (costs.licensePlate || costs.cash || costs.tag)) || 0.0;
         return { has_tolls: tollCost > 0, toll_cost: tollCost };
       })
       .catch(function (err) {
