@@ -118,34 +118,66 @@ Future<Map<String, dynamic>> getDistanceMatrix(
 
 Future<Map<String, dynamic>> getRouteWithTolls(
   String origin,
-  String destination,
-) async {
+  String destination, {
+  List<String>? waypoints,
+  String vehicleType = '2AxlesAuto',
+  String serviceProvider = 'here',
+  DateTime? departureTime,
+}) async {
   try {
     final apiKey = AppConfig.tollGuruApiKey;
-    if (apiKey.isEmpty) return {'has_tolls': false, 'toll_cost': 0.0};
+    if (apiKey.isEmpty) {
+      return {
+        'has_tolls': false,
+        'toll_cost': 0.0,
+        'toll_unavailable': true,
+        'error': 'TOLLGURU_API_KEY is not configured',
+      };
+    }
+
+    final requestBody = <String, dynamic>{
+      'from': {'address': origin},
+      'to': {'address': destination},
+      'serviceProvider': serviceProvider,
+      'vehicle': {'type': vehicleType},
+      'departureTime': (departureTime ?? DateTime.now().toUtc())
+          .toIso8601String(),
+      if (waypoints != null && waypoints.isNotEmpty)
+        'waypoints': waypoints
+            .where((address) => address.trim().isNotEmpty)
+            .map((address) => {'address': address.trim()})
+            .toList(),
+    };
 
     final response = await http.post(
-      Uri.parse('https://apis.tollguru.com/toll/v2/origin-destination-waypoints'),
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-      },
-      body: jsonEncode({
-        'from': {'address': origin},
-        'to': {'address': destination},
-        'vehicleType': '2AxlesAuto',
-        'departure_time': DateTime.now().toUtc().toIso8601String(),
-      }),
+      Uri.parse(
+        'https://apis.tollguru.com/toll/v2/origin-destination-waypoints',
+      ),
+      headers: {'Content-Type': 'application/json', 'x-api-key': apiKey},
+      body: jsonEncode(requestBody),
     );
 
     if (response.statusCode != 200) {
-      return {'has_tolls': false, 'toll_cost': 0.0};
+      Map<String, dynamic> errorData = <String, dynamic>{};
+      try {
+        errorData = jsonDecode(response.body) as Map<String, dynamic>;
+      } catch (_) {
+        errorData = <String, dynamic>{};
+      }
+      final value = errorData['value']?.toString();
+      final error = errorData['error']?.toString();
+      return {
+        'has_tolls': false,
+        'toll_cost': 0.0,
+        'toll_unavailable': true,
+        'error': value ?? error ?? 'HTTP ${response.statusCode}',
+      };
     }
 
     final data = jsonDecode(response.body) as Map<String, dynamic>;
     final routes = data['routes'] as List<dynamic>?;
     if (routes == null || routes.isEmpty) {
-      return {'has_tolls': false, 'toll_cost': 0.0};
+      return {'has_tolls': false, 'toll_cost': 0.0, 'toll_unavailable': false};
     }
 
     final route = routes.first as Map<String, dynamic>;
@@ -163,13 +195,29 @@ Future<Map<String, dynamic>> getRouteWithTolls(
       if (tollCost <= 0) tollCost = parseCost(costs['tag']);
       if (tollCost <= 0) tollCost = parseCost(costs['cash']);
       if (tollCost <= 0) tollCost = parseCost(costs['prepaidCard']);
+      if (tollCost <= 0) tollCost = parseCost(costs['tagAndCash']);
+      if (tollCost <= 0) tollCost = parseCost(costs['minimumTollCost']);
+      if (tollCost <= 0) tollCost = parseCost(costs['maximumTollCost']);
     }
 
+    final summary = route['summary'] as Map<String, dynamic>?;
     final tolls = route['tolls'] as List<dynamic>?;
-    final hasTolls = tollCost > 0 || (tolls != null && tolls.isNotEmpty);
-    return {'has_tolls': hasTolls, 'toll_cost': tollCost};
+    final hasTolls =
+        (summary?['hasTolls'] == true) ||
+        tollCost > 0 ||
+        (tolls != null && tolls.isNotEmpty);
+    return {
+      'has_tolls': hasTolls,
+      'toll_cost': tollCost,
+      'toll_unavailable': false,
+    };
   } catch (e) {
-    return {'has_tolls': false, 'toll_cost': 0.0};
+    return {
+      'has_tolls': false,
+      'toll_cost': 0.0,
+      'toll_unavailable': true,
+      'error': e.toString(),
+    };
   }
 }
 

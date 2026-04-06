@@ -27,8 +27,19 @@ class GoogleMapsService {
 
   static Future<Map<String, dynamic>> getRouteWithTolls(
     String origin,
-    String destination,
-  ) {
-    return platform.getRouteWithTolls(origin, destination);
+    String destination, {
+    List<String>? waypoints,
+    String vehicleType = '2AxlesAuto',
+    String serviceProvider = 'here',
+    DateTime? departureTime,
+  }) {
+    return platform.getRouteWithTolls(
+      origin,
+      destination,
+      waypoints: waypoints,
+      vehicleType: vehicleType,
+      serviceProvider: serviceProvider,
+      departureTime: departureTime,
+    );
   }
 }

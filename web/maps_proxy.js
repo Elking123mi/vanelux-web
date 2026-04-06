@@ -267,7 +267,27 @@
         );
       });
     },
-    getRouteWithTolls: function (origin, destination) {
+    getRouteWithTolls: function (origin, destination, options) {
+      var normalizedOptions = options || {};
+      var vehicleType =
+        (typeof normalizedOptions.vehicleType === 'string' && normalizedOptions.vehicleType.trim())
+          ? normalizedOptions.vehicleType.trim()
+          : '2AxlesAuto';
+      var serviceProvider =
+        (typeof normalizedOptions.serviceProvider === 'string' && normalizedOptions.serviceProvider.trim())
+          ? normalizedOptions.serviceProvider.trim().toLowerCase()
+          : 'here';
+      var departureTime =
+        (typeof normalizedOptions.departureTime === 'string' && normalizedOptions.departureTime.trim())
+          ? normalizedOptions.departureTime.trim()
+          : new Date().toISOString();
+
+      var waypoints = Array.isArray(normalizedOptions.waypoints)
+        ? normalizedOptions.waypoints.filter(function (item) {
+            return typeof item === 'string' && item.trim().length > 0;
+          })
+        : [];
+
       return fetch('/api/tolls', {
         method: 'POST',
         headers: {
@@ -276,6 +296,12 @@
         body: JSON.stringify({
           origin: origin,
           destination: destination,
+          serviceProvider: serviceProvider,
+          vehicle: {
+            type: vehicleType,
+          },
+          departureTime: departureTime,
+          waypoints: waypoints,
         }),
       })
       .then(function (response) {
