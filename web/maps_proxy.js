@@ -268,7 +268,7 @@
       });
     },
     getRouteWithTolls: function (origin, destination) {
-      return fetch('/.netlify/functions/tolls', {
+      return fetch('/api/tolls', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
