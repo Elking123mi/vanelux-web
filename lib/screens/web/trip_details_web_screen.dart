@@ -66,6 +66,7 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
   String? _selectedVehicleName;
   double _tollCost = 0.0;
   bool _tollUnavailable = false;
+  String _tollErrorMessage = '';
 
   final List<_VehicleOption> _vehicles = const [
     _VehicleOption(
@@ -211,12 +212,14 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
           setState(() {
             _tollCost = (tollData['toll_cost'] as num?)?.toDouble() ?? 0.0;
             _tollUnavailable = tollData['toll_unavailable'] == true;
+            _tollErrorMessage = (tollData['error'] as String?) ?? '';
           });
           print('💰 Toll cost: \$$_tollCost (unavailable=$_tollUnavailable)');
         } catch (e) {
           print('⚠️ Could not fetch toll cost: $e');
           setState(() {
             _tollUnavailable = true;
+            _tollErrorMessage = 'Toll API request failed.';
           });
         }
       } else {
@@ -1095,9 +1098,11 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                   if (_tollUnavailable)
-                    const Text(
-                      'Tolls: temporarily unavailable',
-                      style: TextStyle(fontSize: 12, color: Colors.redAccent),
+                    Text(
+                      _tollErrorMessage.isNotEmpty
+                          ? 'Tolls: unavailable (${_tollErrorMessage.contains('403') ? 'authorization issue' : 'API error'})'
+                          : 'Tolls: temporarily unavailable',
+                      style: const TextStyle(fontSize: 12, color: Colors.redAccent),
                     )
                   else if (_tollCost > 0)
                     Text(
@@ -1321,9 +1326,11 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
                 style: const TextStyle(fontSize: 12, color: Colors.grey),
               ),
               if (_tollUnavailable)
-                const Text(
-                  'Tolls: temporarily unavailable (API)',
-                  style: TextStyle(fontSize: 12, color: Colors.redAccent, fontWeight: FontWeight.w600),
+                Text(
+                  _tollErrorMessage.isNotEmpty
+                      ? 'Tolls: unavailable (${_tollErrorMessage.contains('403') ? 'authorization issue' : 'API error'})'
+                      : 'Tolls: temporarily unavailable (API)',
+                  style: const TextStyle(fontSize: 12, color: Colors.redAccent, fontWeight: FontWeight.w600),
                 )
               else if (_tollCost > 0)
                 Text(

@@ -65,16 +65,28 @@ exports.handler = async (event) => {
       }),
     });
 
-    const data = await response.json();
+    const rawText = await response.text();
+    let data = {};
+    try {
+      data = rawText ? JSON.parse(rawText) : {};
+    } catch (_) {
+      data = {};
+    }
     if (!response.ok) {
+      const statusCode = response.status;
+      const detailedError =
+        statusCode === 403
+          ? 'TollGuru unauthorized (403): verify TOLLGURU_API_KEY and activate TollGuru API subscription/trial.'
+          : data?.value || data?.error || `TollGuru request failed (HTTP ${statusCode})`;
       return {
-        statusCode: response.status,
+        statusCode,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           has_tolls: false,
           toll_cost: 0.0,
           toll_unavailable: true,
-          error: data?.value || data?.error || 'TollGuru request failed',
+          error: detailedError,
+          status_code: statusCode,
         }),
       };
     }
