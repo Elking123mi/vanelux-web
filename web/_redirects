@@ -1,1 +1,4 @@
+# Redirect Netlify subdomain to custom domain (301 = permanent, tells Google the canonical URL)
+https://vanelux.netlify.app/*  https://www.vane-lux.com/:splat  301!
+
 /*    /index.html   200
