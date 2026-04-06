@@ -24,4 +24,11 @@ class GoogleMapsService {
   static Future<Map<String, dynamic>> getPlaceDetails(String placeId) {
     return platform.getPlaceDetails(placeId);
   }
+
+  static Future<Map<String, dynamic>> getRouteWithTolls(
+    String origin,
+    String destination,
+  ) {
+    return platform.getRouteWithTolls(origin, destination);
+  }
 }

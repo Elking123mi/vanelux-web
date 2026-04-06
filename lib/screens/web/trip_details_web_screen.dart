@@ -64,6 +64,7 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
   double? _distanceMiles;
   String? _duration;
   String? _selectedVehicleName;
+  double _tollCost = 0.0;
 
   final List<_VehicleOption> _vehicles = const [
     _VehicleOption(
@@ -199,6 +200,20 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
             '✅ Distance set to: $_distanceMiles miles, Duration: $_duration',
           );
         });
+
+        // Fetch real toll cost from Google Routes API
+        try {
+          final tollData = await GoogleMapsService.getRouteWithTolls(
+            '${widget.pickupLat},${widget.pickupLng}',
+            '${widget.destinationLat},${widget.destinationLng}',
+          );
+          setState(() {
+            _tollCost = (tollData['toll_cost'] as num?)?.toDouble() ?? 0.0;
+          });
+          print('💰 Toll cost: \$$_tollCost');
+        } catch (e) {
+          print('⚠️ Could not fetch toll cost: $e');
+        }
       } else {
         print('❌ distance_value or duration_value not found in response!');
       }
@@ -258,6 +273,7 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
         dropoffLng: widget.destinationLng,
         distanceMiles: _distanceMiles!,
         vehicleName: vehicle.name,
+        tollCost: _tollCost,
       );
       final price = estimate.totalPrice;
       if (price.isNaN || price.isInfinite || price < 0) {

@@ -116,6 +116,60 @@ Future<Map<String, dynamic>> getDistanceMatrix(
   }
 }
 
+Future<Map<String, dynamic>> getRouteWithTolls(
+  String origin,
+  String destination,
+) async {
+  try {
+    final response = await http.post(
+      Uri.parse(
+        'https://routes.googleapis.com/directions/v2:computeRoutes',
+      ),
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': AppConfig.googleMapsApiKey,
+        'X-Goog-FieldMask':
+            'routes.travelAdvisory.tollInfo,routes.distanceMeters,routes.duration',
+      },
+      body: jsonEncode({
+        'origin': {'address': origin},
+        'destination': {'address': destination},
+        'travelMode': 'DRIVE',
+        'extraComputations': ['TOLLS'],
+        'routeModifiers': {
+          'vehicleInfo': {'emissionType': 'GASOLINE'},
+        },
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      return {'has_tolls': false, 'toll_cost': 0.0};
+    }
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final routes = data['routes'] as List<dynamic>?;
+    if (routes == null || routes.isEmpty) {
+      return {'has_tolls': false, 'toll_cost': 0.0};
+    }
+
+    final route = routes.first as Map<String, dynamic>;
+    final travelAdvisory = route['travelAdvisory'] as Map<String, dynamic>?;
+    final tollInfo = travelAdvisory?['tollInfo'] as Map<String, dynamic>?;
+    final estimatedPrice = tollInfo?['estimatedPrice'] as List<dynamic>?;
+
+    if (estimatedPrice == null || estimatedPrice.isEmpty) {
+      return {'has_tolls': false, 'toll_cost': 0.0};
+    }
+
+    final price = estimatedPrice.first as Map<String, dynamic>;
+    final units = double.tryParse(price['units']?.toString() ?? '0') ?? 0.0;
+    final nanos = ((price['nanos'] as num?) ?? 0) / 1e9;
+    return {'has_tolls': true, 'toll_cost': units + nanos};
+  } catch (e) {
+    return {'has_tolls': false, 'toll_cost': 0.0};
+  }
+}
+
 Future<Map<String, dynamic>> getPlaceDetails(String placeId) async {
   try {
     final response = await http.get(

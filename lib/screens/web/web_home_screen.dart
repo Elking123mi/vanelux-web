@@ -1196,6 +1196,19 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       final oneWayMiles = distanceValue / 1609.344;
       final totalMiles = oneWayMiles * (isReturnTrip ? 2 : 1);
 
+      // Fetch real toll cost from Google Routes API
+      double tollCost = 0.0;
+      try {
+        final tollData = await GoogleMapsService.getRouteWithTolls(
+          '${originPlace.latitude},${originPlace.longitude}',
+          '${destinationPlace.latitude},${destinationPlace.longitude}',
+        );
+        tollCost = (tollData['toll_cost'] as num?)?.toDouble() ?? 0.0;
+        print('💰 Toll cost for quote: \$$tollCost');
+      } catch (e) {
+        print('⚠️ Could not fetch toll cost for quote: $e');
+      }
+
       // Detect route type and calculate prices using PricingService
       final routeType = PricingService.detectRouteType(
         originPlace.latitude,
@@ -1214,6 +1227,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           distanceMiles: oneWayMiles,
           vehicleName: vehicle.name,
           isReturnTrip: isReturnTrip,
+          tollCost: tollCost,
         );
         return _VehicleQuote(
           vehicle: vehicle,
