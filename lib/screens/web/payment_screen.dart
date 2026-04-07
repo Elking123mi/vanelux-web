@@ -535,7 +535,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
           'currency': 'usd',
           'customer_email': widget.guestEmail ?? user?.email,
           'success_url':
-              'https://vane-lux.com/?payment=success&booking_id=$bookingId',
+              'https://vane-lux.com/gracias?payment=success&booking_id=$bookingId',
           'cancel_url': 'https://vane-lux.com/?payment=cancelled',
         }),
       );

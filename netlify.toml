@@ -20,3 +20,9 @@
   to = "/.netlify/functions/chat"
   status = 200
   force = true
+
+# SPA fallback so routes like /gracias load Flutter web correctly.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
