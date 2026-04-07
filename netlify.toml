@@ -21,6 +21,13 @@
   status = 200
   force = true
 
+# Redirect /api/tolls to the Netlify Function
+[[redirects]]
+  from = "/api/tolls"
+  to = "/.netlify/functions/tolls"
+  status = 200
+  force = true
+
 # SPA fallback so routes like /gracias load Flutter web correctly.
 [[redirects]]
   from = "/*"
