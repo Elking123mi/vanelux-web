@@ -234,6 +234,17 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   bool _isCheckingAuth = true;
   bool _isServiceLockedState = false;
 
+    // Contact form state
+    final TextEditingController _contactFirstNameController =
+      TextEditingController();
+    final TextEditingController _contactLastNameController =
+      TextEditingController();
+    final TextEditingController _contactEmailController = TextEditingController();
+    final TextEditingController _contactPhoneController = TextEditingController();
+    final TextEditingController _contactMessageController =
+      TextEditingController();
+    bool _isSendingContactForm = false;
+
   // AI Assistant state
   bool _showAssistantChat = false;
   final List<AssistantMessage> _assistantMessages = [];
@@ -402,6 +413,105 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     }
   }
 
+  Future<void> _submitContactForm() async {
+    final firstName = _contactFirstNameController.text.trim();
+    final lastName = _contactLastNameController.text.trim();
+    final email = _contactEmailController.text.trim();
+    final phone = _contactPhoneController.text.trim();
+    final message = _contactMessageController.text.trim();
+
+    if (firstName.isEmpty ||
+        lastName.isEmpty ||
+        email.isEmpty ||
+        phone.isEmpty ||
+        message.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please complete all contact form fields.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+    if (!emailRegex.hasMatch(email)) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid email address.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isSendingContactForm = true;
+    });
+
+    try {
+      final response = await http
+          .post(
+            Uri.parse('https://web-production-700fe.up.railway.app/api/v1/vlx/contact'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'first_name': firstName,
+              'last_name': lastName,
+              'email': email,
+              'phone': phone,
+              'message': message,
+            }),
+          )
+          .timeout(const Duration(seconds: 20));
+
+      if (!mounted) return;
+
+      if (response.statusCode == 200) {
+        _contactFirstNameController.clear();
+        _contactLastNameController.clear();
+        _contactEmailController.clear();
+        _contactPhoneController.clear();
+        _contactMessageController.clear();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Message sent successfully. We will contact you shortly.',
+            ),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Unable to send message right now (code ${response.statusCode}). Please try again.',
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Unable to send message right now. Please try again. ($e)',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSendingContactForm = false;
+        });
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -435,6 +545,11 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     _chatDropoffController.dispose();
     _chatPickupDebounce?.cancel();
     _chatDropoffDebounce?.cancel();
+    _contactFirstNameController.dispose();
+    _contactLastNameController.dispose();
+    _contactEmailController.dispose();
+    _contactPhoneController.dispose();
+    _contactMessageController.dispose();
     super.dispose();
   }
 
@@ -7595,17 +7710,33 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     if (isCompact) {
       nameInputs = Column(
         children: [
-          _buildContactInput('First Name'),
+          _buildContactInput(
+            'First Name',
+            controller: _contactFirstNameController,
+          ),
           const SizedBox(height: 20),
-          _buildContactInput('Last Name'),
+          _buildContactInput(
+            'Last Name',
+            controller: _contactLastNameController,
+          ),
         ],
       );
     } else {
       nameInputs = Row(
         children: [
-          Expanded(child: _buildContactInput('First Name')),
+          Expanded(
+            child: _buildContactInput(
+              'First Name',
+              controller: _contactFirstNameController,
+            ),
+          ),
           const SizedBox(width: 20),
-          Expanded(child: _buildContactInput('Last Name')),
+          Expanded(
+            child: _buildContactInput(
+              'Last Name',
+              controller: _contactLastNameController,
+            ),
+          ),
         ],
       );
     }
@@ -7627,16 +7758,29 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         children: [
           nameInputs,
           const SizedBox(height: 20),
-          _buildContactInput('Email Address'),
+          _buildContactInput(
+            'Email Address',
+            controller: _contactEmailController,
+            keyboardType: TextInputType.emailAddress,
+          ),
           const SizedBox(height: 20),
-          _buildContactInput('Phone Number'),
+          _buildContactInput(
+            'Phone Number',
+            controller: _contactPhoneController,
+            keyboardType: TextInputType.phone,
+          ),
           const SizedBox(height: 20),
-          _buildContactInput('Message', maxLines: 4),
+          _buildContactInput(
+            'Message',
+            maxLines: 4,
+            controller: _contactMessageController,
+            keyboardType: TextInputType.multiline,
+          ),
           const SizedBox(height: 30),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: _isSendingContactForm ? null : _submitContactForm,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF0B3254),
                 foregroundColor: const Color(0xFFD4AF37),
@@ -7645,9 +7789,9 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: const Text(
-                'SEND MESSAGE',
-                style: TextStyle(
+              child: Text(
+                _isSendingContactForm ? 'SENDING...' : 'SEND MESSAGE',
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.2,
@@ -7788,7 +7932,12 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     );
   }
 
-  Widget _buildContactInput(String label, {int maxLines = 1}) {
+  Widget _buildContactInput(
+    String label, {
+    int maxLines = 1,
+    TextEditingController? controller,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -7802,7 +7951,9 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         ),
         const SizedBox(height: 8),
         TextField(
+          controller: controller,
           maxLines: maxLines,
+          keyboardType: keyboardType,
           decoration: InputDecoration(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
