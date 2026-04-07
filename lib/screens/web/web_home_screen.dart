@@ -175,6 +175,16 @@ bool _sameAddress(String? a, String? b) {
   return first == second;
 }
 
+const List<Map<String, dynamic>> _knownAirports = [
+  {'name': 'JFK', 'lat': 40.6413, 'lng': -73.7781},
+  {'name': 'LGA', 'lat': 40.7769, 'lng': -73.8740},
+  {'name': 'EWR', 'lat': 40.6895, 'lng': -74.1745},
+  {'name': 'MIA', 'lat': 25.7959, 'lng': -80.2870},
+  {'name': 'FLL', 'lat': 26.0742, 'lng': -80.1506},
+];
+
+const double _airportDetectionRadiusMiles = 3.5;
+
 class WebHomeScreen extends StatefulWidget {
   final String? initialServiceType;
   final String? selectedPackage;
@@ -233,17 +243,18 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   User? _currentUser;
   bool _isCheckingAuth = true;
   bool _isServiceLockedState = false;
+  bool _serviceTypeAutoAdjustedByAirport = false;
 
-    // Contact form state
-    final TextEditingController _contactFirstNameController =
+  // Contact form state
+  final TextEditingController _contactFirstNameController =
       TextEditingController();
-    final TextEditingController _contactLastNameController =
+  final TextEditingController _contactLastNameController =
       TextEditingController();
-    final TextEditingController _contactEmailController = TextEditingController();
-    final TextEditingController _contactPhoneController = TextEditingController();
-    final TextEditingController _contactMessageController =
+  final TextEditingController _contactEmailController = TextEditingController();
+  final TextEditingController _contactPhoneController = TextEditingController();
+  final TextEditingController _contactMessageController =
       TextEditingController();
-    bool _isSendingContactForm = false;
+  bool _isSendingContactForm = false;
 
   // AI Assistant state
   bool _showAssistantChat = false;
@@ -454,7 +465,9 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     try {
       final response = await http
           .post(
-            Uri.parse('https://web-production-700fe.up.railway.app/api/v1/vlx/contact'),
+            Uri.parse(
+              'https://web-production-700fe.up.railway.app/api/v1/vlx/contact',
+            ),
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode({
               'first_name': firstName,
@@ -1931,6 +1944,129 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     });
   }
 
+  bool _containsAirportHint(String rawText) {
+    final text = rawText.toLowerCase();
+    const hints = [
+      'airport',
+      'aeropuerto',
+      'jfk',
+      'laguardia',
+      'lga',
+      'newark liberty',
+      'newark airport',
+      'ewr',
+      'miami international airport',
+      'fort lauderdale-hollywood international airport',
+      'orlando international airport',
+    ];
+    return hints.any(text.contains);
+  }
+
+  bool _isNearKnownAirport(_SelectedLocation? place) {
+    if (place == null) {
+      return false;
+    }
+
+    for (final airport in _knownAirports) {
+      final airportLat = airport['lat'] as double;
+      final airportLng = airport['lng'] as double;
+      final distance = _haversineDistance(
+        place.latitude,
+        place.longitude,
+        airportLat,
+        airportLng,
+      );
+      if (distance <= _airportDetectionRadiusMiles) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool _isAirportLocation(_SelectedLocation? place, String rawText) {
+    return _isNearKnownAirport(place) || _containsAirportHint(rawText);
+  }
+
+  String? _recommendedAirportServiceType() {
+    final pickupIsAirport = _isAirportLocation(
+      _pickupPlace,
+      pickupController.text.trim(),
+    );
+    final destinationIsAirport = _isAirportLocation(
+      _destinationPlace,
+      destinationController.text.trim(),
+    );
+
+    if (pickupIsAirport && !destinationIsAirport) {
+      return 'From Airport';
+    }
+
+    if (destinationIsAirport && !pickupIsAirport) {
+      return 'To Airport';
+    }
+
+    return null;
+  }
+
+  bool _canAutoAdjustAirportServiceType() {
+    final current = selectedServiceType?.trim();
+    return _serviceTypeAutoAdjustedByAirport ||
+        current == null ||
+        current.isEmpty ||
+        current == 'Point to Point' ||
+        current == 'To Airport' ||
+        current == 'From Airport';
+  }
+
+  void _syncAirportDrivenServiceType({bool showFeedback = false}) {
+    if (_isServiceLockedState) {
+      return;
+    }
+
+    final recommended = _recommendedAirportServiceType();
+    final current = selectedServiceType;
+
+    if (recommended != null && _canAutoAdjustAirportServiceType()) {
+      if (current != recommended) {
+        setState(() {
+          selectedServiceType = recommended;
+          _serviceTypeAutoAdjustedByAirport = true;
+        });
+        if (showFeedback && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Service type adjusted automatically to "$recommended" based on airport detection.',
+              ),
+              backgroundColor: const Color(0xFF0B3254),
+            ),
+          );
+        }
+      }
+      return;
+    }
+
+    if (recommended == null &&
+        _serviceTypeAutoAdjustedByAirport &&
+        (current == 'To Airport' || current == 'From Airport')) {
+      setState(() {
+        selectedServiceType = 'Point to Point';
+        _serviceTypeAutoAdjustedByAirport = false;
+      });
+      if (showFeedback && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Airport no longer detected. Service type set back to "Point to Point".',
+            ),
+            backgroundColor: Color(0xFF0B3254),
+          ),
+        );
+      }
+    }
+  }
+
   void _onPickupChanged(String value) {
     _pickupDebounce?.cancel();
 
@@ -1944,6 +2080,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         pickupSuggestions = [];
         _showPickupDropdown = false;
       });
+      _syncAirportDrivenServiceType();
       return;
     }
 
@@ -1953,6 +2090,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       currentQuote = null;
       _showPickupDropdown = true;
     });
+    _syncAirportDrivenServiceType();
 
     // Buscar solo si hay al menos 3 caracteres
     if (query.length < 3) {
@@ -1993,6 +2131,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         destinationSuggestions = [];
         _showDestinationDropdown = false;
       });
+      _syncAirportDrivenServiceType();
       return;
     }
 
@@ -2002,6 +2141,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       currentQuote = null;
       _showDestinationDropdown = true;
     });
+    _syncAirportDrivenServiceType();
 
     // Buscar solo si hay al menos 3 caracteres
     if (query.length < 3) {
@@ -2098,6 +2238,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         }
       });
 
+      _syncAirportDrivenServiceType(showFeedback: true);
+
       return selection;
     } catch (error) {
       if (!mounted) {
@@ -2112,6 +2254,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           _destinationPlace = null;
         }
       });
+
+      _syncAirportDrivenServiceType();
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -2508,8 +2652,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                           ),
                         )
                         .toList(),
-                    onChanged: (value) =>
-                        setState(() => selectedServiceType = value),
+                    onChanged: (value) => setState(() {
+                      selectedServiceType = value;
+                      _serviceTypeAutoAdjustedByAirport = false;
+                    }),
                   ),
                 const SizedBox(height: 24),
                 const Text(
@@ -2699,6 +2845,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                             _isResolvingDestination)
                         ? null
                         : () {
+                            _syncAirportDrivenServiceType(showFeedback: true);
+
                             if (selectedServiceType == null ||
                                 pickupController.text.trim().isEmpty ||
                                 destinationController.text.trim().isEmpty) {
