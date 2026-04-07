@@ -712,7 +712,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             IconButton(
               onPressed: () {},
               icon: const Icon(Icons.phone_outlined, color: Color(0xFF0B3254)),
-              tooltip: '+1 917 599-5522',
+              tooltip: '9294180058',
             ),
             PopupMenuButton<String>(
               icon: const Icon(Icons.menu, color: Color(0xFF0B3254)),
@@ -826,7 +826,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             TextButton(
               onPressed: () {},
               child: const Text(
-                '+1 917 599-5522',
+                '9294180058',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -1848,7 +1848,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
               OutlinedButton.icon(
                 onPressed: () {},
                 icon: const Icon(Icons.phone),
-                label: const Text('CALL: +1 917 599-5522'),
+                label: const Text('CALL: 9294180058'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Colors.white,
                   side: const BorderSide(color: Colors.white, width: 2),
@@ -2444,7 +2444,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                     Icon(Icons.phone, color: Colors.white70, size: 18),
                     SizedBox(width: 8),
                     Text(
-                      '+1 917 599-5522',
+                      '9294180058',
                       style: TextStyle(
                         color: Colors.white70,
                         fontSize: 15,

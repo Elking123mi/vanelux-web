@@ -425,9 +425,9 @@ class _DriverSetPasswordScreenState extends State<DriverSetPasswordScreen> {
                   style: TextStyle(fontSize: 15, height: 1.6),
                 ),
                 const SizedBox(height: 28),
-                _infoRow(Icons.phone, '+1 (917) 599-5522'),
+                _infoRow(Icons.phone, '9294180058'),
                 const SizedBox(height: 8),
-                _infoRow(Icons.email, 'info@vanelux.com'),
+                _infoRow(Icons.email, 'infovanelux@vane-lux.com'),
                 const SizedBox(height: 28),
                 SizedBox(
                   width: double.infinity,

@@ -693,7 +693,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
           _buildNavLink('CONTACT'),
           const SizedBox(width: 32),
           const Text(
-            '+1 917 599-5522',
+            '9294180058',
             style: TextStyle(fontSize: 14, color: Color(0xFF0B3254)),
           ),
         ],

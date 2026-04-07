@@ -545,19 +545,33 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           InputDecoration fieldDeco(String label, {IconData? icon}) {
             return InputDecoration(
               labelText: label,
-              labelStyle: const TextStyle(fontSize: 13, color: Color(0xFF666666)),
-              prefixIcon: icon != null ? Icon(icon, size: 18, color: const Color(0xFF999999)) : null,
+              labelStyle: const TextStyle(
+                fontSize: 13,
+                color: Color(0xFF666666),
+              ),
+              prefixIcon: icon != null
+                  ? Icon(icon, size: 18, color: const Color(0xFF999999))
+                  : null,
               filled: true,
               fillColor: const Color(0xFFF6F7FA),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xFFE0E0E0), width: 1.5),
+                borderSide: const BorderSide(
+                  color: Color(0xFFE0E0E0),
+                  width: 1.5,
+                ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xFF0B3254), width: 1.5),
+                borderSide: const BorderSide(
+                  color: Color(0xFF0B3254),
+                  width: 1.5,
+                ),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 16,
+              ),
             );
           }
 
@@ -565,8 +579,13 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
             builder: (context, setDialogState) {
               return Dialog(
                 backgroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                insetPadding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 24,
+                ),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 420),
                   child: Padding(
@@ -576,34 +595,73 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         // Header
-                        Row(children: [
-                          Container(
-                            width: 36, height: 36,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(color: const Color(0xFFD4AF37), width: 1.5),
-                              color: const Color(0xFF0B3254),
+                        Row(
+                          children: [
+                            Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: const Color(0xFFD4AF37),
+                                  width: 1.5,
+                                ),
+                                color: const Color(0xFF0B3254),
+                              ),
+                              child: const Center(
+                                child: Text(
+                                  'V',
+                                  style: TextStyle(
+                                    color: Color(0xFFD4AF37),
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ),
                             ),
-                            child: const Center(child: Text('V',
-                              style: TextStyle(color: Color(0xFFD4AF37), fontSize: 16, fontWeight: FontWeight.w800))),
-                          ),
-                          const SizedBox(width: 10),
-                          const Text('VANELUX',
-                            style: TextStyle(color: Color(0xFFD4AF37), fontSize: 13, fontWeight: FontWeight.w800, letterSpacing: 2)),
-                          const Spacer(),
-                          IconButton(
-                            icon: const Icon(Icons.close, size: 20, color: Color(0xFF999999)),
-                            onPressed: () => Navigator.of(dialogContext).pop(),
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                          ),
-                        ]),
+                            const SizedBox(width: 10),
+                            const Text(
+                              'VANELUX',
+                              style: TextStyle(
+                                color: Color(0xFFD4AF37),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 2,
+                              ),
+                            ),
+                            const Spacer(),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.close,
+                                size: 20,
+                                color: Color(0xFF999999),
+                              ),
+                              onPressed: () =>
+                                  Navigator.of(dialogContext).pop(),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                            ),
+                          ],
+                        ),
                         const SizedBox(height: 24),
-                        const Text('Welcome', style: TextStyle(
-                          fontSize: 26, fontWeight: FontWeight.w700, color: Color(0xFF0B3254))),
+                        const Text(
+                          'Welcome',
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF0B3254),
+                          ),
+                        ),
                         const SizedBox(height: 4),
-                        Text(isDriverMode ? 'Sign in to your driver account.' : 'Log in to continue to Vanelux.',
-                          style: const TextStyle(fontSize: 14, color: Color(0xFF888888))),
+                        Text(
+                          isDriverMode
+                              ? 'Sign in to your driver account.'
+                              : 'Log in to continue to Vanelux.',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFF888888),
+                          ),
+                        ),
                         const SizedBox(height: 20),
 
                         // Client / Driver toggle (pill)
@@ -614,34 +672,68 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                             color: const Color(0xFFF0F2F5),
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: Row(children: [
-                            Expanded(child: GestureDetector(
-                              onTap: () => setDialogState(() { isDriverMode = false; errorMessage = null; }),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
-                                decoration: BoxDecoration(
-                                  color: !isDriverMode ? const Color(0xFF0B3254) : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(8),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () => setDialogState(() {
+                                    isDriverMode = false;
+                                    errorMessage = null;
+                                  }),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 200),
+                                    decoration: BoxDecoration(
+                                      color: !isDriverMode
+                                          ? const Color(0xFF0B3254)
+                                          : Colors.transparent,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        'Client',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          color: !isDriverMode
+                                              ? Colors.white
+                                              : const Color(0xFF888888),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                                child: Center(child: Text('Client',
-                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600,
-                                    color: !isDriverMode ? Colors.white : const Color(0xFF888888)))),
                               ),
-                            )),
-                            Expanded(child: GestureDetector(
-                              onTap: () => setDialogState(() { isDriverMode = true; errorMessage = null; }),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
-                                decoration: BoxDecoration(
-                                  color: isDriverMode ? const Color(0xFFD4AF37) : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(8),
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () => setDialogState(() {
+                                    isDriverMode = true;
+                                    errorMessage = null;
+                                  }),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 200),
+                                    decoration: BoxDecoration(
+                                      color: isDriverMode
+                                          ? const Color(0xFFD4AF37)
+                                          : Colors.transparent,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        'Driver',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          color: isDriverMode
+                                              ? const Color(0xFF0B3254)
+                                              : const Color(0xFF888888),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                                child: Center(child: Text('Driver',
-                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600,
-                                    color: isDriverMode ? const Color(0xFF0B3254) : const Color(0xFF888888)))),
                               ),
-                            )),
-                          ]),
+                            ],
+                          ),
                         ),
 
                         const SizedBox(height: 20),
@@ -649,21 +741,37 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                           controller: emailController,
                           keyboardType: TextInputType.emailAddress,
                           style: const TextStyle(fontSize: 14),
-                          decoration: fieldDeco('Email address', icon: Icons.email_outlined),
+                          decoration: fieldDeco(
+                            'Email address',
+                            icon: Icons.email_outlined,
+                          ),
                         ),
                         const SizedBox(height: 14),
-                        StatefulBuilder(builder: (_, setSuffix) => TextField(
-                          controller: passwordController,
-                          obscureText: obscurePassword,
-                          style: const TextStyle(fontSize: 14),
-                          decoration: fieldDeco('Password', icon: Icons.lock_outline).copyWith(
-                            suffixIcon: IconButton(
-                              icon: Icon(obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                                size: 18, color: const Color(0xFF999999)),
-                              onPressed: () => setDialogState(() => obscurePassword = !obscurePassword),
-                            ),
+                        StatefulBuilder(
+                          builder: (_, setSuffix) => TextField(
+                            controller: passwordController,
+                            obscureText: obscurePassword,
+                            style: const TextStyle(fontSize: 14),
+                            decoration:
+                                fieldDeco(
+                                  'Password',
+                                  icon: Icons.lock_outline,
+                                ).copyWith(
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      obscurePassword
+                                          ? Icons.visibility_off_outlined
+                                          : Icons.visibility_outlined,
+                                      size: 18,
+                                      color: const Color(0xFF999999),
+                                    ),
+                                    onPressed: () => setDialogState(
+                                      () => obscurePassword = !obscurePassword,
+                                    ),
+                                  ),
+                                ),
                           ),
-                        )),
+                        ),
 
                         if (errorMessage != null) ...[
                           const SizedBox(height: 10),
@@ -672,9 +780,17 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                             decoration: BoxDecoration(
                               color: Colors.red.withOpacity(0.07),
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.red.withOpacity(0.25)),
+                              border: Border.all(
+                                color: Colors.red.withOpacity(0.25),
+                              ),
                             ),
-                            child: Text(errorMessage!, style: const TextStyle(color: Colors.red, fontSize: 13)),
+                            child: Text(
+                              errorMessage!,
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontSize: 13,
+                              ),
+                            ),
                           ),
                         ],
 
@@ -683,106 +799,228 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                           height: 48,
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: isDriverMode ? const Color(0xFFD4AF37) : const Color(0xFF0B3254),
-                              foregroundColor: isDriverMode ? const Color(0xFF0B3254) : Colors.white,
+                              backgroundColor: isDriverMode
+                                  ? const Color(0xFFD4AF37)
+                                  : const Color(0xFF0B3254),
+                              foregroundColor: isDriverMode
+                                  ? const Color(0xFF0B3254)
+                                  : Colors.white,
                               elevation: 0,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
                             ),
-                            onPressed: isLoading ? null : () async {
-                              final email = emailController.text.trim();
-                              final password = passwordController.text;
-                              if (email.isEmpty || password.isEmpty) {
-                                setDialogState(() => errorMessage = 'Please enter your email and password.');
-                                return;
-                              }
-                              setDialogState(() { isLoading = true; errorMessage = null; });
-                              if (isDriverMode) {
-                                try {
-                                  final Driver driver = await AuthService.loginDriver(email, password);
-                                  if (!dialogContext.mounted) return;
-                                  Navigator.of(dialogContext).pop();
-                                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => DriverDashboardWeb(driver: driver)));
-                                } catch (e) {
-                                  setDialogState(() { errorMessage = 'Driver sign-in failed. Check your credentials.'; isLoading = false; });
-                                }
-                              } else {
-                                try {
-                                  final user = await AuthService.login(email, password);
-                                  if (!dialogContext.mounted) return;
-                                  Navigator.of(dialogContext).pop(user);
-                                } catch (e) {
-                                  setDialogState(() { errorMessage = 'Sign-in failed. Please verify your credentials.'; isLoading = false; });
-                                }
-                              }
-                            },
+                            onPressed: isLoading
+                                ? null
+                                : () async {
+                                    final email = emailController.text.trim();
+                                    final password = passwordController.text;
+                                    if (email.isEmpty || password.isEmpty) {
+                                      setDialogState(
+                                        () => errorMessage =
+                                            'Please enter your email and password.',
+                                      );
+                                      return;
+                                    }
+                                    setDialogState(() {
+                                      isLoading = true;
+                                      errorMessage = null;
+                                    });
+                                    if (isDriverMode) {
+                                      try {
+                                        final Driver driver =
+                                            await AuthService.loginDriver(
+                                              email,
+                                              password,
+                                            );
+                                        if (!dialogContext.mounted) return;
+                                        Navigator.of(dialogContext).pop();
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (_) => DriverDashboardWeb(
+                                              driver: driver,
+                                            ),
+                                          ),
+                                        );
+                                      } catch (e) {
+                                        setDialogState(() {
+                                          errorMessage =
+                                              'Driver sign-in failed. Check your credentials.';
+                                          isLoading = false;
+                                        });
+                                      }
+                                    } else {
+                                      try {
+                                        final user = await AuthService.login(
+                                          email,
+                                          password,
+                                        );
+                                        if (!dialogContext.mounted) return;
+                                        Navigator.of(dialogContext).pop(user);
+                                      } catch (e) {
+                                        setDialogState(() {
+                                          errorMessage =
+                                              'Sign-in failed. Please verify your credentials.';
+                                          isLoading = false;
+                                        });
+                                      }
+                                    }
+                                  },
                             child: isLoading
-                                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                                : const Text('Continue', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : const Text(
+                                    'Continue',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
                           ),
                         ),
 
                         const SizedBox(height: 20),
-                        Row(children: [
-                          Expanded(child: Divider(color: Colors.grey[300])),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child: Text('OR', style: TextStyle(color: Colors.grey[400], fontSize: 11, fontWeight: FontWeight.w600)),
-                          ),
-                          Expanded(child: Divider(color: Colors.grey[300])),
-                        ]),
+                        Row(
+                          children: [
+                            Expanded(child: Divider(color: Colors.grey[300])),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
+                              child: Text(
+                                'OR',
+                                style: TextStyle(
+                                  color: Colors.grey[400],
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            Expanded(child: Divider(color: Colors.grey[300])),
+                          ],
+                        ),
                         const SizedBox(height: 16),
 
-                        _authSocialBtn(Icons.apple, 'Continue with Apple', () {}),
+                        _authSocialBtn(
+                          Icons.apple,
+                          'Continue with Apple',
+                          () {},
+                        ),
                         const SizedBox(height: 8),
-                        _authSocialBtn(Icons.g_mobiledata, 'Continue with Google', () async {
-                          setDialogState(() { isLoading = true; errorMessage = null; });
-                          try {
-                            final result = await OAuthService.signInWithGoogle();
-                            if (result != null && result['success'] == true && dialogContext.mounted) {
-                              final userData = result['user'];
-                              final user = userData != null ? User.fromJson(userData as Map<String, dynamic>) : null;
-                              Navigator.of(dialogContext).pop(user);
-                            } else if (dialogContext.mounted) {
-                              setDialogState(() { errorMessage = 'Google sign-in failed. Please try again.'; isLoading = false; });
+                        _authSocialBtn(
+                          Icons.g_mobiledata,
+                          'Continue with Google',
+                          () async {
+                            setDialogState(() {
+                              isLoading = true;
+                              errorMessage = null;
+                            });
+                            try {
+                              final result =
+                                  await OAuthService.signInWithGoogle();
+                              if (result != null &&
+                                  result['success'] == true &&
+                                  dialogContext.mounted) {
+                                final userData = result['user'];
+                                final user = userData != null
+                                    ? User.fromJson(
+                                        userData as Map<String, dynamic>,
+                                      )
+                                    : null;
+                                Navigator.of(dialogContext).pop(user);
+                              } else if (dialogContext.mounted) {
+                                setDialogState(() {
+                                  errorMessage =
+                                      'Google sign-in failed. Please try again.';
+                                  isLoading = false;
+                                });
+                              }
+                            } catch (e) {
+                              if (dialogContext.mounted) {
+                                setDialogState(() {
+                                  errorMessage =
+                                      'Google sign-in error: ${e.toString()}';
+                                  isLoading = false;
+                                });
+                              }
                             }
-                          } catch (e) {
-                            if (dialogContext.mounted) {
-                              setDialogState(() { errorMessage = 'Google sign-in error: ${e.toString()}'; isLoading = false; });
-                            }
-                          }
-                        }),
+                          },
+                        ),
                         const SizedBox(height: 8),
-                        _authSocialBtn(Icons.facebook, 'Continue with Facebook', () async {
-                          setDialogState(() { isLoading = true; errorMessage = null; });
-                          try {
-                            final result = await OAuthService.signInWithFacebook();
-                            if (result != null && result['success'] == true && dialogContext.mounted) {
-                              final userData = result['user'];
-                              final user = userData != null ? User.fromJson(userData as Map<String, dynamic>) : null;
-                              Navigator.of(dialogContext).pop(user);
-                            } else if (dialogContext.mounted) {
-                              setDialogState(() { errorMessage = 'Facebook sign-in failed. Please try again.'; isLoading = false; });
+                        _authSocialBtn(
+                          Icons.facebook,
+                          'Continue with Facebook',
+                          () async {
+                            setDialogState(() {
+                              isLoading = true;
+                              errorMessage = null;
+                            });
+                            try {
+                              final result =
+                                  await OAuthService.signInWithFacebook();
+                              if (result != null &&
+                                  result['success'] == true &&
+                                  dialogContext.mounted) {
+                                final userData = result['user'];
+                                final user = userData != null
+                                    ? User.fromJson(
+                                        userData as Map<String, dynamic>,
+                                      )
+                                    : null;
+                                Navigator.of(dialogContext).pop(user);
+                              } else if (dialogContext.mounted) {
+                                setDialogState(() {
+                                  errorMessage =
+                                      'Facebook sign-in failed. Please try again.';
+                                  isLoading = false;
+                                });
+                              }
+                            } catch (e) {
+                              if (dialogContext.mounted) {
+                                setDialogState(() {
+                                  errorMessage =
+                                      'Facebook sign-in error: ${e.toString()}';
+                                  isLoading = false;
+                                });
+                              }
                             }
-                          } catch (e) {
-                            if (dialogContext.mounted) {
-                              setDialogState(() { errorMessage = 'Facebook sign-in error: ${e.toString()}'; isLoading = false; });
-                            }
-                          }
-                        }),
+                          },
+                        ),
 
                         const SizedBox(height: 20),
-                        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                          const Text("Don't have an account? ", style: TextStyle(fontSize: 13, color: Color(0xFF888888))),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.of(dialogContext).pop();
-                              _navigateToSignup();
-                            },
-                            child: const Text('Sign up',
-                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF0B3254),
-                                decoration: TextDecoration.underline)),
-                          ),
-                        ]),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              "Don't have an account? ",
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Color(0xFF888888),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.of(dialogContext).pop();
+                                _navigateToSignup();
+                              },
+                              child: const Text(
+                                'Sign up',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF0B3254),
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
@@ -807,11 +1045,17 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         padding: const EdgeInsets.symmetric(vertical: 12),
       ),
-      child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Icon(icon, size: 18),
-        const SizedBox(width: 8),
-        Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-      ]),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 18),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+          ),
+        ],
+      ),
     );
   }
 
@@ -833,19 +1077,33 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           InputDecoration fieldDeco(String label, {IconData? icon}) {
             return InputDecoration(
               labelText: label,
-              labelStyle: const TextStyle(fontSize: 13, color: Color(0xFF666666)),
-              prefixIcon: icon != null ? Icon(icon, size: 18, color: const Color(0xFF999999)) : null,
+              labelStyle: const TextStyle(
+                fontSize: 13,
+                color: Color(0xFF666666),
+              ),
+              prefixIcon: icon != null
+                  ? Icon(icon, size: 18, color: const Color(0xFF999999))
+                  : null,
               filled: true,
               fillColor: const Color(0xFFF6F7FA),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xFFE0E0E0), width: 1.5),
+                borderSide: const BorderSide(
+                  color: Color(0xFFE0E0E0),
+                  width: 1.5,
+                ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xFF0B3254), width: 1.5),
+                borderSide: const BorderSide(
+                  color: Color(0xFF0B3254),
+                  width: 1.5,
+                ),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 16,
+              ),
             );
           }
 
@@ -853,8 +1111,13 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
             builder: (context, setDialogState) {
               return Dialog(
                 backgroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                insetPadding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 24,
+                ),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 420),
                   child: Padding(
@@ -865,88 +1128,164 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           // Header
-                          Row(children: [
-                            Container(
-                              width: 36, height: 36,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(color: const Color(0xFFD4AF37), width: 1.5),
-                                color: const Color(0xFF0B3254),
+                          Row(
+                            children: [
+                              Container(
+                                width: 36,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: const Color(0xFFD4AF37),
+                                    width: 1.5,
+                                  ),
+                                  color: const Color(0xFF0B3254),
+                                ),
+                                child: const Center(
+                                  child: Text(
+                                    'V',
+                                    style: TextStyle(
+                                      color: Color(0xFFD4AF37),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ),
                               ),
-                              child: const Center(child: Text('V',
-                                style: TextStyle(color: Color(0xFFD4AF37), fontSize: 16, fontWeight: FontWeight.w800))),
-                            ),
-                            const SizedBox(width: 10),
-                            const Text('VANELUX',
-                              style: TextStyle(color: Color(0xFFD4AF37), fontSize: 13, fontWeight: FontWeight.w800, letterSpacing: 2)),
-                            const Spacer(),
-                            IconButton(
-                              icon: const Icon(Icons.close, size: 20, color: Color(0xFF999999)),
-                              onPressed: () => Navigator.of(dialogContext).pop(),
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                            ),
-                          ]),
+                              const SizedBox(width: 10),
+                              const Text(
+                                'VANELUX',
+                                style: TextStyle(
+                                  color: Color(0xFFD4AF37),
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 2,
+                                ),
+                              ),
+                              const Spacer(),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.close,
+                                  size: 20,
+                                  color: Color(0xFF999999),
+                                ),
+                                onPressed: () =>
+                                    Navigator.of(dialogContext).pop(),
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                              ),
+                            ],
+                          ),
                           const SizedBox(height: 24),
-                          const Text('Create account', style: TextStyle(
-                            fontSize: 26, fontWeight: FontWeight.w700, color: Color(0xFF0B3254))),
+                          const Text(
+                            'Create account',
+                            style: TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF0B3254),
+                            ),
+                          ),
                           const SizedBox(height: 4),
-                          const Text('Join Vanelux for a premium ride experience.',
-                            style: TextStyle(fontSize: 14, color: Color(0xFF888888))),
+                          const Text(
+                            'Join Vanelux for a premium ride experience.',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Color(0xFF888888),
+                            ),
+                          ),
                           const SizedBox(height: 20),
 
                           TextField(
                             controller: nameController,
                             style: const TextStyle(fontSize: 14),
-                            decoration: fieldDeco('Full name', icon: Icons.person_outline),
+                            decoration: fieldDeco(
+                              'Full name',
+                              icon: Icons.person_outline,
+                            ),
                           ),
                           const SizedBox(height: 14),
                           TextField(
                             controller: emailController,
                             keyboardType: TextInputType.emailAddress,
                             style: const TextStyle(fontSize: 14),
-                            decoration: fieldDeco('Email address', icon: Icons.email_outlined),
+                            decoration: fieldDeco(
+                              'Email address',
+                              icon: Icons.email_outlined,
+                            ),
                           ),
                           const SizedBox(height: 14),
                           TextField(
                             controller: phoneController,
                             keyboardType: TextInputType.phone,
                             style: const TextStyle(fontSize: 14),
-                            decoration: fieldDeco('Phone number', icon: Icons.phone_outlined),
+                            decoration: fieldDeco(
+                              'Phone number',
+                              icon: Icons.phone_outlined,
+                            ),
                           ),
                           const SizedBox(height: 14),
                           TextField(
                             controller: passwordController,
                             obscureText: obscurePassword,
                             style: const TextStyle(fontSize: 14),
-                            decoration: fieldDeco('Create password', icon: Icons.lock_outline).copyWith(
-                              suffixIcon: IconButton(
-                                icon: Icon(obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                                  size: 18, color: const Color(0xFF999999)),
-                                onPressed: () => setDialogState(() => obscurePassword = !obscurePassword),
-                              ),
-                            ),
+                            decoration:
+                                fieldDeco(
+                                  'Create password',
+                                  icon: Icons.lock_outline,
+                                ).copyWith(
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      obscurePassword
+                                          ? Icons.visibility_off_outlined
+                                          : Icons.visibility_outlined,
+                                      size: 18,
+                                      color: const Color(0xFF999999),
+                                    ),
+                                    onPressed: () => setDialogState(
+                                      () => obscurePassword = !obscurePassword,
+                                    ),
+                                  ),
+                                ),
                           ),
                           const SizedBox(height: 14),
 
                           // Terms checkbox
-                          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                            SizedBox(
-                              width: 20, height: 20,
-                              child: Checkbox(
-                                value: acceptTerms,
-                                onChanged: isLoading ? null : (v) => setDialogState(() => acceptTerms = v ?? false),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                                activeColor: const Color(0xFF0B3254),
-                                side: const BorderSide(color: Color(0xFFCCCCCC), width: 1.5),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: Checkbox(
+                                  value: acceptTerms,
+                                  onChanged: isLoading
+                                      ? null
+                                      : (v) => setDialogState(
+                                          () => acceptTerms = v ?? false,
+                                        ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  activeColor: const Color(0xFF0B3254),
+                                  side: const BorderSide(
+                                    color: Color(0xFFCCCCCC),
+                                    width: 1.5,
+                                  ),
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 8),
-                            const Expanded(child: Text(
-                              'I agree to the Vanelux terms of service and privacy policy.',
-                              style: TextStyle(fontSize: 12, color: Color(0xFF666666), height: 1.4),
-                            )),
-                          ]),
+                              const SizedBox(width: 8),
+                              const Expanded(
+                                child: Text(
+                                  'I agree to the Vanelux terms of service and privacy policy.',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFF666666),
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
 
                           if (errorMessage != null) ...[
                             const SizedBox(height: 10),
@@ -955,9 +1294,17 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                               decoration: BoxDecoration(
                                 color: Colors.red.withOpacity(0.07),
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.red.withOpacity(0.25)),
+                                border: Border.all(
+                                  color: Colors.red.withOpacity(0.25),
+                                ),
                               ),
-                              child: Text(errorMessage!, style: const TextStyle(color: Colors.red, fontSize: 13)),
+                              child: Text(
+                                errorMessage!,
+                                style: const TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 13,
+                                ),
+                              ),
                             ),
                           ],
 
@@ -969,145 +1316,300 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                                 backgroundColor: const Color(0xFF0B3254),
                                 foregroundColor: Colors.white,
                                 elevation: 0,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
                               ),
-                              onPressed: isLoading ? null : () async {
-                                final name = nameController.text.trim();
-                                final email = emailController.text.trim();
-                                final phone = phoneController.text.trim();
-                                final password = passwordController.text;
-                                if (name.isEmpty || email.isEmpty || phone.isEmpty || password.isEmpty) {
-                                  setDialogState(() => errorMessage = 'Please fill in all required fields.');
-                                  return;
-                                }
-                                if (!acceptTerms) {
-                                  setDialogState(() => errorMessage = 'Please accept the terms to continue.');
-                                  return;
-                                }
-                                setDialogState(() { isLoading = true; errorMessage = null; });
-                                try {
-                                  final user = await AuthService.register(
-                                    name: name, email: email, phone: phone, password: password);
-                                  if (!dialogContext.mounted) return;
-                                  Navigator.of(dialogContext).pop(user);
-                                } catch (e) {
-                                  setDialogState(() {
-                                    final errorText = e.toString();
-                                    if (errorText.contains('Ya existe un usuario')) {
-                                      errorMessage = 'This email is already registered. Please log in.';
-                                    } else if (errorText.contains('timeout') || errorText.contains('connection')) {
-                                      errorMessage = 'Connection error. Check your internet and try again.';
-                                    } else if (errorText.contains('Exception:')) {
-                                      errorMessage = errorText.replaceAll('Exception:', '').trim();
-                                    } else {
-                                      errorMessage = 'Could not create account. Please try again.';
-                                    }
-                                    isLoading = false;
-                                  });
-                                }
-                              },
+                              onPressed: isLoading
+                                  ? null
+                                  : () async {
+                                      final name = nameController.text.trim();
+                                      final email = emailController.text.trim();
+                                      final phone = phoneController.text.trim();
+                                      final password = passwordController.text;
+                                      if (name.isEmpty ||
+                                          email.isEmpty ||
+                                          phone.isEmpty ||
+                                          password.isEmpty) {
+                                        setDialogState(
+                                          () => errorMessage =
+                                              'Please fill in all required fields.',
+                                        );
+                                        return;
+                                      }
+                                      if (!acceptTerms) {
+                                        setDialogState(
+                                          () => errorMessage =
+                                              'Please accept the terms to continue.',
+                                        );
+                                        return;
+                                      }
+                                      setDialogState(() {
+                                        isLoading = true;
+                                        errorMessage = null;
+                                      });
+                                      try {
+                                        final user = await AuthService.register(
+                                          name: name,
+                                          email: email,
+                                          phone: phone,
+                                          password: password,
+                                        );
+                                        if (!dialogContext.mounted) return;
+                                        Navigator.of(dialogContext).pop(user);
+                                      } catch (e) {
+                                        setDialogState(() {
+                                          final errorText = e.toString();
+                                          if (errorText.contains(
+                                            'Ya existe un usuario',
+                                          )) {
+                                            errorMessage =
+                                                'This email is already registered. Please log in.';
+                                          } else if (errorText.contains(
+                                                'timeout',
+                                              ) ||
+                                              errorText.contains(
+                                                'connection',
+                                              )) {
+                                            errorMessage =
+                                                'Connection error. Check your internet and try again.';
+                                          } else if (errorText.contains(
+                                            'Exception:',
+                                          )) {
+                                            errorMessage = errorText
+                                                .replaceAll('Exception:', '')
+                                                .trim();
+                                          } else {
+                                            errorMessage =
+                                                'Could not create account. Please try again.';
+                                          }
+                                          isLoading = false;
+                                        });
+                                      }
+                                    },
                               child: isLoading
-                                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                                  : const Text('Create account', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : const Text(
+                                      'Create account',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
                             ),
                           ),
 
                           const SizedBox(height: 16),
                           // Divider
-                          Row(children: [
-                            Expanded(child: Container(height: 1, color: const Color(0xFFE0E0E0))),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 12),
-                              child: Text('Or sign up with', style: TextStyle(fontSize: 13, color: Color(0xFF888888))),
-                            ),
-                            Expanded(child: Container(height: 1, color: const Color(0xFFE0E0E0))),
-                          ]),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  height: 1,
+                                  color: const Color(0xFFE0E0E0),
+                                ),
+                              ),
+                              const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 12),
+                                child: Text(
+                                  'Or sign up with',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Color(0xFF888888),
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Container(
+                                  height: 1,
+                                  color: const Color(0xFFE0E0E0),
+                                ),
+                              ),
+                            ],
+                          ),
                           const SizedBox(height: 16),
                           // OAuth Buttons
-                          Row(children: [
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                icon: Image.network('https://www.google.com/favicon.ico', width: 16, height: 16),
-                                label: const Text('Google', style: TextStyle(fontSize: 13, color: Color(0xFF333333))),
-                                style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 12),
-                                  side: const BorderSide(color: Color(0xFFDDDDDD)),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  icon: Image.network(
+                                    'https://www.google.com/favicon.ico',
+                                    width: 16,
+                                    height: 16,
+                                  ),
+                                  label: const Text(
+                                    'Google',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Color(0xFF333333),
+                                    ),
+                                  ),
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 12,
+                                    ),
+                                    side: const BorderSide(
+                                      color: Color(0xFFDDDDDD),
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  onPressed: isLoading
+                                      ? null
+                                      : () async {
+                                          setDialogState(() {
+                                            isLoading = true;
+                                            errorMessage = null;
+                                          });
+                                          try {
+                                            final result =
+                                                await OAuthService.signUpWithGoogle();
+                                            if (result != null &&
+                                                result['success'] == true &&
+                                                dialogContext.mounted) {
+                                              final userData = result['user'];
+                                              final user = userData != null
+                                                  ? User.fromJson(
+                                                      userData
+                                                          as Map<
+                                                            String,
+                                                            dynamic
+                                                          >,
+                                                    )
+                                                  : null;
+                                              Navigator.of(
+                                                dialogContext,
+                                              ).pop(user);
+                                            } else if (dialogContext.mounted) {
+                                              setDialogState(() {
+                                                errorMessage =
+                                                    result?['error'] ??
+                                                    'Google sign-up failed. Please try again.';
+                                                isLoading = false;
+                                              });
+                                            }
+                                          } catch (e) {
+                                            if (dialogContext.mounted) {
+                                              setDialogState(() {
+                                                errorMessage =
+                                                    'Google sign-up error: ${e.toString()}';
+                                                isLoading = false;
+                                              });
+                                            }
+                                          }
+                                        },
                                 ),
-                                onPressed: isLoading ? null : () async {
-                                  setDialogState(() { isLoading = true; errorMessage = null; });
-                                  try {
-                                    final result = await OAuthService.signUpWithGoogle();
-                                    if (result != null && result['success'] == true && dialogContext.mounted) {
-                                      final userData = result['user'];
-                                      final user = userData != null ? User.fromJson(userData as Map<String, dynamic>) : null;
-                                      Navigator.of(dialogContext).pop(user);
-                                    } else if (dialogContext.mounted) {
-                                      setDialogState(() {
-                                        errorMessage = result?['error'] ?? 'Google sign-up failed. Please try again.';
-                                        isLoading = false;
-                                      });
-                                    }
-                                  } catch (e) {
-                                    if (dialogContext.mounted) {
-                                      setDialogState(() {
-                                        errorMessage = 'Google sign-up error: ${e.toString()}';
-                                        isLoading = false;
-                                      });
-                                    }
-                                  }
-                                },
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                icon: const Icon(Icons.facebook, color: Color(0xFF1877F2), size: 18),
-                                label: const Text('Facebook', style: TextStyle(fontSize: 13, color: Color(0xFF333333))),
-                                style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 12),
-                                  side: const BorderSide(color: Color(0xFFDDDDDD)),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  icon: const Icon(
+                                    Icons.facebook,
+                                    color: Color(0xFF1877F2),
+                                    size: 18,
+                                  ),
+                                  label: const Text(
+                                    'Facebook',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Color(0xFF333333),
+                                    ),
+                                  ),
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 12,
+                                    ),
+                                    side: const BorderSide(
+                                      color: Color(0xFFDDDDDD),
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  onPressed: isLoading
+                                      ? null
+                                      : () async {
+                                          setDialogState(() {
+                                            isLoading = true;
+                                            errorMessage = null;
+                                          });
+                                          try {
+                                            final result =
+                                                await OAuthService.signInWithFacebook();
+                                            if (result != null &&
+                                                result['success'] == true &&
+                                                dialogContext.mounted) {
+                                              final userData = result['user'];
+                                              final user = userData != null
+                                                  ? User.fromJson(
+                                                      userData
+                                                          as Map<
+                                                            String,
+                                                            dynamic
+                                                          >,
+                                                    )
+                                                  : null;
+                                              Navigator.of(
+                                                dialogContext,
+                                              ).pop(user);
+                                            } else if (dialogContext.mounted) {
+                                              setDialogState(() {
+                                                errorMessage =
+                                                    'Facebook sign-in failed. Please try again.';
+                                                isLoading = false;
+                                              });
+                                            }
+                                          } catch (e) {
+                                            if (dialogContext.mounted) {
+                                              setDialogState(() {
+                                                errorMessage =
+                                                    'Facebook sign-in error: ${e.toString()}';
+                                                isLoading = false;
+                                              });
+                                            }
+                                          }
+                                        },
                                 ),
-                                onPressed: isLoading ? null : () async {
-                                  setDialogState(() { isLoading = true; errorMessage = null; });
-                                  try {
-                                    final result = await OAuthService.signInWithFacebook();
-                                    if (result != null && result['success'] == true && dialogContext.mounted) {
-                                      final userData = result['user'];
-                                      final user = userData != null ? User.fromJson(userData as Map<String, dynamic>) : null;
-                                      Navigator.of(dialogContext).pop(user);
-                                    } else if (dialogContext.mounted) {
-                                      setDialogState(() {
-                                        errorMessage = 'Facebook sign-in failed. Please try again.';
-                                        isLoading = false;
-                                      });
-                                    }
-                                  } catch (e) {
-                                    if (dialogContext.mounted) {
-                                      setDialogState(() {
-                                        errorMessage = 'Facebook sign-in error: ${e.toString()}';
-                                        isLoading = false;
-                                      });
-                                    }
-                                  }
-                                },
                               ),
-                            ),
-                          ]),
+                            ],
+                          ),
                           const SizedBox(height: 16),
-                          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                            const Text('Already have an account? ', style: TextStyle(fontSize: 13, color: Color(0xFF888888))),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.of(dialogContext).pop();
-                                _showLoginDialog();
-                              },
-                              child: const Text('Log in',
-                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF0B3254),
-                                  decoration: TextDecoration.underline)),
-                            ),
-                          ]),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                'Already have an account? ',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Color(0xFF888888),
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.of(dialogContext).pop();
+                                  _showLoginDialog();
+                                },
+                                child: const Text(
+                                  'Log in',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF0B3254),
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                     ),
@@ -3079,7 +3581,11 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const VaneluxLogo(size: 26, dark: true, showText: true),
+                          const VaneluxLogo(
+                            size: 26,
+                            dark: true,
+                            showText: true,
+                          ),
                         ],
                       ),
                     ),
@@ -3127,7 +3633,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                           ),
                           const SizedBox(width: 12),
                           Text(
-                            '+1 917 599-5522',
+                            '9294180058',
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.white.withOpacity(0.9),
@@ -3200,8 +3706,9 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                 onTap: () {
                   // ignore: avoid_web_libraries_in_flutter
                   html.window.open(
-                      'https://wa.me/19175995522?text=Hello%2C%20I%27d%20like%20to%20book%20a%20luxury%20ride%20with%20Vanelux.',
-                      '_blank');
+                    'https://wa.me/19294180058?text=Hello%2C%20I%27d%20like%20to%20book%20a%20luxury%20ride%20with%20Vanelux.',
+                    '_blank',
+                  );
                 },
                 child: Container(
                   width: 56,
@@ -3252,7 +3759,21 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       );
       // Detect booking intent in AI reply
       final lowerReply = reply.toLowerCase();
-      final bookingKeywords = ['pickup', 'drop-off', 'dropoff', 'recogida', 'destino', 'where would you like', 'dónde te recojo', 'dirección', 'address', 'pick you up', 'destination', 'booking', 'reserv'];
+      final bookingKeywords = [
+        'pickup',
+        'drop-off',
+        'dropoff',
+        'recogida',
+        'destino',
+        'where would you like',
+        'dónde te recojo',
+        'dirección',
+        'address',
+        'pick you up',
+        'destination',
+        'booking',
+        'reserv',
+      ];
       final showBooking = bookingKeywords.any((kw) => lowerReply.contains(kw));
       if (mounted) {
         setState(() {
@@ -3273,7 +3794,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
             AssistantMessage(
               role: AssistantRole.assistant,
               content:
-                  'I apologize for the inconvenience. I\'m having trouble connecting right now. Please try again in a moment, or contact us directly at info@vane-lux.com or call us for immediate assistance.',
+                  'I apologize for the inconvenience. I\'m having trouble connecting right now. Please try again in a moment, or contact us directly at infovanelux@vane-lux.com or call us for immediate assistance.',
             ),
           );
           _isAssistantTyping = false;
@@ -3306,7 +3827,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     _chatPickupDebounce = Timer(const Duration(milliseconds: 350), () async {
       try {
         final results = await GoogleMapsService.searchPlaces(query);
-        if (mounted) setState(() => _chatPickupSuggestions = results.take(5).toList());
+        if (mounted)
+          setState(() => _chatPickupSuggestions = results.take(5).toList());
       } catch (_) {
         if (mounted) setState(() => _chatPickupSuggestions = []);
       }
@@ -3335,7 +3857,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     _chatDropoffDebounce = Timer(const Duration(milliseconds: 350), () async {
       try {
         final results = await GoogleMapsService.searchPlaces(query);
-        if (mounted) setState(() => _chatDropoffSuggestions = results.take(5).toList());
+        if (mounted)
+          setState(() => _chatDropoffSuggestions = results.take(5).toList());
       } catch (_) {
         if (mounted) setState(() => _chatDropoffSuggestions = []);
       }
@@ -3380,7 +3903,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     }
   }
 
-  Future<_SelectedLocation?> _resolveChatPlace(String placeId, String fallback) async {
+  Future<_SelectedLocation?> _resolveChatPlace(
+    String placeId,
+    String fallback,
+  ) async {
     try {
       final details = await GoogleMapsService.getPlaceDetails(placeId);
       if (!mounted) return null;
@@ -3428,11 +3954,17 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           // Title row
           Row(
             children: [
-              const Icon(Icons.directions_car, color: Color(0xFFD4AF37), size: 18),
+              const Icon(
+                Icons.directions_car,
+                color: Color(0xFFD4AF37),
+                size: 18,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  _showChatVehicleCards ? 'Choose Your Vehicle' : 'Quick Booking',
+                  _showChatVehicleCards
+                      ? 'Choose Your Vehicle'
+                      : 'Quick Booking',
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
@@ -3472,14 +4004,18 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
               selectedPlace: _chatDropoffPlace,
             ),
             if (_showChatDropoffDropdown && _chatDropoffSuggestions.isNotEmpty)
-              _buildChatSuggestions(_chatDropoffSuggestions, _selectChatDropoff),
+              _buildChatSuggestions(
+                _chatDropoffSuggestions,
+                _selectChatDropoff,
+              ),
             const SizedBox(height: 10),
             // See vehicles button
             SizedBox(
               width: double.infinity,
               height: 38,
               child: ElevatedButton(
-                onPressed: (_chatPickupPlace != null && _chatDropoffPlace != null)
+                onPressed:
+                    (_chatPickupPlace != null && _chatDropoffPlace != null)
                     ? _calculateChatPrices
                     : null,
                 style: ElevatedButton.styleFrom(
@@ -3499,7 +4035,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                       (_chatPickupPlace != null && _chatDropoffPlace != null)
                           ? 'See Vehicles & Prices'
                           : 'Enter both addresses',
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 ),
@@ -3523,7 +4062,11 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                   Expanded(
                     child: Text(
                       '${_chatPrices!.values.first.routeLabel} • ${_chatDistanceMiles.toStringAsFixed(1)} mi',
-                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF0B3254)),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF0B3254),
+                      ),
                     ),
                   ),
                   GestureDetector(
@@ -3531,7 +4074,14 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                       _showChatVehicleCards = false;
                       _chatPrices = null;
                     }),
-                    child: const Text('✏️ Edit', style: TextStyle(fontSize: 11, color: Color(0xFFD4AF37), fontWeight: FontWeight.w600)),
+                    child: const Text(
+                      '✏️ Edit',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFFD4AF37),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -3550,8 +4100,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
 
     // Estimate distance using Haversine (PricingService uses it internally too)
     final distanceMiles = _haversineDistance(
-      _chatPickupPlace!.latitude, _chatPickupPlace!.longitude,
-      _chatDropoffPlace!.latitude, _chatDropoffPlace!.longitude,
+      _chatPickupPlace!.latitude,
+      _chatPickupPlace!.longitude,
+      _chatDropoffPlace!.latitude,
+      _chatDropoffPlace!.longitude,
     );
 
     final prices = PricingService.calculateAllTierPrices(
@@ -3572,18 +4124,27 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     _assistantMessages.add(
       AssistantMessage(
         role: AssistantRole.assistant,
-        content: 'Here are our available vehicles for your trip. Select one to proceed to payment:',
+        content:
+            'Here are our available vehicles for your trip. Select one to proceed to payment:',
       ),
     );
   }
 
-  double _haversineDistance(double lat1, double lng1, double lat2, double lng2) {
+  double _haversineDistance(
+    double lat1,
+    double lng1,
+    double lat2,
+    double lng2,
+  ) {
     const double earthRadiusMiles = 3958.8;
     final dLat = (lat2 - lat1) * pi / 180;
     final dLng = (lng2 - lng1) * pi / 180;
-    final a = sin(dLat / 2) * sin(dLat / 2) +
-        cos(lat1 * pi / 180) * cos(lat2 * pi / 180) *
-        sin(dLng / 2) * sin(dLng / 2);
+    final a =
+        sin(dLat / 2) * sin(dLat / 2) +
+        cos(lat1 * pi / 180) *
+            cos(lat2 * pi / 180) *
+            sin(dLng / 2) *
+            sin(dLng / 2);
     final c = 2 * atan2(sqrt(a), sqrt(1 - a));
     return earthRadiusMiles * c;
   }
@@ -3618,14 +4179,20 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     };
 
     final List<Widget> cards = [];
-    for (final tier in [VehicleTier.sedan, VehicleTier.escalade, VehicleTier.sprinter, VehicleTier.miniCoach]) {
+    for (final tier in [
+      VehicleTier.sedan,
+      VehicleTier.escalade,
+      VehicleTier.sprinter,
+      VehicleTier.miniCoach,
+    ]) {
       final price = _chatPrices![tier];
       if (price == null) continue;
       final info = vehicleInfo[tier]!;
 
       cards.add(
         GestureDetector(
-          onTap: () => _onChatVehicleSelected(tier, info['name'] as String, price),
+          onTap: () =>
+              _onChatVehicleSelected(tier, info['name'] as String, price),
           child: Container(
             margin: const EdgeInsets.only(bottom: 6),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -3650,7 +4217,11 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                     color: const Color(0xFF0B3254).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(info['icon'] as IconData, size: 18, color: const Color(0xFF0B3254)),
+                  child: Icon(
+                    info['icon'] as IconData,
+                    size: 18,
+                    color: const Color(0xFF0B3254),
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -3659,7 +4230,11 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                     children: [
                       Text(
                         info['short'] as String,
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF0B3254)),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF0B3254),
+                        ),
                       ),
                       Text(
                         info['pax'] as String,
@@ -3673,16 +4248,30 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                   children: [
                     Text(
                       '\$${price.totalPrice.toStringAsFixed(0)}',
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFFD4AF37)),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFFD4AF37),
+                      ),
                     ),
                     if (price.isFlat)
-                      Text('Flat rate', style: TextStyle(fontSize: 9, color: Colors.grey[500]))
+                      Text(
+                        'Flat rate',
+                        style: TextStyle(fontSize: 9, color: Colors.grey[500]),
+                      )
                     else
-                      Text('Est.', style: TextStyle(fontSize: 9, color: Colors.grey[500])),
+                      Text(
+                        'Est.',
+                        style: TextStyle(fontSize: 9, color: Colors.grey[500]),
+                      ),
                   ],
                 ),
                 const SizedBox(width: 6),
-                const Icon(Icons.chevron_right, size: 18, color: Color(0xFF0B3254)),
+                const Icon(
+                  Icons.chevron_right,
+                  size: 18,
+                  color: Color(0xFF0B3254),
+                ),
               ],
             ),
           ),
@@ -3735,7 +4324,11 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                   color: Colors.orange.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(Icons.science, size: 18, color: Colors.orange),
+                child: const Icon(
+                  Icons.science,
+                  size: 18,
+                  color: Colors.orange,
+                ),
               ),
               const SizedBox(width: 10),
               const Expanded(
@@ -3744,7 +4337,11 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                   children: [
                     Text(
                       'TEST VEHICLE',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.orange),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.orange,
+                      ),
                     ),
                     Text(
                       'Payment test only • \$0.50',
@@ -3758,9 +4355,16 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                 children: [
                   Text(
                     '\$0.50',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.orange),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.orange,
+                    ),
                   ),
-                  Text('Test', style: TextStyle(fontSize: 9, color: Colors.orange)),
+                  Text(
+                    'Test',
+                    style: TextStyle(fontSize: 9, color: Colors.orange),
+                  ),
                 ],
               ),
               const SizedBox(width: 6),
@@ -3774,7 +4378,11 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     return cards;
   }
 
-  void _onChatVehicleSelected(VehicleTier tier, String vehicleName, PriceEstimate price) {
+  void _onChatVehicleSelected(
+    VehicleTier tier,
+    String vehicleName,
+    PriceEstimate price,
+  ) {
     // Navigate directly to payment
     Navigator.push(
       context,
@@ -3825,10 +4433,17 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           hintStyle: TextStyle(fontSize: 12, color: Colors.grey[400]),
           prefixIcon: Icon(icon, size: 16, color: const Color(0xFF0B3254)),
           suffixIcon: selectedPlace != null
-              ? const Icon(Icons.check_circle, size: 16, color: Color(0xFF2E7D32))
+              ? const Icon(
+                  Icons.check_circle,
+                  size: 16,
+                  color: Color(0xFF2E7D32),
+                )
               : null,
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 10,
+            horizontal: 8,
+          ),
           isDense: true,
         ),
       ),
@@ -3858,7 +4473,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         shrinkWrap: true,
         padding: EdgeInsets.zero,
         itemCount: suggestions.length,
-        separatorBuilder: (_, __) => Divider(height: 1, color: Colors.grey[200]),
+        separatorBuilder: (_, __) =>
+            Divider(height: 1, color: Colors.grey[200]),
         itemBuilder: (context, index) {
           final s = suggestions[index];
           final mainText = _getSuggestionMainText(s);
@@ -3869,15 +4485,31 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               child: Row(
                 children: [
-                  const Icon(Icons.location_on_outlined, size: 16, color: Color(0xFF0B3254)),
+                  const Icon(
+                    Icons.location_on_outlined,
+                    size: 16,
+                    color: Color(0xFF0B3254),
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(mainText, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                        Text(
+                          mainText,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                         if (secondary.isNotEmpty)
-                          Text(secondary, style: TextStyle(fontSize: 11, color: Colors.grey[600])),
+                          Text(
+                            secondary,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey[600],
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -4329,7 +4961,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
 
             final trailingChildren = <Widget>[
               const Text(
-                '+1 917 599-5522',
+                '9294180058',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -4354,7 +4986,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                   ),
                   style: TextButton.styleFrom(
                     foregroundColor: const Color(0xFF0B3254),
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 6,
+                    ),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
@@ -4365,7 +5000,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                       const SizedBox(width: 4),
                       Text(
                         localeProvider.locale.toUpperCase(),
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ],
                   ),
@@ -4790,8 +5428,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        const DriverApplicationsAdminScreen(),
+                    builder: (context) => const DriverApplicationsAdminScreen(),
                   ),
                 );
                 break;
@@ -5334,39 +5971,62 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       {
         'icon': Icons.attach_money_outlined,
         'title': 'Competitive rates',
-        'body': 'Transparent all-inclusive pricing with no hidden fees or surge charges.',
+        'body':
+            'Transparent all-inclusive pricing with no hidden fees or surge charges.',
       },
       {
         'icon': Icons.flight_land_outlined,
         'title': 'Seamless airport travel',
-        'body': 'We track your flight and wait up to 60 min free for delays at no extra cost.',
+        'body':
+            'We track your flight and wait up to 60 min free for delays at no extra cost.',
       },
       {
         'icon': Icons.route_outlined,
         'title': 'Travel on your terms',
-        'body': 'Choose your preferred vehicle class and pick-up time for total flexibility.',
+        'body':
+            'Choose your preferred vehicle class and pick-up time for total flexibility.',
       },
     ];
 
     Widget featureCol(Map<String, dynamic> f) => Expanded(
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: isCompact ? 0 : 20),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Container(
-            width: 44, height: 44,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: const Color(0xFF0B3254),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFF0B3254),
+              ),
+              child: Icon(
+                f['icon'] as IconData,
+                color: const Color(0xFFD4AF37),
+                size: 20,
+              ),
             ),
-            child: Icon(f['icon'] as IconData, color: const Color(0xFFD4AF37), size: 20),
-          ),
-          const SizedBox(height: 14),
-          Text(f['title'] as String,
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF0B3254))),
-          const SizedBox(height: 6),
-          Text(f['body'] as String,
-            style: TextStyle(fontSize: 13, color: Colors.grey[600], height: 1.5)),
-        ]),
+            const SizedBox(height: 14),
+            Text(
+              f['title'] as String,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF0B3254),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              f['body'] as String,
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.grey[600],
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
       ),
     );
 
@@ -5380,9 +6040,15 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
             color: const Color(0xFF0B3254).withOpacity(0.08),
             borderRadius: BorderRadius.circular(20),
           ),
-          child: const Text('AIRPORT TRANSFER',
-            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800,
-              color: Color(0xFF0B3254), letterSpacing: 1.5)),
+          child: const Text(
+            'AIRPORT TRANSFER',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF0B3254),
+              letterSpacing: 1.5,
+            ),
+          ),
         ),
         const SizedBox(height: 20),
         Text(
@@ -5397,26 +6063,43 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         const SizedBox(height: 20),
         Text(
           'Start your journey stress-free. Our professional chauffeurs meet you at arrivals, assist with luggage, and whisk you to your destination in premium comfort — from JFK, LGA, EWR and all metro-area airports.',
-          style: TextStyle(fontSize: isCompact ? 14 : 16, color: Colors.grey[600], height: 1.65),
+          style: TextStyle(
+            fontSize: isCompact ? 14 : 16,
+            color: Colors.grey[600],
+            height: 1.65,
+          ),
         ),
         const SizedBox(height: 16),
         Text(
           'Whether you\'re heading into Manhattan, the Hamptons, or anywhere else in the tri-state area, Vanelux delivers the most reliable airport ride you\'ve ever taken.',
-          style: TextStyle(fontSize: isCompact ? 13 : 15, color: Colors.grey[500], height: 1.6),
+          style: TextStyle(
+            fontSize: isCompact ? 13 : 15,
+            color: Colors.grey[500],
+            height: 1.6,
+          ),
         ),
         const SizedBox(height: 32),
         ElevatedButton(
-          onPressed: () => Navigator.push(context,
-            MaterialPageRoute(builder: (_) => const ServiceDetailScreen(serviceType: 'Airport Transfer'))),
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) =>
+                  const ServiceDetailScreen(serviceType: 'Airport Transfer'),
+            ),
+          ),
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF0B3254),
             foregroundColor: Colors.white,
             elevation: 0,
             padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
-          child: const Text('Book Airport Transfer',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+          child: const Text(
+            'Book Airport Transfer',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+          ),
         ),
       ],
     );
@@ -5426,32 +6109,62 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       child: Container(
         height: isCompact ? 260 : 420,
         color: const Color(0xFF0B3254),
-        child: Stack(fit: StackFit.expand, children: [
-          Image.asset('assets/images/cadillac-scalade.png',
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => Container(
-              color: const Color(0xFF0D2B45),
-              child: Center(child: Icon(Icons.flight_takeoff,
-                size: 80, color: Colors.white.withOpacity(0.15))),
-            )),
-          Container(decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Colors.transparent, const Color(0xFF0B3254).withOpacity(0.55)],
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.asset(
+              'assets/images/cadillac-scalade.png',
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(
+                color: const Color(0xFF0D2B45),
+                child: Center(
+                  child: Icon(
+                    Icons.flight_takeoff,
+                    size: 80,
+                    color: Colors.white.withOpacity(0.15),
+                  ),
+                ),
+              ),
             ),
-          )),
-          Positioned(
-            bottom: 20, left: 20,
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Text('Serving all NYC metro airports',
-                style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
-              const SizedBox(height: 4),
-              Text('JFK · LGA · EWR · HPN · SWF',
-                style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 12)),
-            ]),
-          ),
-        ]),
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    const Color(0xFF0B3254).withOpacity(0.55),
+                  ],
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 20,
+              left: 20,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Serving all NYC metro airports',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'JFK · LGA · EWR · HPN · SWF',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.7),
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
 
@@ -5461,29 +6174,44 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         vertical: isCompact ? 56 : 88,
         horizontal: isCompact ? 20 : 60,
       ),
-      child: Column(children: [
-        // Top split layout
-        isCompact
-            ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                textColumn,
-                const SizedBox(height: 32),
-                imageColumn,
-              ])
-            : Row(children: [
-                Expanded(flex: 5, child: textColumn),
-                const SizedBox(width: 60),
-                Expanded(flex: 5, child: imageColumn),
-              ]),
-        const SizedBox(height: 56),
-        // Feature columns
-        isCompact
-            ? Column(children: features.map((f) => Padding(
-                padding: const EdgeInsets.only(bottom: 28),
-                child: featureCol(f))).toList())
-            : Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: features.map(featureCol).toList()),
-      ]),
+      child: Column(
+        children: [
+          // Top split layout
+          isCompact
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    textColumn,
+                    const SizedBox(height: 32),
+                    imageColumn,
+                  ],
+                )
+              : Row(
+                  children: [
+                    Expanded(flex: 5, child: textColumn),
+                    const SizedBox(width: 60),
+                    Expanded(flex: 5, child: imageColumn),
+                  ],
+                ),
+          const SizedBox(height: 56),
+          // Feature columns
+          isCompact
+              ? Column(
+                  children: features
+                      .map(
+                        (f) => Padding(
+                          padding: const EdgeInsets.only(bottom: 28),
+                          child: featureCol(f),
+                        ),
+                      )
+                      .toList(),
+                )
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: features.map(featureCol).toList(),
+                ),
+        ],
+      ),
     );
   }
 
@@ -5493,19 +6221,69 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     final bool isCompact = w < 900;
 
     final List<Map<String, dynamic>> cities = [
-      {'name': 'New York', 'sub': '12 routes', 'color': const Color(0xFF1A3A5C), 'icon': Icons.location_city},
-      {'name': 'Miami', 'sub': '8 routes', 'color': const Color(0xFF0E5952), 'icon': Icons.beach_access},
-      {'name': 'Los Angeles', 'sub': '6 routes', 'color': const Color(0xFF5C3A1A), 'icon': Icons.wb_sunny_outlined},
-      {'name': 'Chicago', 'sub': '5 routes', 'color': const Color(0xFF2A2A4A), 'icon': Icons.apartment},
+      {
+        'name': 'New York',
+        'sub': '12 routes',
+        'color': const Color(0xFF1A3A5C),
+        'icon': Icons.location_city,
+      },
+      {
+        'name': 'Miami',
+        'sub': '8 routes',
+        'color': const Color(0xFF0E5952),
+        'icon': Icons.beach_access,
+      },
+      {
+        'name': 'Los Angeles',
+        'sub': '6 routes',
+        'color': const Color(0xFF5C3A1A),
+        'icon': Icons.wb_sunny_outlined,
+      },
+      {
+        'name': 'Chicago',
+        'sub': '5 routes',
+        'color': const Color(0xFF2A2A4A),
+        'icon': Icons.apartment,
+      },
     ];
 
     final List<Map<String, String>> routes = [
-      {'from': 'New York', 'to': 'JFK Airport', 'duration': '45 min', 'distance': '15 mi'},
-      {'from': 'Manhattan', 'to': 'Newark Airport', 'duration': '35 min', 'distance': '18 mi'},
-      {'from': 'Brooklyn', 'to': 'LaGuardia Airport', 'duration': '30 min', 'distance': '12 mi'},
-      {'from': 'New York', 'to': 'The Hamptons', 'duration': '2 hrs', 'distance': '98 mi'},
-      {'from': 'Manhattan', 'to': 'Princeton, NJ', 'duration': '1 hr 15 min', 'distance': '57 mi'},
-      {'from': 'New York', 'to': 'Philadelphia', 'duration': '2 hrs', 'distance': '95 mi'},
+      {
+        'from': 'New York',
+        'to': 'JFK Airport',
+        'duration': '45 min',
+        'distance': '15 mi',
+      },
+      {
+        'from': 'Manhattan',
+        'to': 'Newark Airport',
+        'duration': '35 min',
+        'distance': '18 mi',
+      },
+      {
+        'from': 'Brooklyn',
+        'to': 'LaGuardia Airport',
+        'duration': '30 min',
+        'distance': '12 mi',
+      },
+      {
+        'from': 'New York',
+        'to': 'The Hamptons',
+        'duration': '2 hrs',
+        'distance': '98 mi',
+      },
+      {
+        'from': 'Manhattan',
+        'to': 'Princeton, NJ',
+        'duration': '1 hr 15 min',
+        'distance': '57 mi',
+      },
+      {
+        'from': 'New York',
+        'to': 'Philadelphia',
+        'duration': '2 hrs',
+        'distance': '95 mi',
+      },
     ];
 
     Widget cityCard(Map<String, dynamic> city) => Container(
@@ -5516,53 +6294,120 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         color: city['color'] as Color,
         borderRadius: BorderRadius.circular(14),
       ),
-      child: Stack(children: [
-        Positioned(bottom: 16, left: 16, child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(city['name'] as String,
-              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w800)),
-            const SizedBox(height: 2),
-            Text(city['sub'] as String,
-              style: TextStyle(color: Colors.white.withOpacity(0.65), fontSize: 12)),
-          ],
-        )),
-        Positioned(top: 14, right: 14, child: Icon(city['icon'] as IconData,
-          color: Colors.white.withOpacity(0.2), size: 44)),
-      ]),
-    );
-
-    Widget routeRow(Map<String, String> r, bool isLast) => Column(children: [
-      Padding(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        child: Row(children: [
-          Expanded(child: Row(children: [
-            Container(width: 8, height: 8,
-              decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFFD4AF37))),
-            const SizedBox(width: 10),
-            Text(r['from']!, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF0B3254))),
-            const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Icon(Icons.arrow_right_alt, color: Color(0xFFD4AF37), size: 18)),
-            Text(r['to']!, style: TextStyle(fontSize: 14, color: Colors.grey[700])),
-          ])),
-          const SizedBox(width: 16),
-          Text('${r['duration']} · ${r['distance']}',
-            style: TextStyle(fontSize: 12, color: Colors.grey[500])),
-          const SizedBox(width: 16),
-          GestureDetector(
-            onTap: _navigateToSignup,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-              decoration: BoxDecoration(
-                color: const Color(0xFF0B3254),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: const Text('Book', style: TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w600)),
+      child: Stack(
+        children: [
+          Positioned(
+            bottom: 16,
+            left: 16,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  city['name'] as String,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  city['sub'] as String,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.65),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
             ),
           ),
-        ]),
+          Positioned(
+            top: 14,
+            right: 14,
+            child: Icon(
+              city['icon'] as IconData,
+              color: Colors.white.withOpacity(0.2),
+              size: 44,
+            ),
+          ),
+        ],
       ),
-      if (!isLast) Divider(color: Colors.grey[200], height: 1),
-    ]);
+    );
+
+    Widget routeRow(Map<String, String> r, bool isLast) => Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          child: Row(
+            children: [
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color(0xFFD4AF37),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      r['from']!,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF0B3254),
+                      ),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8),
+                      child: Icon(
+                        Icons.arrow_right_alt,
+                        color: Color(0xFFD4AF37),
+                        size: 18,
+                      ),
+                    ),
+                    Text(
+                      r['to']!,
+                      style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              Text(
+                '${r['duration']} · ${r['distance']}',
+                style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+              ),
+              const SizedBox(width: 16),
+              GestureDetector(
+                onTap: _navigateToSignup,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0B3254),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Text(
+                    'Book',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (!isLast) Divider(color: Colors.grey[200], height: 1),
+      ],
+    );
 
     return Container(
       color: Colors.white,
@@ -5570,62 +6415,92 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         vertical: isCompact ? 48 : 80,
         horizontal: isCompact ? 20 : 60,
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        // Header
-        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-              decoration: BoxDecoration(
-                color: const Color(0xFFD4AF37).withOpacity(0.12),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Text('CITY ROUTES', style: TextStyle(
-                fontSize: 11, fontWeight: FontWeight.w800, color: Color(0xFFD4AF37), letterSpacing: 1.5)),
-            ),
-            const SizedBox(height: 12),
-            Text('Top destinations', style: TextStyle(
-              fontSize: isCompact ? 26 : 36,
-              fontWeight: FontWeight.w800,
-              color: const Color(0xFF0B3254),
-            )),
-          ]),
-        ]),
-        const SizedBox(height: 28),
-
-        // City cards horizontal scroll
-        SizedBox(
-          height: isCompact ? 120 : 150,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(children: cities.map(cityCard).toList()),
-          ),
-        ),
-        const SizedBox(height: 40),
-
-        // Top Routes list
-        Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFFF8F9FB),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: const Color(0xFFE8EAED)),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Padding(
-                padding: EdgeInsets.only(top: 20, bottom: 8),
-                child: Text('Popular routes',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFF0B3254))),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD4AF37).withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text(
+                      'CITY ROUTES',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFFD4AF37),
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Top destinations',
+                    style: TextStyle(
+                      fontSize: isCompact ? 26 : 36,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF0B3254),
+                    ),
+                  ),
+                ],
               ),
-              const Divider(height: 1),
-              ...routes.asMap().entries.map((e) => routeRow(e.value, e.key == routes.length - 1)),
-              const SizedBox(height: 8),
             ],
           ),
-        ),
-      ]),
+          const SizedBox(height: 28),
+
+          // City cards horizontal scroll
+          SizedBox(
+            height: isCompact ? 120 : 150,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(children: cities.map(cityCard).toList()),
+            ),
+          ),
+          const SizedBox(height: 40),
+
+          // Top Routes list
+          Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8F9FB),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: const Color(0xFFE8EAED)),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(top: 20, bottom: 8),
+                  child: Text(
+                    'Popular routes',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF0B3254),
+                    ),
+                  ),
+                ),
+                const Divider(height: 1),
+                ...routes.asMap().entries.map(
+                  (e) => routeRow(e.value, e.key == routes.length - 1),
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -5638,7 +6513,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       {
         'category': 'First Class',
         'tagline': 'Mercedes S-Class, BMW 7 Series or similar',
-        'description': 'Premium sedans built for executive comfort and prestige.',
+        'description':
+            'Premium sedans built for executive comfort and prestige.',
         'capacity': 'up to 3',
         'luggage': 'up to 3',
         'image': 'assets/images/mercdes-s-class.png',
@@ -5648,7 +6524,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       {
         'category': 'Business SUV',
         'tagline': 'Cadillac Escalade, Chevy Suburban or similar',
-        'description': 'Spacious luxury SUVs for groups, events and airport runs.',
+        'description':
+            'Spacious luxury SUVs for groups, events and airport runs.',
         'capacity': 'up to 6',
         'luggage': 'up to 6',
         'image': 'assets/images/cadillac-scalade.png',
@@ -5694,7 +6571,9 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
             // Vehicle image
             ClipRRect(
               borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16), topRight: Radius.circular(16)),
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
+              ),
               child: AspectRatio(
                 aspectRatio: 16 / 9,
                 child: Image.asset(
@@ -5702,8 +6581,13 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => Container(
                     color: const Color(0xFF1A3A5C),
-                    child: Center(child: Icon(Icons.directions_car,
-                      size: 72, color: Colors.white.withOpacity(0.3))),
+                    child: Center(
+                      child: Icon(
+                        Icons.directions_car,
+                        size: 72,
+                        color: Colors.white.withOpacity(0.3),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -5716,9 +6600,14 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                 children: [
                   // Category label
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
-                      color: hi ? const Color(0xFFD4AF37).withOpacity(0.15) : const Color(0xFF0B3254).withOpacity(0.08),
+                      color: hi
+                          ? const Color(0xFFD4AF37).withOpacity(0.15)
+                          : const Color(0xFF0B3254).withOpacity(0.08),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
@@ -5727,49 +6616,90 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                         fontSize: 10,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 1.5,
-                        color: hi ? const Color(0xFFD4AF37) : const Color(0xFF0B3254),
+                        color: hi
+                            ? const Color(0xFFD4AF37)
+                            : const Color(0xFF0B3254),
                       ),
                     ),
                   ),
                   const SizedBox(height: 12),
 
-                  Text(cat['tagline'] as String,
+                  Text(
+                    cat['tagline'] as String,
                     style: TextStyle(
-                      fontSize: 15, fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
                       color: hi ? Colors.white : const Color(0xFF0B3254),
                       height: 1.3,
-                    )),
+                    ),
+                  ),
                   const SizedBox(height: 8),
-                  Text(cat['description'] as String,
+                  Text(
+                    cat['description'] as String,
                     style: TextStyle(
-                      fontSize: 13, height: 1.5,
-                      color: hi ? Colors.white.withOpacity(0.65) : Colors.grey[600],
-                    )),
+                      fontSize: 13,
+                      height: 1.5,
+                      color: hi
+                          ? Colors.white.withOpacity(0.65)
+                          : Colors.grey[600],
+                    ),
+                  ),
                   const SizedBox(height: 18),
 
                   // Capacity & Luggage badges
-                  Row(children: [
-                    _fleetBadge(Icons.people_outline, cat['capacity'] as String, hi),
-                    const SizedBox(width: 12),
-                    _fleetBadge(Icons.luggage_outlined, cat['luggage'] as String, hi),
-                  ]),
+                  Row(
+                    children: [
+                      _fleetBadge(
+                        Icons.people_outline,
+                        cat['capacity'] as String,
+                        hi,
+                      ),
+                      const SizedBox(width: 12),
+                      _fleetBadge(
+                        Icons.luggage_outlined,
+                        cat['luggage'] as String,
+                        hi,
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 20),
 
                   // Models list
-                  Wrap(spacing: 6, runSpacing: 6,
-                    children: (cat['vehicles'] as List<String>).map((v) => Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: hi ? Colors.white.withOpacity(0.1) : Colors.grey[100],
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(
-                          color: hi ? Colors.white.withOpacity(0.15) : Colors.grey.shade200),
-                      ),
-                      child: Text(v, style: TextStyle(
-                        fontSize: 11, fontWeight: FontWeight.w500,
-                        color: hi ? Colors.white.withOpacity(0.8) : Colors.grey[700],
-                      )),
-                    )).toList()),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: (cat['vehicles'] as List<String>)
+                        .map(
+                          (v) => Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: hi
+                                  ? Colors.white.withOpacity(0.1)
+                                  : Colors.grey[100],
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(
+                                color: hi
+                                    ? Colors.white.withOpacity(0.15)
+                                    : Colors.grey.shade200,
+                              ),
+                            ),
+                            child: Text(
+                              v,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                color: hi
+                                    ? Colors.white.withOpacity(0.8)
+                                    : Colors.grey[700],
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
                   const SizedBox(height: 22),
 
                   // Book button
@@ -5779,17 +6709,30 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                     child: ElevatedButton(
                       onPressed: () {
                         Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const FleetScreen()));
+                          MaterialPageRoute(
+                            builder: (_) => const FleetScreen(),
+                          ),
+                        );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: hi ? const Color(0xFFD4AF37) : const Color(0xFF0B3254),
-                        foregroundColor: hi ? const Color(0xFF0B3254) : Colors.white,
+                        backgroundColor: hi
+                            ? const Color(0xFFD4AF37)
+                            : const Color(0xFF0B3254),
+                        foregroundColor: hi
+                            ? const Color(0xFF0B3254)
+                            : Colors.white,
                         elevation: 0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                       child: Text(
                         'Book ${cat['category']}',
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.5,
+                        ),
                       ),
                     ),
                   ),
@@ -5816,9 +6759,15 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
               color: const Color(0xFF0B3254),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: const Text('OUR FLEET',
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold,
-                color: Color(0xFFD4AF37), letterSpacing: 2)),
+            child: const Text(
+              'OUR FLEET',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFFD4AF37),
+                letterSpacing: 2,
+              ),
+            ),
           ),
           const SizedBox(height: 24),
           Padding(
@@ -5839,7 +6788,11 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
             child: Text(
               'Experience the ultimate private chauffeur service. Top-of-the-line vehicles for every occasion.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: isCompact ? 14 : 16, color: Colors.grey[600], height: 1.6),
+              style: TextStyle(
+                fontSize: isCompact ? 14 : 16,
+                color: Colors.grey[600],
+                height: 1.6,
+              ),
             ),
           ),
           const SizedBox(height: 48),
@@ -5862,16 +6815,26 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           // View full fleet CTA
           OutlinedButton.icon(
             onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(builder: (_) => const FleetScreen()));
+              Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const FleetScreen()));
             },
             icon: const Icon(Icons.directions_car_outlined, size: 18),
-            label: const Text('VIEW FULL FLEET',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 1)),
+            label: const Text(
+              'VIEW FULL FLEET',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1,
+              ),
+            ),
             style: OutlinedButton.styleFrom(
               foregroundColor: const Color(0xFF0B3254),
               side: const BorderSide(color: Color(0xFF0B3254), width: 1.5),
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
           ),
         ],
@@ -5880,14 +6843,25 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   }
 
   Widget _fleetBadge(IconData icon, String label, bool dark) {
-    return Row(mainAxisSize: MainAxisSize.min, children: [
-      Icon(icon, size: 15, color: dark ? Colors.white.withOpacity(0.7) : Colors.grey[600]),
-      const SizedBox(width: 5),
-      Text(label, style: TextStyle(
-        fontSize: 12, fontWeight: FontWeight.w600,
-        color: dark ? Colors.white.withOpacity(0.8) : Colors.grey[700],
-      )),
-    ]);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          size: 15,
+          color: dark ? Colors.white.withOpacity(0.7) : Colors.grey[600],
+        ),
+        const SizedBox(width: 5),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: dark ? Colors.white.withOpacity(0.8) : Colors.grey[700],
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildAboutSection(BuildContext context) {
@@ -6098,13 +7072,25 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                     // Social Media Icons
                     Row(
                       children: [
-                        _buildSocialIcon(Icons.facebook, 'https://www.facebook.com/vanelux'),
+                        _buildSocialIcon(
+                          Icons.facebook,
+                          'https://www.facebook.com/vanelux',
+                        ),
                         const SizedBox(width: 16),
-                        _buildSocialIcon(Icons.chat, 'https://wa.me/19175995522'),
+                        _buildSocialIcon(
+                          Icons.chat,
+                          'https://wa.me/19294180058',
+                        ),
                         const SizedBox(width: 16),
-                        _buildSocialIcon(Icons.camera_alt, 'https://www.instagram.com/vanelux'),
+                        _buildSocialIcon(
+                          Icons.camera_alt,
+                          'https://www.instagram.com/vanelux',
+                        ),
                         const SizedBox(width: 16),
-                        _buildSocialIcon(Icons.video_camera_back, 'https://www.tiktok.com/@vanelux'),
+                        _buildSocialIcon(
+                          Icons.video_camera_back,
+                          'https://www.tiktok.com/@vanelux',
+                        ),
                       ],
                     ),
                   ],
@@ -6185,8 +7171,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    _buildContactItem(Icons.phone, '+1 (917) 599-5522'),
-                    _buildContactItem(Icons.email, 'info@vanelux.com'),
+                    _buildContactItem(Icons.phone, '9294180058'),
+                    _buildContactItem(Icons.email, 'infovanelux@vane-lux.com'),
                     _buildContactItem(Icons.location_on, 'Miami, FL 33101'),
                     const SizedBox(height: 16),
                     const Text(
@@ -6255,14 +7241,24 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     final isMobile = MediaQuery.of(context).size.width < 768;
     final stats = [
       {'number': '10,000+', 'label': 'Rides Completed', 'sub': 'Since 2019'},
-      {'number': '4.9★', 'label': 'Average Rating', 'sub': 'Across all platforms'},
-      {'number': '7', 'label': 'Luxury Vehicles', 'sub': 'Mercedes, Cadillac & more'},
+      {
+        'number': '4.9★',
+        'label': 'Average Rating',
+        'sub': 'Across all platforms',
+      },
+      {
+        'number': '7',
+        'label': 'Luxury Vehicles',
+        'sub': 'Mercedes, Cadillac & more',
+      },
       {'number': '24/7', 'label': 'Available', 'sub': 'Always here for you'},
       {'number': '\$0', 'label': 'Hidden Fees', 'sub': 'Transparent pricing'},
     ];
     return Container(
       padding: EdgeInsets.symmetric(
-          vertical: isMobile ? 40 : 56, horizontal: isMobile ? 20 : 60),
+        vertical: isMobile ? 40 : 56,
+        horizontal: isMobile ? 20 : 60,
+      ),
       color: const Color(0xFF0B3254),
       child: Column(
         children: [
@@ -6276,11 +7272,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          Container(
-            width: 40,
-            height: 2,
-            color: const Color(0xFFD4AF37),
-          ),
+          Container(width: 40, height: 2, color: const Color(0xFFD4AF37)),
           const SizedBox(height: 10),
           const Text(
             'New York City\'s premium black-car service — trusted by executives,\ncelebrities, and travelers who refuse to compromise.',
@@ -6305,13 +7297,14 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
               : Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: stats
-                      .map((s) => Expanded(
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8),
-                              child: _buildStatCard(s, isMobile),
-                            ),
-                          ))
+                      .map(
+                        (s) => Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: _buildStatCard(s, isMobile),
+                          ),
+                        ),
+                      )
                       .toList(),
                 ),
         ],
@@ -6325,8 +7318,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.07),
         borderRadius: BorderRadius.circular(12),
-        border:
-            Border.all(color: const Color(0xFFD4AF37).withOpacity(0.35), width: 1),
+        border: Border.all(
+          color: const Color(0xFFD4AF37).withOpacity(0.35),
+          width: 1,
+        ),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -6353,7 +7348,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           Text(
             stat['sub']!,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 10, color: Colors.white.withOpacity(0.55)),
+            style: TextStyle(
+              fontSize: 10,
+              color: Colors.white.withOpacity(0.55),
+            ),
           ),
         ],
       ),
@@ -6399,7 +7397,9 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     ];
     return Container(
       padding: EdgeInsets.symmetric(
-          vertical: isMobile ? 60 : 80, horizontal: isMobile ? 24 : 60),
+        vertical: isMobile ? 60 : 80,
+        horizontal: isMobile ? 24 : 60,
+      ),
       color: Colors.white,
       child: Column(
         children: [
@@ -6419,28 +7419,34 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
             'Real experiences from real clients across New York City.',
             textAlign: TextAlign.center,
             style: TextStyle(
-                fontSize: 16, color: Color(0xFF555555), height: 1.6),
+              fontSize: 16,
+              color: Color(0xFF555555),
+              height: 1.6,
+            ),
           ),
           const SizedBox(height: 48),
           isMobile
               ? Column(
                   children: reviews
-                      .map((r) => Padding(
-                            padding: const EdgeInsets.only(bottom: 20),
-                            child: _buildReviewCard(r),
-                          ))
+                      .map(
+                        (r) => Padding(
+                          padding: const EdgeInsets.only(bottom: 20),
+                          child: _buildReviewCard(r),
+                        ),
+                      )
                       .toList(),
                 )
               : Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: reviews
-                      .map((r) => Expanded(
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 10),
-                              child: _buildReviewCard(r),
-                            ),
-                          ))
+                      .map(
+                        (r) => Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            child: _buildReviewCard(r),
+                          ),
+                        ),
+                      )
                       .toList(),
                 ),
         ],
@@ -6462,7 +7468,9 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           ),
         ],
         border: Border.all(
-            color: const Color(0xFFD4AF37).withOpacity(0.2), width: 1),
+          color: const Color(0xFFD4AF37).withOpacity(0.2),
+          width: 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -6503,7 +7511,9 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                     Text(
                       review['location'] as String,
                       style: const TextStyle(
-                          fontSize: 12, color: Color(0xFF888888)),
+                        fontSize: 12,
+                        color: Color(0xFF888888),
+                      ),
                     ),
                   ],
                 ),
@@ -6514,8 +7524,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           Row(
             children: List.generate(
               review['stars'] as int,
-              (_) => const Icon(Icons.star,
-                  color: Color(0xFFD4AF37), size: 16),
+              (_) => const Icon(Icons.star, color: Color(0xFFD4AF37), size: 16),
             ),
           ),
           const SizedBox(height: 12),
@@ -6665,14 +7674,14 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         _buildContactInfoCard(
           Icons.phone,
           'Phone',
-          '+1 (917) 599-5522',
+          '9294180058',
           'Available 24/7',
         ),
         const SizedBox(height: 24),
         _buildContactInfoCard(
           Icons.email,
           'Email',
-          'info@vanelux.com',
+          'infovanelux@vane-lux.com',
           'We respond within 1 hour',
         ),
         const SizedBox(height: 24),
