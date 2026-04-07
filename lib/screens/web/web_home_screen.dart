@@ -2480,6 +2480,12 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
 
   Widget _buildBookingForm(bool isCompact) {
     final double maxWidth = isCompact ? double.infinity : 460;
+    final String? airportRecommendedService = _recommendedAirportServiceType();
+    final List<String> selectableServiceTypes =
+        airportRecommendedService != null
+        ? <String>[airportRecommendedService]
+        : serviceTypes;
+
     return ConstrainedBox(
       constraints: BoxConstraints(maxWidth: maxWidth),
       child: LayoutBuilder(
@@ -2631,31 +2637,62 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                     ),
                   )
                 else
-                  DropdownButtonFormField<String>(
-                    initialValue: selectedServiceType,
-                    hint: const Text('Select service type'),
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                    ),
-                    items: serviceTypes
-                        .map(
-                          (service) => DropdownMenuItem<String>(
-                            value: service,
-                            child: Text(service),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (airportRecommendedService != null)
+                        Container(
+                          width: double.infinity,
+                          margin: const EdgeInsets.only(bottom: 10),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 10,
                           ),
-                        )
-                        .toList(),
-                    onChanged: (value) => setState(() {
-                      selectedServiceType = value;
-                      _serviceTypeAutoAdjustedByAirport = false;
-                    }),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFF7DB),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: const Color(0xFFD4AF37).withOpacity(0.5),
+                            ),
+                          ),
+                          child: Text(
+                            'Airport detected. Service type fixed to "$airportRecommendedService".',
+                            style: const TextStyle(
+                              fontSize: 12.5,
+                              color: Color(0xFF0B3254),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      DropdownButtonFormField<String>(
+                        initialValue: selectedServiceType,
+                        hint: const Text('Select service type'),
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                        ),
+                        items: selectableServiceTypes
+                            .map(
+                              (service) => DropdownMenuItem<String>(
+                                value: service,
+                                child: Text(service),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: airportRecommendedService != null
+                            ? null
+                            : (value) => setState(() {
+                                selectedServiceType = value;
+                                _serviceTypeAutoAdjustedByAirport = false;
+                              }),
+                      ),
+                    ],
                   ),
                 const SizedBox(height: 24),
                 const Text(
