@@ -3,6 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../services/auth_service.dart';
 import '../../models/user.dart';
 import 'payment_screen.dart';
+import 'contact_us_screen.dart';
 
 class BookingDetailsScreen extends StatefulWidget {
   final String pickupAddress;
@@ -499,6 +500,12 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: TextButton(
         onPressed: () {
+          if (text == 'CONTACT') {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const ContactUsScreen()),
+            );
+            return;
+          }
           // Navigate to main screen
           Navigator.pushNamedAndRemoveUntil(
             context,

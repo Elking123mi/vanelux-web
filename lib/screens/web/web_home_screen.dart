@@ -30,6 +30,7 @@ import 'payment_screen.dart';
 import 'service_detail_screen.dart';
 import 'trip_details_web_screen.dart';
 import 'about_us_screen.dart';
+import 'contact_us_screen.dart';
 
 class _QuoteVehicleOption {
   const _QuoteVehicleOption({
@@ -602,6 +603,12 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (_) => const AboutUsScreen()));
+  }
+
+  void _openContactPage() {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const ContactUsScreen()));
   }
 
   Future<void> _loadCurrentUser() async {
@@ -5112,6 +5119,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   Widget _buildQuickAction(String label) {
     return InkWell(
       onTap: () {
+        if (label.toLowerCase().contains('contact')) {
+          _openContactPage();
+          return;
+        }
         _assistantController.text = label;
         _sendAssistantMessage();
       },
@@ -5240,7 +5251,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
             _openAboutPage();
             break;
           case 'CONTACT':
-            _scrollToSection(_contactKey);
+            _openContactPage();
             break;
         }
       },
@@ -5868,7 +5879,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
               _openAboutPage();
               break;
             case 'CONTACT':
-              _scrollToSection(_contactKey);
+              _openContactPage();
               break;
           }
         },
@@ -7457,7 +7468,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                     _buildFooterLink('Book Now'),
                     _buildFooterLink('Our Fleet'),
                     _buildFooterLink('About Us', onTap: _openAboutPage),
-                    _buildFooterLink('Contact'),
+                    _buildFooterLink('Contact', onTap: _openContactPage),
                     _buildFooterLink(
                       'Become a Driver',
                       onTap: () {

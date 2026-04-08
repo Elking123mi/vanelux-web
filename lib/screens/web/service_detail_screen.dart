@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 import 'fleet_screen.dart';
 import 'web_home_screen.dart';
+import 'contact_us_screen.dart';
 
 class ServiceDetailScreen extends StatefulWidget {
   final String serviceType;
@@ -2407,7 +2408,13 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                   ),
                 ),
                 OutlinedButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const ContactUsScreen(),
+                      ),
+                    );
+                  },
                   icon: const Icon(Icons.phone),
                   label: const Text('CONTACT US'),
                   style: OutlinedButton.styleFrom(
