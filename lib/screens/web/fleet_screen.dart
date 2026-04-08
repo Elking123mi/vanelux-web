@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../utils/web_url_sync.dart';
+import 'about_us_screen.dart';
+import 'service_detail_screen.dart';
+import 'web_home_screen.dart';
 
 class FleetScreen extends StatelessWidget {
   const FleetScreen({super.key});
@@ -39,7 +42,11 @@ class FleetScreen extends StatelessWidget {
       child: Row(
         children: [
           InkWell(
-            onTap: () => Navigator.of(context).pop(),
+            onTap: () {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => const WebHomeScreen()),
+              );
+            },
             child: const Text(
               'VANELUX',
               style: TextStyle(
@@ -51,13 +58,28 @@ class FleetScreen extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          _buildNavItem('HOME', () => Navigator.of(context).pop()),
+          _buildNavItem('HOME', () {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const WebHomeScreen()),
+            );
+          }),
           const SizedBox(width: 30),
-          _buildNavItem('SERVICES', () => Navigator.of(context).pop()),
+          _buildNavItem('SERVICES', () {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) =>
+                    const ServiceDetailScreen(serviceType: 'Point to Point'),
+              ),
+            );
+          }),
           const SizedBox(width: 30),
           _buildNavItem('FLEET', null),
           const SizedBox(width: 30),
-          _buildNavItem('ABOUT', () => Navigator.of(context).pop()),
+          _buildNavItem('ABOUT', () {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const AboutUsScreen()),
+            );
+          }),
           const SizedBox(width: 40),
           TextButton(
             onPressed: () {},

@@ -5,6 +5,7 @@ import '../../models/user.dart';
 import '../../utils/web_url_sync.dart';
 import 'payment_screen.dart';
 import 'contact_us_screen.dart';
+import 'trip_details_web_screen.dart';
 
 class BookingDetailsScreen extends StatefulWidget {
   final String pickupAddress;
@@ -107,6 +108,28 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
   bool _isAirportService() {
     return widget.serviceType == 'to-airport' ||
         widget.serviceType == 'from-airport';
+  }
+
+  void _goBackSafely() {
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+      return;
+    }
+
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => TripDetailsWebScreen(
+          pickupAddress: widget.pickupAddress,
+          destinationAddress: widget.destinationAddress,
+          pickupLat: widget.pickupLat,
+          pickupLng: widget.pickupLng,
+          destinationLat: widget.destinationLat,
+          destinationLng: widget.destinationLng,
+          selectedDateTime: widget.selectedDateTime,
+          serviceType: widget.serviceType,
+        ),
+      ),
+    );
   }
 
   void _proceedToPayment() {
@@ -290,7 +313,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                             ),
                             const SizedBox(height: 12),
                             TextButton.icon(
-                              onPressed: () => Navigator.pop(context),
+                              onPressed: _goBackSafely,
                               icon: const Icon(Icons.arrow_back),
                               label: const Text('Back'),
                               style: TextButton.styleFrom(
@@ -304,7 +327,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                       : Row(
                           children: [
                             TextButton.icon(
-                              onPressed: () => Navigator.pop(context),
+                              onPressed: _goBackSafely,
                               icon: const Icon(Icons.arrow_back),
                               label: const Text('Back'),
                               style: TextButton.styleFrom(

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'web_home_screen.dart';
+
 import '../../utils/web_url_sync.dart';
 
 class AboutUsScreen extends StatelessWidget {
@@ -424,7 +426,11 @@ class AboutUsScreen extends StatelessWidget {
 
   Widget _ctaButton(BuildContext context) {
     return ElevatedButton(
-      onPressed: () => Navigator.of(context).pop(),
+      onPressed: () {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const WebHomeScreen()),
+        );
+      },
       style: ElevatedButton.styleFrom(
         backgroundColor: _brandGold,
         foregroundColor: _brandBlue,

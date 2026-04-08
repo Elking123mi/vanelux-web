@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/user.dart';
 import '../../services/auth_service.dart';
 import '../../utils/web_url_sync.dart';
+import 'about_us_screen.dart';
 import 'corporate_registration_screen.dart';
 import 'fleet_screen.dart';
 import 'web_home_screen.dart';
@@ -817,7 +818,11 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             );
           }),
           const SizedBox(width: 30),
-          _buildNavItem('ABOUT', () => Navigator.of(context).pop()),
+          _buildNavItem('ABOUT', () {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const AboutUsScreen()),
+            );
+          }),
           const SizedBox(width: 40),
           if (userName != null) ...[
             Row(

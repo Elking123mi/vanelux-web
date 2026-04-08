@@ -4,6 +4,7 @@ import '../../models/user.dart';
 import '../../services/auth_service.dart';
 import '../../services/booking_service.dart';
 import '../../utils/web_url_sync.dart';
+import 'web_home_screen.dart';
 
 class CorporateDashboardWeb extends StatefulWidget {
   final User user;
@@ -234,7 +235,13 @@ class _CorporateDashboardWebState extends State<CorporateDashboardWeb> {
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => const WebHomeScreen(),
+                        ),
+                      );
+                    },
                     icon: const Icon(Icons.arrow_back, size: 16),
                     label: const Text('Back to Home'),
                     style: OutlinedButton.styleFrom(
