@@ -66,62 +66,78 @@ class PricingService {
   // ─── Flat airport rates (Manhattan ↔ Airport) ─────────────
   static const Map<RouteType, Map<VehicleTier, double>> _airportFlatRates = {
     RouteType.airportManhattanJFK: {
-      VehicleTier.sedan: 140.0,
-      VehicleTier.suv: 150.0,
-      VehicleTier.escalade: 170.0,
-      VehicleTier.sprinter: 250.0,
-      VehicleTier.miniCoach: 350.0,
+      VehicleTier.sedan: 190.0,
+      VehicleTier.suv: 230.0,
+      VehicleTier.escalade: 280.0,
+      VehicleTier.sprinter: 390.0,
+      VehicleTier.miniCoach: 560.0,
     },
     RouteType.airportManhattanLGA: {
-      VehicleTier.sedan: 120.0,
-      VehicleTier.suv: 135.0,
-      VehicleTier.escalade: 155.0,
-      VehicleTier.sprinter: 220.0,
-      VehicleTier.miniCoach: 310.0,
+      VehicleTier.sedan: 170.0,
+      VehicleTier.suv: 210.0,
+      VehicleTier.escalade: 255.0,
+      VehicleTier.sprinter: 360.0,
+      VehicleTier.miniCoach: 520.0,
     },
     RouteType.airportManhattanNewark: {
-      VehicleTier.sedan: 180.0,
-      VehicleTier.suv: 210.0,
-      VehicleTier.escalade: 240.0,
-      VehicleTier.sprinter: 320.0,
-      VehicleTier.miniCoach: 420.0,
+      VehicleTier.sedan: 230.0,
+      VehicleTier.suv: 275.0,
+      VehicleTier.escalade: 330.0,
+      VehicleTier.sprinter: 460.0,
+      VehicleTier.miniCoach: 640.0,
     },
   };
 
   // ─── Local city base rates (up to 5 miles included) ───────
   static const Map<VehicleTier, double> _localBaseRate = {
-    VehicleTier.sedan: 60.0,
-    VehicleTier.suv: 80.0,
-    VehicleTier.escalade: 95.0,
-    VehicleTier.sprinter: 140.0,
-    VehicleTier.miniCoach: 200.0,
+    VehicleTier.sedan: 75.0,
+    VehicleTier.suv: 95.0,
+    VehicleTier.escalade: 125.0,
+    VehicleTier.sprinter: 190.0,
+    VehicleTier.miniCoach: 280.0,
   };
 
   static const Map<VehicleTier, double> _localExtraMileRate = {
-    VehicleTier.sedan: 3.00,
-    VehicleTier.suv: 3.75,
-    VehicleTier.escalade: 4.25,
-    VehicleTier.sprinter: 5.50,
-    VehicleTier.miniCoach: 7.00,
+    VehicleTier.sedan: 4.25,
+    VehicleTier.suv: 5.50,
+    VehicleTier.escalade: 6.75,
+    VehicleTier.sprinter: 9.50,
+    VehicleTier.miniCoach: 12.00,
   };
 
   static const double _localBaseIncludedMiles = 5.0;
 
   // ─── Outside city: Base fare + per-mile rates ─────────────
   static const Map<VehicleTier, double> _outsideCityBaseFare = {
-    VehicleTier.sedan: 120.0,
-    VehicleTier.suv: 140.0,
-    VehicleTier.escalade: 160.0,
-    VehicleTier.sprinter: 200.0,
-    VehicleTier.miniCoach: 250.0,
+    VehicleTier.sedan: 140.0,
+    VehicleTier.suv: 170.0,
+    VehicleTier.escalade: 210.0,
+    VehicleTier.sprinter: 300.0,
+    VehicleTier.miniCoach: 430.0,
   };
 
   static const Map<VehicleTier, double> _outsideCityRate = {
-    VehicleTier.sedan: 3.75,
-    VehicleTier.suv: 4.10,
-    VehicleTier.escalade: 4.75,
-    VehicleTier.sprinter: 7.75,
-    VehicleTier.miniCoach: 9.75,
+    VehicleTier.sedan: 6.00,
+    VehicleTier.suv: 7.25,
+    VehicleTier.escalade: 8.75,
+    VehicleTier.sprinter: 12.50,
+    VehicleTier.miniCoach: 16.00,
+  };
+
+  static const Map<String, double> _serviceMultipliers = {
+    'point to point': 1.0,
+    'to airport': 1.10,
+    'from airport': 1.10,
+    'airport transfer': 1.10,
+    'hourly/as directed': 1.35,
+    'hourly service': 1.35,
+    'corporate': 1.20,
+    'wedding': 1.40,
+    'events': 1.40,
+    'proms': 1.40,
+    'tour': 1.25,
+    'tours': 1.25,
+    'city tour': 1.25,
   };
 
   // ─── Vehicle name → Tier mapping ──────────────────────────
@@ -266,6 +282,17 @@ class PricingService {
     }
   }
 
+  static String _normalizeServiceType(String? serviceType) {
+    final raw = (serviceType ?? '').trim().toLowerCase();
+    if (raw.isEmpty) return 'point to point';
+    return raw;
+  }
+
+  static double _serviceMultiplier(String? serviceType) {
+    final normalized = _normalizeServiceType(serviceType);
+    return _serviceMultipliers[normalized] ?? 1.0;
+  }
+
   // ─── Price calculation ────────────────────────────────────
   static PriceEstimate calculatePrice({
     required double pickupLat,
@@ -274,6 +301,7 @@ class PricingService {
     required double dropoffLng,
     required double distanceMiles,
     required String vehicleName,
+    String? serviceType,
     bool isReturnTrip = false,
     double tollCost = 0.0, // Toll cost from TollService
   }) {
@@ -286,16 +314,18 @@ class PricingService {
     );
     final effectiveMiles = distanceMiles * (isReturnTrip ? 2 : 1);
     final effectiveTolls = tollCost * (isReturnTrip ? 2 : 1);
+    final serviceMultiplier = _serviceMultiplier(serviceType);
 
     // ── Airport flat rates ──
     if (_airportFlatRates.containsKey(routeType)) {
-      final flatRate = _airportFlatRates[routeType]![tier] ?? 140.0;
+      final flatRate = _airportFlatRates[routeType]![tier] ?? 190.0;
       final totalFlat = flatRate * (isReturnTrip ? 2 : 1);
+      final serviceAdjusted = totalFlat * serviceMultiplier;
       return PriceEstimate(
         routeType: routeType,
         routeLabel: getRouteLabel(routeType),
         tier: tier,
-        totalPrice: totalFlat + effectiveTolls,
+        totalPrice: serviceAdjusted + effectiveTolls,
         distanceMiles: effectiveMiles,
         isFlat: true,
         tollCost: effectiveTolls,
@@ -309,7 +339,8 @@ class PricingService {
       final extraMiles = (effectiveMiles > _localBaseIncludedMiles)
           ? effectiveMiles - _localBaseIncludedMiles
           : 0.0;
-      final total = base + (extraMiles * extraRate) + effectiveTolls;
+      final subtotal = base + (extraMiles * extraRate);
+      final total = (subtotal * serviceMultiplier) + effectiveTolls;
       return PriceEstimate(
         routeType: routeType,
         routeLabel: getRouteLabel(routeType),
@@ -324,8 +355,9 @@ class PricingService {
 
     // ── Outside city ──
     final baseFare = _outsideCityBaseFare[tier] ?? 120.0;
-    final rate = _outsideCityRate[tier] ?? 3.75;
-    final total = baseFare + (effectiveMiles * rate) + effectiveTolls;
+    final rate = _outsideCityRate[tier] ?? 6.00;
+    final subtotal = baseFare + (effectiveMiles * rate);
+    final total = (subtotal * serviceMultiplier) + effectiveTolls;
     return PriceEstimate(
       routeType: routeType,
       routeLabel: getRouteLabel(routeType),
@@ -345,6 +377,7 @@ class PricingService {
     required double dropoffLat,
     required double dropoffLng,
     required double distanceMiles,
+    String? serviceType,
     bool isReturnTrip = false,
     double tollCost = 0.0,
   }) {
@@ -366,6 +399,7 @@ class PricingService {
         dropoffLng: dropoffLng,
         distanceMiles: distanceMiles,
         vehicleName: entry.value,
+        serviceType: serviceType,
         isReturnTrip: isReturnTrip,
         tollCost: tollCost,
       );

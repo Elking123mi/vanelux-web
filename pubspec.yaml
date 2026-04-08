@@ -116,6 +116,7 @@ flutter:
     - assets/images/telefono2.png
     - assets/images/telefono3.png
     - assets/images/telefono4.png
+    - assets/images/logo.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

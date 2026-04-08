@@ -170,14 +170,22 @@ class OpenAIAssistantService {
 
 💰 PRICING (Share when asked):
 • AIRPORT ↔ MANHATTAN (Flat Rates):
-  - JFK: Sedan \$140 | SUV \$150 | Escalade \$170 | Sprinter \$250 | Mini Coach \$350
-  - LaGuardia: Sedan \$120 | SUV \$135 | Escalade \$155 | Sprinter \$220 | Mini Coach \$310
-  - Newark: Sedan \$180 | SUV \$210 | Escalade \$240 | Sprinter \$320 | Mini Coach \$420
+  - JFK: Sedan \$190 | SUV \$230 | Escalade \$280 | Sprinter \$390 | Mini Coach \$560
+  - LaGuardia: Sedan \$170 | SUV \$210 | Escalade \$255 | Sprinter \$360 | Mini Coach \$520
+  - Newark: Sedan \$230 | SUV \$275 | Escalade \$330 | Sprinter \$460 | Mini Coach \$640
 • NYC LOCAL (within city):
-  - Base fare (up to 5 miles): Sedan \$60 | SUV \$80 | Escalade \$95 | Sprinter \$140 | Mini Coach \$200
-  - Per extra mile: Sedan \$3.00 | SUV \$3.75 | Escalade \$4.25 | Sprinter \$5.50 | Mini Coach \$7.00
+  - Base fare (up to 5 miles): Sedan \$75 | SUV \$95 | Escalade \$125 | Sprinter \$190 | Mini Coach \$280
+  - Per extra mile: Sedan \$4.25 | SUV \$5.50 | Escalade \$6.75 | Sprinter \$9.50 | Mini Coach \$12.00
 • OUTSIDE NYC:
-  - Per mile: Sedan \$5.75 | SUV \$6.25 | Escalade \$7.25 | Sprinter \$10.75 | Mini Coach \$12.75
+  - Base fare: Sedan \$140 | SUV \$170 | Escalade \$210 | Sprinter \$300 | Mini Coach \$430
+  - Per mile: Sedan \$6.00 | SUV \$7.25 | Escalade \$8.75 | Sprinter \$12.50 | Mini Coach \$16.00
+• SERVICE ADJUSTMENTS:
+  - Point to Point: standard rate
+  - Airport services: +10% service premium
+  - Hourly / As Directed: +35%
+  - Corporate: +20%
+  - Wedding / Events / Proms: +40%
+  - Tours: +25%
 
 📋 SERVICE TYPES:
 - To Airport / From Airport — Airport transfers with meet-and-greet

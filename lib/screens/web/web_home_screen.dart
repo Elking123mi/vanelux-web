@@ -1856,6 +1856,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           dropoffLng: destinationPlace.longitude,
           distanceMiles: oneWayMiles,
           vehicleName: vehicle.name,
+          serviceType: _selectedServiceType,
           isReturnTrip: isReturnTrip,
           tollCost: tollCost,
         );
@@ -4412,6 +4413,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       dropoffLat: _chatDropoffPlace!.latitude,
       dropoffLng: _chatDropoffPlace!.longitude,
       distanceMiles: distanceMiles,
+      serviceType: _selectedServiceType,
     );
 
     setState(() {
@@ -7234,7 +7236,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         statsLayout,
         const SizedBox(height: 32),
         ElevatedButton(
-          onPressed: () {},
+          onPressed: () => _scrollToSection(_aboutKey),
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFFD4AF37),
             foregroundColor: const Color(0xFF0B3254),
@@ -7257,6 +7259,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
 
     final Widget imagePlaceholder = Container(
       height: isCompact ? 240 : 400,
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
@@ -7265,23 +7268,32 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           width: 2,
         ),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.business,
-            size: isCompact ? 72 : 100,
-            color: const Color(0xFFD4AF37).withOpacity(0.7),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Company Image',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
-              fontSize: 16,
-            ),
-          ),
-        ],
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Image.asset(
+          'assets/images/logo.png',
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.business,
+                  size: isCompact ? 72 : 100,
+                  color: const Color(0xFFD4AF37).withOpacity(0.7),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Company Image',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.8),
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
 
