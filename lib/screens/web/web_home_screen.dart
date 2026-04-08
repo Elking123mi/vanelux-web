@@ -31,6 +31,7 @@ import 'service_detail_screen.dart';
 import 'trip_details_web_screen.dart';
 import 'about_us_screen.dart';
 import 'contact_us_screen.dart';
+import 'corporate_registration_screen.dart';
 
 class _QuoteVehicleOption {
   const _QuoteVehicleOption({
@@ -609,6 +610,21 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (_) => const ContactUsScreen()));
+  }
+
+  void _openCorporateRegistrationPage() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const CorporateRegistrationScreen(),
+      ),
+    );
+  }
+
+  bool get _isCorporateVerifiedUser {
+    final user = _currentUser;
+    if (user == null) return false;
+    return user.roles.contains('corporate') ||
+        user.allowedApps.contains('vanelux_corporate');
   }
 
   Future<void> _loadCurrentUser() async {
@@ -6167,8 +6183,132 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
             const SizedBox(height: 40),
             _buildServiceRow(services.sublist(3)),
           ],
+          const SizedBox(height: 34),
+          _buildCorporatePromoCard(isCompact),
         ],
       ),
+    );
+  }
+
+  Widget _buildCorporatePromoCard(bool isCompact) {
+    final title = _isCorporateVerifiedUser
+        ? 'Corporate Account Active'
+        : 'Corporate Account Registration';
+    final subtitle = _isCorporateVerifiedUser
+        ? 'Your login is already verified as corporate. Manage your corporate account setup and service requirements.'
+        : 'Register your company account for priority dispatch, consolidated billing and executive support.';
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(
+        horizontal: isCompact ? 16 : 24,
+        vertical: isCompact ? 18 : 22,
+      ),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF0B3254), Color(0xFF1A4E77)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: isCompact
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Color(0xFFD4AF37),
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                ElevatedButton.icon(
+                  onPressed: _openCorporateRegistrationPage,
+                  icon: Icon(
+                    _isCorporateVerifiedUser
+                        ? Icons.domain_verification
+                        : Icons.business_center,
+                  ),
+                  label: Text(
+                    _isCorporateVerifiedUser
+                        ? 'Manage Corporate Setup'
+                        : 'Apply for Corporate Account',
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFD4AF37),
+                    foregroundColor: const Color(0xFF0B3254),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 14,
+                    ),
+                  ),
+                ),
+              ],
+            )
+          : Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          color: Color(0xFFD4AF37),
+                          fontSize: 28,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        subtitle,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          height: 1.5,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 20),
+                ElevatedButton.icon(
+                  onPressed: _openCorporateRegistrationPage,
+                  icon: Icon(
+                    _isCorporateVerifiedUser
+                        ? Icons.domain_verification
+                        : Icons.business_center,
+                  ),
+                  label: Text(
+                    _isCorporateVerifiedUser
+                        ? 'Manage Corporate Setup'
+                        : 'Apply for Corporate Account',
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFD4AF37),
+                    foregroundColor: const Color(0xFF0B3254),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
+                    ),
+                    textStyle: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
     );
   }
 

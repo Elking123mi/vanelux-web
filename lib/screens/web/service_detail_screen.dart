@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../models/user.dart';
 import '../../services/auth_service.dart';
+import 'corporate_registration_screen.dart';
 import 'fleet_screen.dart';
 import 'web_home_screen.dart';
 import 'contact_us_screen.dart';
@@ -15,6 +17,7 @@ class ServiceDetailScreen extends StatefulWidget {
 
 class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   String? userName;
+  User? _currentUser;
 
   @override
   void initState() {
@@ -28,11 +31,19 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       if (user != null && mounted) {
         setState(() {
           userName = user.name;
+          _currentUser = user;
         });
       }
     } catch (e) {
       debugPrint('Error loading user: $e');
     }
+  }
+
+  bool get _isCorporateVerified {
+    final user = _currentUser;
+    if (user == null) return false;
+    return user.roles.contains('corporate') ||
+        user.allowedApps.contains('vanelux_corporate');
   }
 
   String _mapServiceTypeForBooking() {
@@ -655,6 +666,14 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     );
   }
 
+  void _openCorporateRegistration() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const CorporateRegistrationScreen(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final serviceInfo = _getServiceInfo();
@@ -1102,6 +1121,50 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                         fontWeight: FontWeight.w400,
                       ),
                     ),
+                    if (widget.serviceType == 'Corporate') ...[
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _isCorporateVerified
+                              ? const Color(0xFF22C55E).withOpacity(0.22)
+                              : Colors.white.withOpacity(0.14),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: _isCorporateVerified
+                                ? const Color(0xFF22C55E)
+                                : Colors.white.withOpacity(0.35),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _isCorporateVerified
+                                  ? Icons.verified
+                                  : Icons.approval,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                _isCorporateVerified
+                                    ? 'Corporate account verified for your login'
+                                    : 'Not corporate-verified yet. Submit your corporate account request.',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                     SizedBox(height: isMobile ? 24 : 34),
                     Wrap(
                       spacing: 12,
@@ -1159,6 +1222,39 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                             ),
                           ),
                         ),
+                        if (widget.serviceType == 'Corporate')
+                          ElevatedButton.icon(
+                            onPressed: _openCorporateRegistration,
+                            icon: Icon(
+                              _isCorporateVerified
+                                  ? Icons.domain_verification
+                                  : Icons.business_center,
+                            ),
+                            label: Text(
+                              _isCorporateVerified
+                                  ? 'Manage corporate setup'
+                                  : 'Apply corporate account',
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF0B3254),
+                              foregroundColor: const Color(0xFFD4AF37),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 16,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                side: const BorderSide(
+                                  color: Color(0xFFD4AF37),
+                                  width: 1.2,
+                                ),
+                              ),
+                              textStyle: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ],
@@ -1660,9 +1756,11 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                                 SizedBox(
                                   width: double.infinity,
                                   child: ElevatedButton(
-                                    onPressed: () => _navigateToBooking(
-                                      packageName: package['name'],
-                                    ),
+                                    onPressed: widget.serviceType == 'Corporate'
+                                        ? _openCorporateRegistration
+                                        : () => _navigateToBooking(
+                                            packageName: package['name'],
+                                          ),
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: const Color(0xFF0B3254),
                                       foregroundColor: Colors.white,
@@ -1676,7 +1774,11 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                                         fontWeight: FontWeight.w700,
                                       ),
                                     ),
-                                    child: const Text('Choose package'),
+                                    child: Text(
+                                      widget.serviceType == 'Corporate'
+                                          ? 'Apply account'
+                                          : 'Choose package',
+                                    ),
                                   ),
                                 ),
                               ],
@@ -1704,8 +1806,10 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Custom Hourly Services',
+                Text(
+                  widget.serviceType == 'Corporate'
+                      ? 'Corporate Account Registration'
+                      : 'Custom Hourly Services',
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -1714,7 +1818,9 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 ),
                 const SizedBox(height: 15),
                 Text(
-                  'Need a custom duration? We can accommodate any timeframe for your specific needs.',
+                  widget.serviceType == 'Corporate'
+                      ? 'Corporate account registration: submit your company request and our team will verify your account manually.'
+                      : 'Need a custom duration? We can accommodate any timeframe for your specific needs.',
                   style: TextStyle(
                     fontSize: isMobile ? 14 : 15,
                     color: Colors.white70,
@@ -1726,7 +1832,9 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                   runSpacing: 12,
                   children: [
                     ElevatedButton(
-                      onPressed: () => _navigateToBooking(),
+                      onPressed: widget.serviceType == 'Corporate'
+                          ? _openCorporateRegistration
+                          : () => _navigateToBooking(),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFFFD700),
                         foregroundColor: const Color(0xFF0B3254),
@@ -1738,7 +1846,11 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text('Request custom quote'),
+                      child: Text(
+                        widget.serviceType == 'Corporate'
+                            ? 'Request corporate verification'
+                            : 'Request custom quote',
+                      ),
                     ),
                     OutlinedButton(
                       onPressed: _goHome,

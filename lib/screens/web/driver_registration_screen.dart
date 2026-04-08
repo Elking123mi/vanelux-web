@@ -159,7 +159,7 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
       bool emailSent = false;
       try {
         final emailUrl = Uri.parse(
-          'https://formsubmit.co/ajax/elkinchila2006@gmail.com',
+          'https://formsubmit.co/ajax/infovanelux@vane-lux.com',
         );
         final emailBody = {
           '_subject': 'New Driver Application - Vanelux',
@@ -210,7 +210,7 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({
             ...applicationData,
-            'notification_email': 'elkinchila2006@gmail.com',
+            'notification_email': 'infovanelux@vane-lux.com',
           }),
         );
         if (response.statusCode == 201) {
