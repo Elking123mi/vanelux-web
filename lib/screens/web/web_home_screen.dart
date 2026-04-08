@@ -29,6 +29,7 @@ import 'fleet_screen.dart';
 import 'payment_screen.dart';
 import 'service_detail_screen.dart';
 import 'trip_details_web_screen.dart';
+import 'about_us_screen.dart';
 
 class _QuoteVehicleOption {
   const _QuoteVehicleOption({
@@ -595,6 +596,12 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         curve: Curves.easeInOut,
       );
     }
+  }
+
+  void _openAboutPage() {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const AboutUsScreen()));
   }
 
   Future<void> _loadCurrentUser() async {
@@ -5230,7 +5237,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
             _scrollToSection(_fleetKey);
             break;
           case 'ABOUT':
-            _scrollToSection(_aboutKey);
+            _openAboutPage();
             break;
           case 'CONTACT':
             _scrollToSection(_contactKey);
@@ -5858,7 +5865,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
               ).push(MaterialPageRoute(builder: (_) => const FleetScreen()));
               break;
             case 'ABOUT':
-              _scrollToSection(_aboutKey);
+              _openAboutPage();
               break;
             case 'CONTACT':
               _scrollToSection(_contactKey);
@@ -7236,7 +7243,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         statsLayout,
         const SizedBox(height: 32),
         ElevatedButton(
-          onPressed: () => _scrollToSection(_aboutKey),
+          onPressed: _openAboutPage,
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFFD4AF37),
             foregroundColor: const Color(0xFF0B3254),
@@ -7449,7 +7456,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                     const SizedBox(height: 16),
                     _buildFooterLink('Book Now'),
                     _buildFooterLink('Our Fleet'),
-                    _buildFooterLink('About Us'),
+                    _buildFooterLink('About Us', onTap: _openAboutPage),
                     _buildFooterLink('Contact'),
                     _buildFooterLink(
                       'Become a Driver',
