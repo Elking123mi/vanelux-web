@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/stripe_service.dart';
+import '../../utils/web_url_sync.dart';
 
 class StripePaymentScreen extends StatefulWidget {
   final int bookingId;
@@ -18,6 +19,12 @@ class StripePaymentScreen extends StatefulWidget {
 class _StripePaymentScreenState extends State<StripePaymentScreen> {
   final StripeService _stripeService = StripeService();
   bool _isProcessing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    syncWebPath('/payment/stripe');
+  }
 
   Future<void> _processPayment() async {
     setState(() => _isProcessing = true);
