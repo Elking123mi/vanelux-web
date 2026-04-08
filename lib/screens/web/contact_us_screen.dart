@@ -189,6 +189,7 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    syncWebPath('/contact/${toUrlSlug(_issueType)}');
     final width = MediaQuery.of(context).size.width;
     final isCompact = width < 980;
 
