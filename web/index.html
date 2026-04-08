@@ -79,6 +79,22 @@
 
     gtag('config', 'AW-18069160639');
     gtag('config', 'AW-18869168639');
+
+    // Global click conversion event for Google Ads across the SPA.
+    // Set data-no-ads-conversion="true" on elements that should be excluded.
+    function sendGlobalAdsClickConversion() {
+      if (typeof gtag !== 'function') return;
+      gtag('event', 'ads_conversion_Compra_1', {
+        'event_timeout': 2000,
+      });
+    }
+
+    document.addEventListener('click', function (event) {
+      var clickable = event.target.closest('a, button, [role="button"]');
+      if (!clickable) return;
+      if (clickable.dataset && clickable.dataset.noAdsConversion === 'true') return;
+      sendGlobalAdsClickConversion();
+    }, true);
   </script>
 
   <!-- Google Sign-In -->
