@@ -36,9 +36,21 @@ class User {
         return value.map((e) => e.toString()).toList();
       }
       if (value is String && value.isNotEmpty) {
+        final trimmed = value.trim();
+        // Handle JSON-array strings like ["passenger", "corporate"]
+        if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+          try {
+            final decoded = jsonDecode(trimmed);
+            if (decoded is List) {
+              return decoded.map((e) => e.toString()).toList();
+            }
+          } catch (_) {
+            // Fallback below
+          }
+        }
         return value
             .split(',')
-            .map((e) => e.trim())
+            .map((e) => e.trim().replaceAll('[', '').replaceAll(']', '').replaceAll('"', '').replaceAll("'", ''))
             .where((e) => e.isNotEmpty)
             .toList();
       }

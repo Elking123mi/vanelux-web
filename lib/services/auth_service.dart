@@ -204,7 +204,15 @@ class AuthService {
         await _persistUser(normalizedUser, role);
       }
 
-      return normalizedUser;
+      // Try to refresh user from backend so role/app updates (e.g. corporate approval)
+      // are reflected without forcing manual cache clearing.
+      try {
+        final fresh = await CentralBackendService.fetchCurrentUser();
+        await _persistUser(fresh, await getUserRole());
+        return fresh;
+      } catch (_) {
+        return normalizedUser;
+      }
     }
     try {
       final fresh = await CentralBackendService.fetchCurrentUser();

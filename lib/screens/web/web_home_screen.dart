@@ -24,6 +24,7 @@ import 'driver_applications_admin_screen.dart';
 import 'driver_registration_screen.dart';
 import '../../widgets/route_map_view.dart';
 import 'customer_dashboard_web.dart';
+import 'corporate_dashboard_web.dart';
 import 'driver_dashboard_web.dart';
 import 'fleet_screen.dart';
 import 'payment_screen.dart';
@@ -625,6 +626,22 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     if (user == null) return false;
     return user.roles.contains('corporate') ||
         user.allowedApps.contains('vanelux_corporate');
+  }
+
+  void _openAuthenticatedDashboard() {
+    final user = _currentUser;
+    if (user == null) {
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => _isCorporateVerifiedUser
+            ? CorporateDashboardWeb(user: user)
+            : CustomerDashboardWeb(user: user),
+      ),
+    );
   }
 
   Future<void> _loadCurrentUser() async {
@@ -5460,13 +5477,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                         onSelected: (value) {
                           switch (value) {
                             case 'dashboard':
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      CustomerDashboardWeb(user: _currentUser!),
-                                ),
-                              );
+                              _openAuthenticatedDashboard();
                               break;
                             case 'driver_apps':
                               Navigator.push(
@@ -5603,13 +5614,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                       onSelected: (value) {
                         switch (value) {
                           case 'dashboard':
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    CustomerDashboardWeb(user: _currentUser!),
-                              ),
-                            );
+                            _openAuthenticatedDashboard();
                             break;
                           case 'driver_apps':
                             Navigator.push(
@@ -5752,13 +5757,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           onSelected: (value) {
             switch (value) {
               case 'dashboard':
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        CustomerDashboardWeb(user: _currentUser!),
-                  ),
-                );
+                _openAuthenticatedDashboard();
                 break;
               case 'driver_apps':
                 Navigator.push(

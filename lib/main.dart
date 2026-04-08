@@ -7,6 +7,7 @@ import 'dart:html' as html;
 import 'screens/auth/login_screen.dart';
 import 'screens/web/web_home_screen.dart';
 import 'screens/web/driver_set_password_screen.dart';
+import 'screens/web/corporate_set_password_screen.dart';
 import 'screens/auth/register_screen.dart';
 import 'constants/vanelux_colors.dart';
 import 'providers/locale_provider.dart';
@@ -140,7 +141,12 @@ class _WebEntry extends StatelessWidget {
       if (hash.contains('/set-password')) {
         final uri = Uri.tryParse(hash.replaceFirst('#', ''));
         final token = uri?.queryParameters['token'] ?? '';
+        final account =
+            (uri?.queryParameters['account'] ?? '').trim().toLowerCase();
         if (token.isNotEmpty) {
+          if (account == 'corporate') {
+            return CorporateSetPasswordScreen(token: token);
+          }
           return DriverSetPasswordScreen(token: token);
         }
       }
