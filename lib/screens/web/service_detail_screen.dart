@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/user.dart';
 import '../../services/auth_service.dart';
+import '../../utils/web_url_sync.dart';
 import 'corporate_registration_screen.dart';
 import 'fleet_screen.dart';
 import 'web_home_screen.dart';
@@ -22,6 +23,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   @override
   void initState() {
     super.initState();
+    syncWebPath('/services');
     _loadUserData();
   }
 

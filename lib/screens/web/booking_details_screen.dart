@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../services/auth_service.dart';
 import '../../models/user.dart';
+import '../../utils/web_url_sync.dart';
 import 'payment_screen.dart';
 import 'contact_us_screen.dart';
 
@@ -60,6 +61,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
   @override
   void initState() {
     super.initState();
+    syncWebPath('/booking');
     _setupMap();
     _loadCurrentUser();
   }

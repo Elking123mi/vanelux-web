@@ -4,6 +4,7 @@ import '../../services/google_maps_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/pricing_service.dart';
 import '../../models/user.dart';
+import '../../utils/web_url_sync.dart';
 import 'login_screen.dart';
 import 'booking_details_screen.dart';
 
@@ -156,6 +157,7 @@ class _TripDetailsWebScreenState extends State<TripDetailsWebScreen> {
   @override
   void initState() {
     super.initState();
+    syncWebPath('/trip-details');
     _loadRouteData();
     _loadCurrentUser();
   }

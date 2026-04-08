@@ -3,6 +3,7 @@ import '../../models/user.dart';
 import '../../models/trip.dart';
 import '../../services/auth_service.dart';
 import '../../services/booking_service.dart';
+import '../../utils/web_url_sync.dart';
 import 'trip_tracking_screen.dart';
 
 class CustomerDashboardWeb extends StatefulWidget {
@@ -37,6 +38,7 @@ class _CustomerDashboardWebState extends State<CustomerDashboardWeb> {
   @override
   void initState() {
     super.initState();
+    syncWebPath('/dashboard/customer');
     _loadBookings();
   }
 

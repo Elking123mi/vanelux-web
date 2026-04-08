@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../utils/web_url_sync.dart';
+
 class FleetScreen extends StatelessWidget {
   const FleetScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    syncWebPath('/fleet');
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(

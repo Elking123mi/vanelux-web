@@ -9,6 +9,7 @@ import '../../config/app_config.dart';
 import '../../models/driver.dart';
 import '../../services/auth_service.dart';
 import '../../services/central_backend_service.dart';
+import '../../utils/web_url_sync.dart';
 
 // ─── Data models ─────────────────────────────────────────────────────────
 
@@ -187,6 +188,7 @@ class _DriverDashboardWebState extends State<DriverDashboardWeb>
   @override
   void initState() {
     super.initState();
+    syncWebPath('/dashboard/driver');
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),

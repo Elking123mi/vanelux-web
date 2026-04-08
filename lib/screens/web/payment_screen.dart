@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../services/booking_service.dart';
 import '../../services/auth_service.dart';
 import '../../models/types.dart';
+import '../../utils/web_url_sync.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 // Conditional imports
@@ -118,6 +119,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   @override
   void initState() {
     super.initState();
+    syncWebPath('/payment');
     _loadDetailedRoute();
     _initializeStripe();
   }

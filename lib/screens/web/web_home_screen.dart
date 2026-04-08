@@ -18,6 +18,7 @@ import '../../services/oauth_service.dart';
 import '../../services/google_maps_service.dart';
 import '../../services/openai_assistant_service.dart';
 import '../../services/pricing_service.dart';
+import '../../utils/web_url_sync.dart';
 import '../../widgets/vanelux_logo.dart';
 import '../../widgets/notifications_panel.dart';
 import 'driver_applications_admin_screen.dart';
@@ -532,6 +533,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   @override
   void initState() {
     super.initState();
+    syncWebPath('/', replace: true);
     // Initialize service type from widget parameters
     if (widget.initialServiceType != null) {
       selectedServiceType = widget.initialServiceType;

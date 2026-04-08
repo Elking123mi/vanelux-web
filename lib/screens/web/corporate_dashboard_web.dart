@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../models/user.dart';
 import '../../services/auth_service.dart';
 import '../../services/booking_service.dart';
+import '../../utils/web_url_sync.dart';
 
 class CorporateDashboardWeb extends StatefulWidget {
   final User user;
@@ -38,6 +39,7 @@ class _CorporateDashboardWebState extends State<CorporateDashboardWeb> {
   @override
   void initState() {
     super.initState();
+    syncWebPath('/dashboard/corporate');
     _loadCorporateBookings();
   }
 
