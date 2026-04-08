@@ -1856,7 +1856,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           dropoffLng: destinationPlace.longitude,
           distanceMiles: oneWayMiles,
           vehicleName: vehicle.name,
-          serviceType: _selectedServiceType,
+          serviceType: selectedServiceType,
           isReturnTrip: isReturnTrip,
           tollCost: tollCost,
         );
@@ -4413,7 +4413,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       dropoffLat: _chatDropoffPlace!.latitude,
       dropoffLng: _chatDropoffPlace!.longitude,
       distanceMiles: distanceMiles,
-      serviceType: _selectedServiceType,
+      serviceType: selectedServiceType,
     );
 
     setState(() {
