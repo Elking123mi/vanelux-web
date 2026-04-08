@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'types.dart';
 
 class User {
