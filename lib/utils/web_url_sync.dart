@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'dart:async';
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:html' as html;
 
@@ -32,13 +33,20 @@ void syncWebPath(
   );
   final targetHash = '#${targetUri.toString()}';
 
-  if (html.window.location.hash == targetHash) {
-    return;
+  void apply({required bool useReplace}) {
+    if (html.window.location.hash == targetHash) return;
+    if (useReplace) {
+      html.window.history.replaceState(null, '', targetHash);
+    } else {
+      html.window.history.pushState(null, '', targetHash);
+    }
   }
 
-  if (replace) {
-    html.window.history.replaceState(null, '', targetHash);
-  } else {
-    html.window.history.pushState(null, '', targetHash);
-  }
+  apply(useReplace: replace);
+
+  // Flutter Web can rewrite URL right after startup; enforce the target hash.
+  scheduleMicrotask(() => apply(useReplace: true));
+  Future.delayed(const Duration(milliseconds: 120), () {
+    apply(useReplace: true);
+  });
 }
