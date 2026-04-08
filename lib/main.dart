@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:html' as html;
 import 'screens/auth/login_screen.dart';
 import 'screens/web/web_home_screen.dart';
 import 'screens/web/about_us_screen.dart';
@@ -140,6 +138,28 @@ class VaneLuxApp extends StatelessWidget {
 class _WebEntry extends StatelessWidget {
   const _WebEntry();
 
+  Uri _resolveEntryUri() {
+    final base = Uri.base;
+
+    if (base.fragment.isNotEmpty) {
+      final fragmentPath = base.fragment.startsWith('/')
+          ? base.fragment
+          : '/${base.fragment}';
+      return Uri.tryParse(fragmentPath) ?? Uri(path: '/');
+    }
+
+    if (base.path.isNotEmpty && base.path != '/') {
+      return Uri(
+        path: base.path,
+        queryParameters: base.queryParameters.isEmpty
+            ? null
+            : base.queryParameters,
+      );
+    }
+
+    return Uri(path: '/');
+  }
+
   String _serviceTypeFromSlug(String slug) {
     switch (slug.trim().toLowerCase()) {
       case 'airport-transfer':
@@ -162,10 +182,7 @@ class _WebEntry extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (kIsWeb) {
-      final hash = html.window.location.hash;
-      final uri = Uri.tryParse(
-        hash.isNotEmpty ? hash.replaceFirst('#', '') : '/',
-      );
+      final uri = _resolveEntryUri();
       final path = (uri?.path ?? '/').trim().isEmpty ? '/' : (uri?.path ?? '/');
       final segments = uri?.pathSegments ?? const <String>[];
 
