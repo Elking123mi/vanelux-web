@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../../config/app_config.dart';
+import '../../utils/web_url_sync.dart';
 
 /// Screen that a new driver opens from their approval email link.
 /// URL format: https://vanelux.netlify.app/#/set-password?token=XXX
@@ -35,6 +36,14 @@ class _DriverSetPasswordScreenState extends State<DriverSetPasswordScreen> {
   @override
   void initState() {
     super.initState();
+    syncWebPath(
+      '/set-password',
+      replace: true,
+      queryParameters: {
+        'token': widget.token,
+        'account': 'driver',
+      },
+    );
     _decodeTokenPreview();
   }
 

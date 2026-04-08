@@ -35,10 +35,25 @@ class _CustomerDashboardWebState extends State<CustomerDashboardWeb> {
     Icons.settings_outlined,
   ];
 
+  String get _currentTabSlug {
+    switch (_selectedIndex) {
+      case 0:
+        return 'overview';
+      case 1:
+        return 'bookings';
+      case 2:
+        return 'profile';
+      case 3:
+        return 'settings';
+      default:
+        return 'overview';
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    syncWebPath('/dashboard/customer');
+    syncWebPath('/dashboard/customer/overview');
     _loadBookings();
   }
 
@@ -116,6 +131,7 @@ class _CustomerDashboardWebState extends State<CustomerDashboardWeb> {
 
   @override
   Widget build(BuildContext context) {
+    syncWebPath('/dashboard/customer/$_currentTabSlug');
     return Scaffold(
       body: Row(
         children: [

@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 
 import '../../config/app_config.dart';
 import '../../services/auth_service.dart';
+import '../../utils/web_url_sync.dart';
 
 class DriverApplicationsAdminScreen extends StatefulWidget {
   const DriverApplicationsAdminScreen({super.key});
@@ -26,6 +27,7 @@ class _DriverApplicationsAdminScreenState
   @override
   void initState() {
     super.initState();
+    syncWebPath('/admin/driver-applications');
     _loadApplications();
   }
 

@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+import '../../utils/web_url_sync.dart';
+
 class ContactUsScreen extends StatefulWidget {
   const ContactUsScreen({super.key});
 
@@ -57,6 +59,12 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
           'Yes. Choose "Corporate Account" and provide company information so we can prepare account setup and billing options.',
     },
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    syncWebPath('/contact');
+  }
 
   @override
   void dispose() {

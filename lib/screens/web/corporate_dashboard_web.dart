@@ -36,10 +36,27 @@ class _CorporateDashboardWebState extends State<CorporateDashboardWeb> {
     Icons.rule_folder_outlined,
   ];
 
+  String get _currentTabSlug {
+    switch (_selectedIndex) {
+      case 0:
+        return 'overview';
+      case 1:
+        return 'trips';
+      case 2:
+        return 'team';
+      case 3:
+        return 'billing';
+      case 4:
+        return 'policy';
+      default:
+        return 'overview';
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    syncWebPath('/dashboard/corporate');
+    syncWebPath('/dashboard/corporate/overview');
     _loadCorporateBookings();
   }
 
@@ -104,6 +121,7 @@ class _CorporateDashboardWebState extends State<CorporateDashboardWeb> {
 
   @override
   Widget build(BuildContext context) {
+    syncWebPath('/dashboard/corporate/$_currentTabSlug');
     return Scaffold(
       body: Row(
         children: [

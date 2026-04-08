@@ -6,6 +6,13 @@ import 'package:provider/provider.dart';
 import 'dart:html' as html;
 import 'screens/auth/login_screen.dart';
 import 'screens/web/web_home_screen.dart';
+import 'screens/web/about_us_screen.dart';
+import 'screens/web/contact_us_screen.dart';
+import 'screens/web/fleet_screen.dart';
+import 'screens/web/service_detail_screen.dart';
+import 'screens/web/driver_registration_screen.dart';
+import 'screens/web/corporate_registration_screen.dart';
+import 'screens/web/driver_applications_admin_screen.dart';
 import 'screens/web/driver_set_password_screen.dart';
 import 'screens/web/corporate_set_password_screen.dart';
 import 'screens/auth/register_screen.dart';
@@ -133,13 +140,36 @@ class VaneLuxApp extends StatelessWidget {
 class _WebEntry extends StatelessWidget {
   const _WebEntry();
 
+  String _serviceTypeFromSlug(String slug) {
+    switch (slug.trim().toLowerCase()) {
+      case 'airport-transfer':
+        return 'Airport Transfer';
+      case 'point-to-point':
+        return 'Point to Point';
+      case 'hourly-service':
+        return 'Hourly Service';
+      case 'corporate':
+        return 'Corporate';
+      case 'events':
+        return 'Events';
+      case 'tours':
+        return 'Tours';
+      default:
+        return 'Point to Point';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (kIsWeb) {
-      // Parse the hash fragment: e.g. #/set-password?token=eyJ...
-      final hash = html.window.location.hash; // e.g. "#/set-password?token=XXX"
-      if (hash.contains('/set-password')) {
-        final uri = Uri.tryParse(hash.replaceFirst('#', ''));
+      final hash = html.window.location.hash;
+      final uri = Uri.tryParse(
+        hash.isNotEmpty ? hash.replaceFirst('#', '') : '/',
+      );
+      final path = (uri?.path ?? '/').trim().isEmpty ? '/' : (uri?.path ?? '/');
+      final segments = uri?.pathSegments ?? const <String>[];
+
+      if (path == '/set-password') {
         final token = uri?.queryParameters['token'] ?? '';
         final account =
             (uri?.queryParameters['account'] ?? '').trim().toLowerCase();
@@ -149,6 +179,40 @@ class _WebEntry extends StatelessWidget {
           }
           return DriverSetPasswordScreen(token: token);
         }
+      }
+
+      if (path == '/about') {
+        return const AboutUsScreen();
+      }
+
+      if (path == '/contact') {
+        return const ContactUsScreen();
+      }
+
+      if (path == '/fleet') {
+        return const FleetScreen();
+      }
+
+      if (path == '/drivers/register') {
+        return const DriverRegistrationScreen();
+      }
+
+      if (path == '/corporate/register') {
+        return const CorporateRegistrationScreen();
+      }
+
+      if (path == '/admin/driver-applications') {
+        return const DriverApplicationsAdminScreen();
+      }
+
+      if (path == '/services') {
+        return const ServiceDetailScreen(serviceType: 'Point to Point');
+      }
+
+      if (segments.length >= 2 && segments.first == 'services') {
+        return ServiceDetailScreen(
+          serviceType: _serviceTypeFromSlug(segments[1]),
+        );
       }
     }
     return const WebHomeScreen();

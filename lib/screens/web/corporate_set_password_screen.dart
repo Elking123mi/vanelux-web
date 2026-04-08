@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../../config/app_config.dart';
+import '../../utils/web_url_sync.dart';
 
 class CorporateSetPasswordScreen extends StatefulWidget {
   final String token;
@@ -33,6 +34,14 @@ class _CorporateSetPasswordScreenState extends State<CorporateSetPasswordScreen>
   @override
   void initState() {
     super.initState();
+    syncWebPath(
+      '/set-password',
+      replace: true,
+      queryParameters: {
+        'token': widget.token,
+        'account': 'corporate',
+      },
+    );
     _decodeTokenPreview();
   }
 

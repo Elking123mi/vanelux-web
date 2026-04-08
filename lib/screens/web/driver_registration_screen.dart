@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
 
+import '../../utils/web_url_sync.dart';
+
 class DriverRegistrationScreen extends StatefulWidget {
   const DriverRegistrationScreen({super.key});
 
@@ -42,6 +44,12 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
   final _notesController = TextEditingController();
 
   final List<String> _vehicleTypes = ['Sedan', 'SUV', 'Van', 'Luxury', 'Other'];
+
+  @override
+  void initState() {
+    super.initState();
+    syncWebPath('/drivers/register');
+  }
 
   @override
   void dispose() {

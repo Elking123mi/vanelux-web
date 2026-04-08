@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../models/user.dart';
 import '../../services/auth_service.dart';
 import '../../services/oauth_service.dart';
+import '../../utils/web_url_sync.dart';
 import 'booking_details_screen.dart';
 
 class LoginWebScreen extends StatefulWidget {
@@ -51,6 +52,12 @@ class _LoginWebScreenState extends State<LoginWebScreen> {
   bool _isLogin = true;
   bool _isLoading = false;
   String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    syncWebPath('/login');
+  }
 
   void _goToNextStep(User? user) {
     Navigator.push(

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../utils/web_url_sync.dart';
+
 class AboutUsScreen extends StatelessWidget {
   const AboutUsScreen({super.key});
 
@@ -8,6 +10,7 @@ class AboutUsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    syncWebPath('/about');
     final width = MediaQuery.of(context).size.width;
     final isCompact = width < 900;
 

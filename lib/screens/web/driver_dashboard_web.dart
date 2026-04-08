@@ -81,6 +81,21 @@ class _DriverDashboardWebState extends State<DriverDashboardWeb>
   // Navigation
   int _selectedIndex = 0;
 
+  String get _currentTabSlug {
+    switch (_selectedIndex) {
+      case 0:
+        return 'overview';
+      case 1:
+        return 'trips';
+      case 2:
+        return 'earnings';
+      case 3:
+        return 'profile';
+      default:
+        return 'overview';
+    }
+  }
+
   // Online status
   bool _isOnline = false;
   bool _isSharingLocation = false;
@@ -188,7 +203,7 @@ class _DriverDashboardWebState extends State<DriverDashboardWeb>
   @override
   void initState() {
     super.initState();
-    syncWebPath('/dashboard/driver');
+    syncWebPath('/dashboard/driver/overview');
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
@@ -421,6 +436,7 @@ class _DriverDashboardWebState extends State<DriverDashboardWeb>
 
   @override
   Widget build(BuildContext context) {
+    syncWebPath('/dashboard/driver/$_currentTabSlug');
     final isMobile = MediaQuery.of(context).size.width < 768;
 
     return Scaffold(

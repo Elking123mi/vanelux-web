@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../utils/web_url_sync.dart';
+
 class FleetPage extends StatefulWidget {
   const FleetPage({super.key});
 
@@ -230,6 +232,7 @@ class _FleetPageState extends State<FleetPage> {
 
   @override
   Widget build(BuildContext context) {
+    syncWebPath('/fleet');
     return Scaffold(
       backgroundColor: const Color(0xFFF5F4F0),
       body: CustomScrollView(

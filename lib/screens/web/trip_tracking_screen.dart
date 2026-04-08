@@ -10,6 +10,7 @@ import 'package:http/http.dart' as http;
 
 import '../../config/app_config.dart';
 import '../../services/auth_service.dart';
+import '../../utils/web_url_sync.dart';
 
 class TripTrackingScreen extends StatefulWidget {
   final int bookingId;
@@ -79,6 +80,7 @@ class _TripTrackingScreenState extends State<TripTrackingScreen> {
   @override
   void initState() {
     super.initState();
+    syncWebPath('/tracking/${widget.bookingId}');
     _mapId = 'tracking-map-${_mapCounter++}';
     _loadTracking();
     _pollTimer = Timer.periodic(const Duration(seconds: 5), (_) => _loadTracking());

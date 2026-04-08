@@ -23,7 +23,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   @override
   void initState() {
     super.initState();
-    syncWebPath('/services');
+    syncWebPath('/services/${toUrlSlug(widget.serviceType)}');
     _loadUserData();
   }
 

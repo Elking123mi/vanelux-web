@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 
 import '../../models/user.dart';
 import '../../services/auth_service.dart';
+import '../../utils/web_url_sync.dart';
 
 class CorporateRegistrationScreen extends StatefulWidget {
   const CorporateRegistrationScreen({super.key});
@@ -39,6 +40,7 @@ class _CorporateRegistrationScreenState
   @override
   void initState() {
     super.initState();
+    syncWebPath('/corporate/register');
     _loadCurrentUser();
   }
 
