@@ -6449,45 +6449,43 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       },
     ];
 
-    Widget featureCol(Map<String, dynamic> f) => Expanded(
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: isCompact ? 0 : 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xFF0B3254),
-              ),
-              child: Icon(
-                f['icon'] as IconData,
-                color: const Color(0xFFD4AF37),
-                size: 20,
-              ),
+    Widget featureCol(Map<String, dynamic> f) => Padding(
+      padding: EdgeInsets.symmetric(horizontal: isCompact ? 0 : 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: const Color(0xFF0B3254),
             ),
-            const SizedBox(height: 14),
-            Text(
-              f['title'] as String,
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF0B3254),
-              ),
+            child: Icon(
+              f['icon'] as IconData,
+              color: const Color(0xFFD4AF37),
+              size: 20,
             ),
-            const SizedBox(height: 6),
-            Text(
-              f['body'] as String,
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.grey[600],
-                height: 1.5,
-              ),
+          ),
+          const SizedBox(height: 14),
+          Text(
+            f['title'] as String,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF0B3254),
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            f['body'] as String,
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.grey[600],
+              height: 1.5,
+            ),
+          ),
+        ],
       ),
     );
 
@@ -6669,7 +6667,9 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                 )
               : Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: features.map(featureCol).toList(),
+                  children: features
+                      .map((f) => Expanded(child: featureCol(f)))
+                      .toList(),
                 ),
         ],
       ),
