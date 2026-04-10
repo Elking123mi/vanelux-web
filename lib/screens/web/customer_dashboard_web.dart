@@ -5,6 +5,7 @@ import '../../services/auth_service.dart';
 import '../../services/booking_service.dart';
 import '../../utils/web_url_sync.dart';
 import 'trip_tracking_screen.dart';
+import 'web_home_screen.dart';
 
 class CustomerDashboardWeb extends StatefulWidget {
   final User user;
@@ -132,23 +133,41 @@ class _CustomerDashboardWebState extends State<CustomerDashboardWeb> {
   @override
   Widget build(BuildContext context) {
     syncWebPath('/dashboard/customer/$_currentTabSlug');
+    final isMobile = MediaQuery.of(context).size.width < 900;
+
     return Scaffold(
-      body: Row(
-        children: [
-          // Sidebar
-          _buildSidebar(),
-          // Main content
-          Expanded(
-            child: _buildMainContent(),
-          ),
-        ],
-      ),
+      appBar: isMobile
+          ? AppBar(
+              backgroundColor: Colors.white,
+              foregroundColor: const Color(0xFF0B3254),
+              elevation: 0.8,
+              title: const Text(
+                'Customer Dashboard',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+              ),
+            )
+          : null,
+      drawer: isMobile
+          ? Drawer(
+              child: _buildSidebar(isMobile: true),
+            )
+          : null,
+      body: isMobile
+          ? _buildMainContent()
+          : Row(
+              children: [
+                _buildSidebar(),
+                Expanded(
+                  child: _buildMainContent(),
+                ),
+              ],
+            ),
     );
   }
 
-  Widget _buildSidebar() {
+  Widget _buildSidebar({bool isMobile = false}) {
     return Container(
-      width: 280,
+      width: isMobile ? double.infinity : 280,
       decoration: BoxDecoration(
         color: const Color(0xFF0B3254),
         boxShadow: [
@@ -198,7 +217,13 @@ class _CustomerDashboardWebState extends State<CustomerDashboardWeb> {
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: () => Navigator.pop(context),
+                onTap: () {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (context) => const WebHomeScreen(),
+                    ),
+                  );
+                },
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
@@ -301,7 +326,12 @@ class _CustomerDashboardWebState extends State<CustomerDashboardWeb> {
                   child: Material(
                     color: Colors.transparent,
                     child: InkWell(
-                      onTap: () => setState(() => _selectedIndex = index),
+                      onTap: () {
+                        setState(() => _selectedIndex = index);
+                        if (isMobile && Navigator.of(context).canPop()) {
+                          Navigator.of(context).pop();
+                        }
+                      },
                       borderRadius: BorderRadius.circular(12),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
@@ -407,87 +437,134 @@ class _CustomerDashboardWebState extends State<CustomerDashboardWeb> {
   }
 
   Widget _buildDashboardView() {
+    final isMobile = MediaQuery.of(context).size.width < 900;
+
     return Container(
       color: const Color(0xFFF8F9FA),
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(40),
+        padding: EdgeInsets.all(isMobile ? 16 : 40),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Welcome back, ${widget.user.name.split(' ').first}',
-                      style: const TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF0B3254),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Manage your luxury transportation experience',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
-                ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  icon: const Icon(Icons.add_circle_outline),
-                  label: const Text('New Booking'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFD4AF37),
-                    foregroundColor: const Color(0xFF0B3254),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 16,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+            if (isMobile)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Welcome back, ${widget.user.name.split(' ').first}',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF0B3254),
                     ),
                   ),
-                ),
-              ],
-            ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Manage your luxury transportation experience',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (context) => const WebHomeScreen(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.add_circle_outline),
+                      label: const Text('New Booking'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFD4AF37),
+                        foregroundColor: const Color(0xFF0B3254),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            else
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Welcome back, ${widget.user.name.split(' ').first}',
+                        style: const TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF0B3254),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Manage your luxury transportation experience',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => const WebHomeScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.add_circle_outline),
+                    label: const Text('New Booking'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFD4AF37),
+                      foregroundColor: const Color(0xFF0B3254),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 16,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             const SizedBox(height: 40),
 
             // Stats cards
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStatCard(
+            if (isMobile)
+              Column(
+                children: [
+                  _buildStatCard(
                     'Total Trips',
                     _bookings.length.toString(),
                     Icons.route_outlined,
                     const Color(0xFF0B3254),
                   ),
-                ),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: _buildStatCard(
+                  const SizedBox(height: 12),
+                  _buildStatCard(
                     'Upcoming',
                     _bookings
-                        .where((b) =>
-                            b.requestTime.isAfter(DateTime.now()))
+                        .where((b) => b.requestTime.isAfter(DateTime.now()))
                         .length
                         .toString(),
                     Icons.schedule_outlined,
                     const Color(0xFFD4AF37),
                   ),
-                ),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: _buildStatCard(
+                  const SizedBox(height: 12),
+                  _buildStatCard(
                     'Completed',
                     _bookings
                         .where((b) => b.status == 'completed')
@@ -496,9 +573,45 @@ class _CustomerDashboardWebState extends State<CustomerDashboardWeb> {
                     Icons.check_circle_outline,
                     const Color(0xFF2E7D32),
                   ),
-                ),
-              ],
-            ),
+                ],
+              )
+            else
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildStatCard(
+                      'Total Trips',
+                      _bookings.length.toString(),
+                      Icons.route_outlined,
+                      const Color(0xFF0B3254),
+                    ),
+                  ),
+                  const SizedBox(width: 20),
+                  Expanded(
+                    child: _buildStatCard(
+                      'Upcoming',
+                      _bookings
+                          .where((b) => b.requestTime.isAfter(DateTime.now()))
+                          .length
+                          .toString(),
+                      Icons.schedule_outlined,
+                      const Color(0xFFD4AF37),
+                    ),
+                  ),
+                  const SizedBox(width: 20),
+                  Expanded(
+                    child: _buildStatCard(
+                      'Completed',
+                      _bookings
+                          .where((b) => b.status == 'completed')
+                          .length
+                          .toString(),
+                      Icons.check_circle_outline,
+                      const Color(0xFF2E7D32),
+                    ),
+                  ),
+                ],
+              ),
             const SizedBox(height: 40),
 
             // Recent bookings
@@ -550,6 +663,8 @@ class _CustomerDashboardWebState extends State<CustomerDashboardWeb> {
     IconData icon,
     Color color,
   ) {
+    final isMobile = MediaQuery.of(context).size.width < 900;
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -583,7 +698,7 @@ class _CustomerDashboardWebState extends State<CustomerDashboardWeb> {
           Text(
             value,
             style: TextStyle(
-              fontSize: 32,
+              fontSize: isMobile ? 28 : 32,
               fontWeight: FontWeight.w700,
               color: color,
             ),
@@ -603,10 +718,12 @@ class _CustomerDashboardWebState extends State<CustomerDashboardWeb> {
   }
 
   Widget _buildBookingsView() {
+    final isMobile = MediaQuery.of(context).size.width < 900;
+
     return Container(
       color: const Color(0xFFF8F9FA),
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(40),
+        padding: EdgeInsets.all(isMobile ? 16 : 40),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -667,6 +784,7 @@ class _CustomerDashboardWebState extends State<CustomerDashboardWeb> {
   }
 
   Widget _buildBookingCard(Trip booking) {
+    final isMobile = MediaQuery.of(context).size.width < 900;
     final bool isUpcoming =
         booking.requestTime.isAfter(DateTime.now());
     final String statusText = booking.status.toString().split('.').last;
@@ -724,179 +842,348 @@ class _CustomerDashboardWebState extends State<CustomerDashboardWeb> {
             ],
           ),
           const SizedBox(height: 20),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          if (isMobile)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF2E7D32),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            booking.pickupLocation.address,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF0B3254),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 4),
-                      child: Container(
-                        width: 2,
-                        height: 24,
-                        color: Colors.grey[300],
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF2E7D32),
+                        shape: BoxShape.circle,
                       ),
                     ),
-                    Row(
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFD4AF37),
-                            shape: BoxShape.circle,
-                          ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        booking.pickupLocation.address,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF0B3254),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            booking.destinationLocation.address,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF0B3254),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(width: 24),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  const Icon(
-                    Icons.calendar_today_outlined,
-                    size: 20,
-                    color: Color(0xFF0B3254),
+                Padding(
+                  padding: const EdgeInsets.only(left: 4),
+                  child: Container(
+                    width: 2,
+                    height: 20,
+                    color: Colors.grey[300],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    _formatDate(booking.requestTime),
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+                ),
+                Row(
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFD4AF37),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        booking.destinationLocation.address,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF0B3254),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.calendar_today_outlined,
+                      size: 18,
                       color: Color(0xFF0B3254),
                     ),
-                  ),
-                  Text(
-                    _formatTime(booking.requestTime),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
+                    const SizedBox(width: 8),
+                    Text(
+                      '${_formatDate(booking.requestTime)} · ${_formatTime(booking.requestTime)}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
+                  ],
+                ),
+              ],
+            )
+          else
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF2E7D32),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              booking.pickupLocation.address,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF0B3254),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 4),
+                        child: Container(
+                          width: 2,
+                          height: 24,
+                          color: Colors.grey[300],
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFD4AF37),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              booking.destinationLocation.address,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF0B3254),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ],
-          ),
+                ),
+                const SizedBox(width: 24),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    const Icon(
+                      Icons.calendar_today_outlined,
+                      size: 20,
+                      color: Color(0xFF0B3254),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _formatDate(booking.requestTime),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF0B3254),
+                      ),
+                    ),
+                    Text(
+                      _formatTime(booking.requestTime),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           const SizedBox(height: 20),
           const Divider(height: 1),
           const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.directions_car_outlined,
-                    size: 20,
-                    color: Colors.grey[600],
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    booking.vehicleType.toString().split('.').last,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[700],
-                      fontWeight: FontWeight.w500,
+          if (isMobile)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.directions_car_outlined,
+                      size: 20,
+                      color: Colors.grey[600],
                     ),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      _showBookingDetailsDialog(context, booking);
-                    },
-                    child: const Text('View Details'),
-                  ),
-                  const SizedBox(width: 8),
-                  if (isUpcoming)
-                    OutlinedButton(
-                      onPressed: () {
-                        // Cancel booking
-                      },
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.red,
-                        side: const BorderSide(color: Colors.red),
-                      ),
-                      child: const Text('Cancel'),
-                    ),
-                  const SizedBox(width: 8),
-                  if (statusText != 'completed' && statusText != 'cancelled' &&
-                      int.tryParse(booking.id) != null)
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => TripTrackingScreen(
-                              bookingId: int.parse(booking.id),
-                              pickupAddress: booking.pickupLocation.address,
-                              destinationAddress:
-                                  booking.destinationLocation.address,
-                            ),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.location_on, size: 16),
-                      label: const Text('Track Live'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0B3254),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 10),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        booking.vehicleType.toString().split('.').last,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[700],
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
-                ],
-              ),
-            ],
-          ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        _showBookingDetailsDialog(context, booking);
+                      },
+                      child: const Text('View Details'),
+                    ),
+                    if (isUpcoming)
+                      OutlinedButton(
+                        onPressed: () {
+                          // Cancel booking
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.red,
+                          side: const BorderSide(color: Colors.red),
+                        ),
+                        child: const Text('Cancel'),
+                      ),
+                    if (statusText != 'completed' &&
+                        statusText != 'cancelled' &&
+                        int.tryParse(booking.id) != null)
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => TripTrackingScreen(
+                                bookingId: int.parse(booking.id),
+                                pickupAddress: booking.pickupLocation.address,
+                                destinationAddress:
+                                    booking.destinationLocation.address,
+                              ),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.location_on, size: 16),
+                        label: const Text('Track Live'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF0B3254),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 10,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            )
+          else
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.directions_car_outlined,
+                      size: 20,
+                      color: Colors.grey[600],
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      booking.vehicleType.toString().split('.').last,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        _showBookingDetailsDialog(context, booking);
+                      },
+                      child: const Text('View Details'),
+                    ),
+                    const SizedBox(width: 8),
+                    if (isUpcoming)
+                      OutlinedButton(
+                        onPressed: () {
+                          // Cancel booking
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.red,
+                          side: const BorderSide(color: Colors.red),
+                        ),
+                        child: const Text('Cancel'),
+                      ),
+                    const SizedBox(width: 8),
+                    if (statusText != 'completed' &&
+                        statusText != 'cancelled' &&
+                        int.tryParse(booking.id) != null)
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => TripTrackingScreen(
+                                bookingId: int.parse(booking.id),
+                                pickupAddress: booking.pickupLocation.address,
+                                destinationAddress:
+                                    booking.destinationLocation.address,
+                              ),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.location_on, size: 16),
+                        label: const Text('Track Live'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF0B3254),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 10,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
         ],
       ),
     );
@@ -935,7 +1222,11 @@ class _CustomerDashboardWebState extends State<CustomerDashboardWeb> {
             const SizedBox(height: 32),
             ElevatedButton.icon(
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (context) => const WebHomeScreen(),
+                  ),
+                );
               },
               icon: const Icon(Icons.add_circle_outline),
               label: const Text('Create Booking'),
@@ -958,17 +1249,19 @@ class _CustomerDashboardWebState extends State<CustomerDashboardWeb> {
   }
 
   Widget _buildProfileView() {
+    final isMobile = MediaQuery.of(context).size.width < 900;
+
     return Container(
       color: const Color(0xFFF8F9FA),
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(40),
+        padding: EdgeInsets.all(isMobile ? 16 : 40),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
               'My Profile',
               style: TextStyle(
-                fontSize: 32,
+                fontSize: isMobile ? 24 : 32,
                 fontWeight: FontWeight.w700,
                 color: Color(0xFF0B3254),
               ),
@@ -1103,29 +1396,32 @@ class _CustomerDashboardWebState extends State<CustomerDashboardWeb> {
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                  fontWeight: FontWeight.w500,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF0B3254),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF0B3254),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           Icon(
             Icons.chevron_right,
@@ -1137,17 +1433,19 @@ class _CustomerDashboardWebState extends State<CustomerDashboardWeb> {
   }
 
   Widget _buildSettingsView() {
+    final isMobile = MediaQuery.of(context).size.width < 900;
+
     return Container(
       color: const Color(0xFFF8F9FA),
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(40),
+        padding: EdgeInsets.all(isMobile ? 16 : 40),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
               'Settings',
               style: TextStyle(
-                fontSize: 32,
+                fontSize: isMobile ? 24 : 32,
                 fontWeight: FontWeight.w700,
                 color: Color(0xFF0B3254),
               ),

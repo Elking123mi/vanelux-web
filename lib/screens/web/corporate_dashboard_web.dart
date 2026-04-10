@@ -123,19 +123,39 @@ class _CorporateDashboardWebState extends State<CorporateDashboardWeb> {
   @override
   Widget build(BuildContext context) {
     syncWebPath('/dashboard/corporate/$_currentTabSlug');
+    final isMobile = MediaQuery.of(context).size.width < 900;
+
     return Scaffold(
-      body: Row(
-        children: [
-          _buildSidebar(),
-          Expanded(child: _buildMainPanel()),
-        ],
-      ),
+      appBar: isMobile
+          ? AppBar(
+              backgroundColor: Colors.white,
+              foregroundColor: const Color(0xFF0B3254),
+              elevation: 0.8,
+              title: const Text(
+                'Corporate Dashboard',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+              ),
+            )
+          : null,
+      drawer: isMobile
+          ? Drawer(
+              child: _buildSidebar(isMobile: true),
+            )
+          : null,
+      body: isMobile
+          ? _buildMainPanel()
+          : Row(
+              children: [
+                _buildSidebar(),
+                Expanded(child: _buildMainPanel()),
+              ],
+            ),
     );
   }
 
-  Widget _buildSidebar() {
+  Widget _buildSidebar({bool isMobile = false}) {
     return Container(
-      width: 290,
+      width: isMobile ? double.infinity : 290,
       color: const Color(0xFF0B3254),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -222,7 +242,12 @@ class _CorporateDashboardWebState extends State<CorporateDashboardWeb> {
                         fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                       ),
                     ),
-                    onTap: () => setState(() => _selectedIndex = index),
+                    onTap: () {
+                      setState(() => _selectedIndex = index);
+                      if (isMobile && Navigator.of(context).canPop()) {
+                        Navigator.of(context).pop();
+                      }
+                    },
                   ),
                 );
               },
@@ -300,14 +325,20 @@ class _CorporateDashboardWebState extends State<CorporateDashboardWeb> {
   }
 
   Widget _buildOverviewTab() {
+    final isMobile = MediaQuery.of(context).size.width < 900;
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(isMobile ? 16 : 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Corporate Account Overview',
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: Color(0xFF0B3254)),
+            style: TextStyle(
+              fontSize: isMobile ? 22 : 28,
+              fontWeight: FontWeight.w800,
+              color: const Color(0xFF0B3254),
+            ),
           ),
           const SizedBox(height: 8),
           const Text(
@@ -341,11 +372,13 @@ class _CorporateDashboardWebState extends State<CorporateDashboardWeb> {
   }
 
   Widget _buildTripsTab() {
+    final isMobile = MediaQuery.of(context).size.width < 900;
+
     if (_bookings.isEmpty) {
       return const Center(child: Text('No corporate trips yet.'));
     }
     return ListView.separated(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(isMobile ? 16 : 24),
       itemCount: _bookings.length,
       separatorBuilder: (_, __) => const SizedBox(height: 10),
       itemBuilder: (context, index) {
@@ -384,11 +417,13 @@ class _CorporateDashboardWebState extends State<CorporateDashboardWeb> {
   }
 
   Widget _placeholderTab({required String title, required String subtitle}) {
+    final isMobile = MediaQuery.of(context).size.width < 900;
+
     return Center(
       child: Container(
         constraints: const BoxConstraints(maxWidth: 640),
-        margin: const EdgeInsets.all(24),
-        padding: const EdgeInsets.all(24),
+        margin: EdgeInsets.all(isMobile ? 16 : 24),
+        padding: EdgeInsets.all(isMobile ? 18 : 24),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
@@ -399,7 +434,13 @@ class _CorporateDashboardWebState extends State<CorporateDashboardWeb> {
           children: [
             const Icon(Icons.business_center, size: 48, color: Color(0xFF0B3254)),
             const SizedBox(height: 14),
-            Text(title, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: isMobile ? 20 : 24,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
             const SizedBox(height: 10),
             Text(subtitle, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFF4B5563))),
           ],
@@ -409,8 +450,10 @@ class _CorporateDashboardWebState extends State<CorporateDashboardWeb> {
   }
 
   Widget _metricCard(String label, String value, IconData icon) {
+    final isMobile = MediaQuery.of(context).size.width < 900;
+
     return Container(
-      width: 240,
+      width: isMobile ? double.infinity : 240,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,

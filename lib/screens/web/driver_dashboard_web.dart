@@ -427,7 +427,8 @@ class _DriverDashboardWebState extends State<DriverDashboardWeb>
 
   Future<void> _logout() async {
     await AuthService.logout();
-    if (mounted) Navigator.of(context).pop();
+    if (!mounted) return;
+    Navigator.of(context).pushReplacementNamed('/');
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -437,7 +438,7 @@ class _DriverDashboardWebState extends State<DriverDashboardWeb>
   @override
   Widget build(BuildContext context) {
     syncWebPath('/dashboard/driver/$_currentTabSlug');
-    final isMobile = MediaQuery.of(context).size.width < 768;
+    final isMobile = MediaQuery.of(context).size.width < 900;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
