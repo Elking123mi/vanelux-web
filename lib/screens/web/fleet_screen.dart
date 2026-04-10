@@ -11,22 +11,92 @@ class FleetScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     syncWebPath('/fleet');
+    final isMobile = MediaQuery.of(context).size.width < 900;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           children: [
-            _buildNavBar(context),
-            _buildHeroSection(),
-            _buildFleetGrid(),
-            _buildFooter(),
+            _buildNavBar(context, isMobile),
+            _buildHeroSection(isMobile),
+            _buildFleetGrid(isMobile),
+            _buildFooter(isMobile),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildNavBar(BuildContext context) {
+  Widget _buildNavBar(BuildContext context, bool isMobile) {
+    if (isMobile) {
+      return Container(
+        height: 72,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            InkWell(
+              onTap: () {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => const WebHomeScreen()),
+                );
+              },
+              child: const Text(
+                'VANELUX',
+                style: TextStyle(
+                  fontSize: 34,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF0B3254),
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ),
+            const Spacer(),
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.menu, color: Color(0xFF0B3254)),
+              onSelected: (value) {
+                switch (value) {
+                  case 'home':
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => const WebHomeScreen()),
+                    );
+                    break;
+                  case 'services':
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            const ServiceDetailScreen(serviceType: 'Point to Point'),
+                      ),
+                    );
+                    break;
+                  case 'about':
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => const AboutUsScreen()),
+                    );
+                    break;
+                }
+              },
+              itemBuilder: (_) => const [
+                PopupMenuItem(value: 'home', child: Text('Home')),
+                PopupMenuItem(value: 'services', child: Text('Services')),
+                PopupMenuItem(value: 'fleet', child: Text('Fleet')),
+                PopupMenuItem(value: 'about', child: Text('About')),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
     return Container(
       height: 88,
       padding: const EdgeInsets.symmetric(horizontal: 40),
@@ -115,9 +185,9 @@ class FleetScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeroSection() {
+  Widget _buildHeroSection(bool isMobile) {
     return Container(
-      height: 400,
+      height: isMobile ? 300 : 400,
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -135,34 +205,42 @@ class FleetScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(30),
+                  padding: EdgeInsets.all(isMobile ? 20 : 30),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.directions_car,
-                    size: 80,
+                    size: isMobile ? 52 : 80,
                     color: Color(0xFFFFD700),
                   ),
                 ),
-                const SizedBox(height: 30),
-                const Text(
+                SizedBox(height: isMobile ? 18 : 30),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: isMobile ? 20 : 0),
+                  child: Text(
                   'Our Premium Fleet',
-                  style: TextStyle(
-                    fontSize: 56,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 1.5,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: isMobile ? 52 : 56,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 1.2,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 15),
-                const Text(
+                SizedBox(height: isMobile ? 10 : 15),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: isMobile ? 24 : 0),
+                  child: Text(
                   'Luxury Vehicles for Every Occasion',
-                  style: TextStyle(
-                    fontSize: 24,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w300,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: isMobile ? 18 : 24,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w300,
+                    ),
                   ),
                 ),
               ],
@@ -173,7 +251,7 @@ class FleetScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFleetGrid() {
+  Widget _buildFleetGrid(bool isMobile) {
     final vehicles = [
       {
         'name': 'Mercedes S-Class',
@@ -234,26 +312,29 @@ class FleetScreen extends StatelessWidget {
     ];
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 80),
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 14 : 100,
+        vertical: isMobile ? 24 : 80,
+      ),
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          crossAxisSpacing: 30,
-          mainAxisSpacing: 40,
-          childAspectRatio: 0.75,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: isMobile ? 1 : 3,
+          crossAxisSpacing: isMobile ? 0 : 30,
+          mainAxisSpacing: isMobile ? 16 : 40,
+          childAspectRatio: isMobile ? 1.05 : 0.75,
         ),
         itemCount: vehicles.length,
         itemBuilder: (context, index) {
           final vehicle = vehicles[index];
-          return _buildVehicleCard(vehicle);
+          return _buildVehicleCard(vehicle, isMobile);
         },
       ),
     );
   }
 
-  Widget _buildVehicleCard(Map<String, dynamic> vehicle) {
+  Widget _buildVehicleCard(Map<String, dynamic> vehicle, bool isMobile) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -283,12 +364,12 @@ class FleetScreen extends StatelessWidget {
                 ),
                 child: Image.asset(
                   vehicle['image'],
-                  height: 200,
+                  height: isMobile ? 170 : 200,
                   width: double.infinity,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
-                      height: 200,
+                      height: isMobile ? 170 : 200,
                       color: const Color(0xFFF5F5F5),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -337,28 +418,28 @@ class FleetScreen extends StatelessWidget {
           ),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(20),
+              padding: EdgeInsets.all(isMobile ? 16 : 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     vehicle['name'],
-                    style: const TextStyle(
-                      fontSize: 22,
+                    style: TextStyle(
+                      fontSize: isMobile ? 18 : 22,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF0B3254),
+                      color: const Color(0xFF0B3254),
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  SizedBox(height: isMobile ? 8 : 10),
                   Text(
                     vehicle['description'],
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: isMobile ? 13 : 14,
                       color: Colors.grey[600],
                       height: 1.4,
                     ),
                   ),
-                  const SizedBox(height: 15),
+                  SizedBox(height: isMobile ? 10 : 15),
                   Row(
                     children: [
                       const Icon(
@@ -383,28 +464,28 @@ class FleetScreen extends StatelessWidget {
                     children: [
                       Text(
                         vehicle['price'],
-                        style: const TextStyle(
-                          fontSize: 24,
+                        style: TextStyle(
+                          fontSize: isMobile ? 20 : 24,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFFFFD700),
+                          color: const Color(0xFFFFD700),
                         ),
                       ),
                       ElevatedButton(
                         onPressed: () {},
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF0B3254),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 12,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isMobile ? 14 : 20,
+                            vertical: isMobile ? 10 : 12,
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        child: const Text(
+                        child: Text(
                           'Book Now',
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: isMobile ? 13 : 14,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
@@ -421,9 +502,9 @@ class FleetScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFooter() {
+  Widget _buildFooter(bool isMobile) {
     return Container(
-      padding: const EdgeInsets.all(40),
+      padding: EdgeInsets.all(isMobile ? 20 : 40),
       color: const Color(0xFF0B3254),
       child: const Center(
         child: Text(
