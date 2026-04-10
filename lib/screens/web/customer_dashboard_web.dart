@@ -1258,7 +1258,7 @@ class _CustomerDashboardWebState extends State<CustomerDashboardWeb> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'My Profile',
               style: TextStyle(
                 fontSize: isMobile ? 24 : 32,
@@ -1442,7 +1442,7 @@ class _CustomerDashboardWebState extends State<CustomerDashboardWeb> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Settings',
               style: TextStyle(
                 fontSize: isMobile ? 24 : 32,
