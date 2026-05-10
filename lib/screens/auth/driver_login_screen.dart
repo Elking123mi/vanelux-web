@@ -21,6 +21,13 @@ class _DriverLoginScreenState extends State<DriverLoginScreen> {
   bool _obscurePassword = true;
 
   @override
+  void initState() {
+    super.initState();
+    _emailController.text = AuthService.demoDriverEmail;
+    _passwordController.text = AuthService.demoDriverPassword;
+  }
+
+  @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
@@ -147,6 +154,33 @@ class _DriverLoginScreenState extends State<DriverLoginScreen> {
 
                 const SizedBox(height: 40),
 
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFFD4AF37).withOpacity(0.4),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Demo account available',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Email: ${AuthService.demoDriverEmail}\nPassword: ${AuthService.demoDriverPassword}',
+                        style: TextStyle(color: Colors.grey[200]),
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 24),
 
                 // Login form

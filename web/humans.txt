@@ -1,0 +1,19 @@
+# humanstxt.org
+
+/* TEAM */
+  Company: Vanelux Luxury Transportation
+  Location: New York City, NY, USA
+  Contact: info@vanelux.com
+  Website: https://www.vane-lux.com
+
+/* SITE */
+  Last update: 2026-05-09
+  Language: English / Español
+  Standards: HTML5, CSS3, Flutter Web
+  Components: Flutter, Stripe, Google Maps
+  Software: Visual Studio Code, Git, Netlify
+  
+/* THANKS */
+  Special thanks to all our drivers and customers
+  who make Vanelux the premier luxury transportation
+  service in New York City.

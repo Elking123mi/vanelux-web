@@ -1,0 +1,756 @@
+/* ==========================================================================
+   VANELUX DESIGN SYSTEM v2.0
+   Luxury · Premium · Interactive
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  /* === Premium Color Palette === */
+  --vx-black: #0a0a0a;
+  --vx-black-soft: #111114;
+  --vx-navy: #0B3254;
+  --vx-navy-deep: #061a2e;
+  --vx-navy-light: #1a4d7a;
+  --vx-gold: #D4AF37;
+  --vx-gold-bright: #FFD700;
+  --vx-gold-soft: #f4d77b;
+  --vx-white: #ffffff;
+  --vx-cream: #faf7f0;
+  --vx-gray-100: #f5f5f7;
+  --vx-gray-300: #d2d2d7;
+  --vx-gray-500: #86868b;
+  --vx-gray-700: #424245;
+  --vx-gray-900: #1d1d1f;
+  
+  /* === Gradients === */
+  --vx-gradient-luxury: linear-gradient(135deg, #0a0a0a 0%, #0B3254 50%, #1a4d7a 100%);
+  --vx-gradient-gold: linear-gradient(135deg, #D4AF37 0%, #FFD700 50%, #f4d77b 100%);
+  --vx-gradient-dark: linear-gradient(180deg, #061a2e 0%, #0a0a0a 100%);
+  --vx-gradient-mesh: radial-gradient(at 20% 20%, rgba(212,175,55,0.15) 0px, transparent 50%),
+                     radial-gradient(at 80% 0%, rgba(11,50,84,0.4) 0px, transparent 50%),
+                     radial-gradient(at 0% 50%, rgba(26,77,122,0.3) 0px, transparent 50%),
+                     radial-gradient(at 80% 80%, rgba(212,175,55,0.1) 0px, transparent 50%);
+  --vx-gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%);
+
+  /* === Typography === */
+  --vx-font-display: 'Playfair Display', Georgia, serif;
+  --vx-font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* === Shadows === */
+  --vx-shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+  --vx-shadow-md: 0 8px 24px rgba(0,0,0,0.12);
+  --vx-shadow-lg: 0 20px 60px rgba(0,0,0,0.25);
+  --vx-shadow-xl: 0 30px 80px rgba(0,0,0,0.4);
+  --vx-shadow-gold: 0 10px 40px rgba(212,175,55,0.35);
+  --vx-shadow-glow: 0 0 60px rgba(255,215,0,0.4);
+
+  /* === Spacing === */
+  --vx-radius-sm: 8px;
+  --vx-radius-md: 16px;
+  --vx-radius-lg: 24px;
+  --vx-radius-xl: 32px;
+  --vx-radius-full: 999px;
+
+  /* === Transitions === */
+  --vx-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --vx-ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --vx-ease-smooth: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* ==========================================================================
+   Base Reset
+   ========================================================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--vx-font-body);
+  background: var(--vx-black);
+  color: var(--vx-white);
+  line-height: 1.6;
+  overflow-x: hidden;
+  cursor: default;
+}
+
+img { max-width: 100%; display: block; }
+a { color: inherit; text-decoration: none; }
+
+/* ==========================================================================
+   Animated Mesh Background
+   ========================================================================== */
+.vx-bg-mesh {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background: var(--vx-black);
+  overflow: hidden;
+}
+
+.vx-bg-mesh::before {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background: var(--vx-gradient-mesh);
+  animation: vx-mesh-drift 20s ease-in-out infinite;
+}
+
+@keyframes vx-mesh-drift {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(-5%, -3%) rotate(2deg); }
+  66% { transform: translate(3%, -5%) rotate(-2deg); }
+}
+
+/* Floating orbs */
+.vx-orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.4;
+  z-index: -1;
+  pointer-events: none;
+  animation: vx-orb-float 15s ease-in-out infinite;
+}
+
+.vx-orb-1 {
+  width: 500px;
+  height: 500px;
+  background: var(--vx-gold);
+  top: -10%;
+  right: -10%;
+}
+
+.vx-orb-2 {
+  width: 600px;
+  height: 600px;
+  background: var(--vx-navy-light);
+  bottom: -20%;
+  left: -10%;
+  animation-delay: -5s;
+}
+
+.vx-orb-3 {
+  width: 400px;
+  height: 400px;
+  background: var(--vx-gold-soft);
+  top: 50%;
+  left: 50%;
+  opacity: 0.15;
+  animation-delay: -10s;
+}
+
+@keyframes vx-orb-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(50px, -30px) scale(1.1); }
+  66% { transform: translate(-30px, 50px) scale(0.95); }
+}
+
+/* ==========================================================================
+   Particles
+   ========================================================================== */
+.vx-particles {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.vx-particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: var(--vx-gold);
+  border-radius: 50%;
+  opacity: 0;
+  animation: vx-particle-rise 10s linear infinite;
+  box-shadow: 0 0 6px var(--vx-gold);
+}
+
+@keyframes vx-particle-rise {
+  0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-10vh) translateX(50px); opacity: 0; }
+}
+
+/* ==========================================================================
+   Navigation
+   ========================================================================== */
+.vx-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 20px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(10, 10, 10, 0.6);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+  transition: all 0.3s var(--vx-ease);
+}
+
+.vx-nav.scrolled {
+  padding: 12px 40px;
+  background: rgba(10, 10, 10, 0.9);
+  border-bottom-color: rgba(212, 175, 55, 0.3);
+}
+
+.vx-nav-logo {
+  font-family: var(--vx-font-display);
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  background: var(--vx-gradient-gold);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-transform: uppercase;
+}
+
+.vx-nav-links {
+  display: flex;
+  gap: 32px;
+  list-style: none;
+  align-items: center;
+}
+
+.vx-nav-links a {
+  color: var(--vx-cream);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  position: relative;
+  transition: color 0.3s var(--vx-ease);
+}
+
+.vx-nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--vx-gradient-gold);
+  transition: width 0.3s var(--vx-ease);
+}
+
+.vx-nav-links a:hover {
+  color: var(--vx-gold-bright);
+}
+
+.vx-nav-links a:hover::after {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .vx-nav { padding: 16px 20px; }
+  .vx-nav-links { display: none; }
+}
+
+/* ==========================================================================
+   Hero Section
+   ========================================================================== */
+.vx-hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 120px 20px 60px;
+  position: relative;
+}
+
+.vx-hero-eyebrow {
+  display: inline-block;
+  padding: 8px 20px;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  border-radius: var(--vx-radius-full);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--vx-gold-bright);
+  background: rgba(212, 175, 55, 0.05);
+  backdrop-filter: blur(10px);
+  margin-bottom: 32px;
+  animation: vx-fade-up 0.8s var(--vx-ease) 0.1s both;
+}
+
+.vx-hero h1 {
+  font-family: var(--vx-font-display);
+  font-size: clamp(48px, 8vw, 96px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: 24px;
+  max-width: 1100px;
+  animation: vx-fade-up 0.8s var(--vx-ease) 0.2s both;
+}
+
+.vx-hero h1 .gold {
+  background: var(--vx-gradient-gold);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-style: italic;
+}
+
+.vx-hero-subtitle {
+  font-size: clamp(16px, 2vw, 20px);
+  color: var(--vx-gray-300);
+  max-width: 640px;
+  margin: 0 auto 48px;
+  font-weight: 300;
+  line-height: 1.7;
+  animation: vx-fade-up 0.8s var(--vx-ease) 0.4s both;
+}
+
+.vx-hero-ctas {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+  animation: vx-fade-up 0.8s var(--vx-ease) 0.6s both;
+}
+
+@keyframes vx-fade-up {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+.vx-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 36px;
+  font-family: var(--vx-font-body);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border: none;
+  border-radius: var(--vx-radius-full);
+  cursor: pointer;
+  transition: all 0.4s var(--vx-ease);
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+}
+
+.vx-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+  transform: translateX(-100%);
+  transition: transform 0.6s var(--vx-ease);
+}
+
+.vx-btn:hover::before {
+  transform: translateX(100%);
+}
+
+.vx-btn-primary {
+  background: var(--vx-gradient-gold);
+  color: var(--vx-black);
+  box-shadow: var(--vx-shadow-gold);
+}
+
+.vx-btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 50px rgba(212, 175, 55, 0.5);
+}
+
+.vx-btn-ghost {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--vx-white);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.vx-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--vx-gold);
+  transform: translateY(-3px);
+}
+
+.vx-btn-arrow {
+  display: inline-block;
+  transition: transform 0.3s var(--vx-ease);
+}
+
+.vx-btn:hover .vx-btn-arrow {
+  transform: translateX(6px);
+}
+
+/* ==========================================================================
+   Sections
+   ========================================================================== */
+.vx-section {
+  padding: 120px 20px;
+  position: relative;
+}
+
+.vx-container {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.vx-section-header {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto 80px;
+}
+
+.vx-section-eyebrow {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--vx-gold-bright);
+  margin-bottom: 16px;
+}
+
+.vx-section-title {
+  font-family: var(--vx-font-display);
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 20px;
+  letter-spacing: -0.02em;
+}
+
+.vx-section-subtitle {
+  font-size: 18px;
+  color: var(--vx-gray-300);
+  font-weight: 300;
+  line-height: 1.7;
+}
+
+/* ==========================================================================
+   Cards (Glass Morphism)
+   ========================================================================== */
+.vx-grid {
+  display: grid;
+  gap: 24px;
+}
+
+.vx-grid-3 {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.vx-card {
+  position: relative;
+  padding: 40px 32px;
+  background: var(--vx-gradient-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--vx-radius-lg);
+  transition: all 0.5s var(--vx-ease);
+  overflow: hidden;
+}
+
+.vx-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212,175,55,0.5), transparent);
+  opacity: 0;
+  transition: opacity 0.5s var(--vx-ease);
+}
+
+.vx-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(212, 175, 55, 0.3);
+  background: linear-gradient(135deg, rgba(212,175,55,0.08) 0%, rgba(255,255,255,0.02) 100%);
+  box-shadow: var(--vx-shadow-lg);
+}
+
+.vx-card:hover::before {
+  opacity: 1;
+}
+
+.vx-card-icon {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--vx-gradient-gold);
+  border-radius: var(--vx-radius-md);
+  margin-bottom: 24px;
+  font-size: 32px;
+  box-shadow: var(--vx-shadow-gold);
+  transition: transform 0.4s var(--vx-ease-bounce);
+}
+
+.vx-card:hover .vx-card-icon {
+  transform: scale(1.1) rotate(-5deg);
+}
+
+.vx-card h3 {
+  font-family: var(--vx-font-display);
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--vx-white);
+}
+
+.vx-card p {
+  color: var(--vx-gray-300);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.vx-card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  color: var(--vx-gold-bright);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.vx-card-link svg {
+  transition: transform 0.3s var(--vx-ease);
+}
+
+.vx-card:hover .vx-card-link svg {
+  transform: translateX(6px);
+}
+
+/* ==========================================================================
+   Pricing / Routes
+   ========================================================================== */
+.vx-route {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 32px;
+  background: var(--vx-gradient-glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--vx-radius-md);
+  margin-bottom: 12px;
+  transition: all 0.4s var(--vx-ease);
+}
+
+.vx-route:hover {
+  border-color: var(--vx-gold);
+  transform: translateX(8px);
+  background: rgba(212, 175, 55, 0.05);
+}
+
+.vx-route-name {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--vx-cream);
+}
+
+.vx-route-price {
+  font-family: var(--vx-font-display);
+  font-size: 28px;
+  font-weight: 700;
+  background: var(--vx-gradient-gold);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ==========================================================================
+   Footer CTA
+   ========================================================================== */
+.vx-cta-section {
+  padding: 120px 20px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.vx-cta-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(212,175,55,0.15) 0%, transparent 70%);
+  z-index: -1;
+}
+
+/* ==========================================================================
+   Footer
+   ========================================================================== */
+.vx-footer {
+  padding: 60px 20px 30px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.vx-footer-logo {
+  font-family: var(--vx-font-display);
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 6px;
+  background: var(--vx-gradient-gold);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 16px;
+}
+
+.vx-footer-links {
+  display: flex;
+  gap: 32px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 24px 0;
+  list-style: none;
+}
+
+.vx-footer-links a {
+  color: var(--vx-gray-300);
+  font-size: 14px;
+  transition: color 0.3s var(--vx-ease);
+}
+
+.vx-footer-links a:hover {
+  color: var(--vx-gold-bright);
+}
+
+.vx-footer-copy {
+  color: var(--vx-gray-500);
+  font-size: 13px;
+  margin-top: 24px;
+}
+
+/* ==========================================================================
+   WhatsApp Floating Button
+   ========================================================================== */
+.vx-whatsapp {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #25D366, #128C7E);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 30px rgba(37, 211, 102, 0.5);
+  z-index: 999;
+  transition: all 0.4s var(--vx-ease-bounce);
+  animation: vx-whatsapp-pulse 2.5s ease-in-out infinite;
+}
+
+.vx-whatsapp:hover {
+  transform: scale(1.15) rotate(8deg);
+}
+
+.vx-whatsapp svg {
+  width: 32px;
+  height: 32px;
+  fill: white;
+}
+
+@keyframes vx-whatsapp-pulse {
+  0%, 100% { box-shadow: 0 10px 30px rgba(37, 211, 102, 0.5), 0 0 0 0 rgba(37, 211, 102, 0.5); }
+  50% { box-shadow: 0 10px 30px rgba(37, 211, 102, 0.5), 0 0 0 20px rgba(37, 211, 102, 0); }
+}
+
+/* ==========================================================================
+   Scroll Reveal
+   ========================================================================== */
+.vx-reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s var(--vx-ease), transform 0.8s var(--vx-ease);
+}
+
+.vx-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ==========================================================================
+   Stats / Numbers
+   ========================================================================== */
+.vx-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 32px;
+  margin: 60px 0;
+}
+
+.vx-stat {
+  text-align: center;
+  padding: 24px;
+}
+
+.vx-stat-number {
+  font-family: var(--vx-font-display);
+  font-size: clamp(42px, 6vw, 72px);
+  font-weight: 700;
+  line-height: 1;
+  background: var(--vx-gradient-gold);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 8px;
+}
+
+.vx-stat-label {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--vx-gray-300);
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+@media (max-width: 768px) {
+  .vx-section { padding: 80px 20px; }
+  .vx-section-header { margin-bottom: 50px; }
+  .vx-card { padding: 32px 24px; }
+  .vx-route { flex-direction: column; gap: 8px; text-align: center; }
+  .vx-btn { padding: 16px 28px; font-size: 14px; }
+  .vx-whatsapp { width: 56px; height: 56px; bottom: 16px; right: 16px; }
+}
+
+/* ==========================================================================
+   Reduce motion
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

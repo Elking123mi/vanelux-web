@@ -1,0 +1,92 @@
+# Vanelux - Netlify Configuration
+# https://docs.netlify.com/configure-builds/file-based-configuration/
+
+[build]
+  # Build command for Flutter Web
+  command = "flutter build web --release --web-renderer auto"
+  publish = "build/web"
+
+[build.environment]
+  # Flutter build environment
+  FLUTTER_VERSION = "3.22.0"
+
+# Enable all Netlify optimizations
+[build.processing]
+  skip_processing = false
+
+[build.processing.css]
+  bundle = true
+  minify = true
+
+[build.processing.js]
+  bundle = true
+  minify = true
+
+[build.processing.html]
+  pretty_urls = true
+
+[build.processing.images]
+  compress = true
+
+# SPA redirect for Flutter routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = false
+  conditions = {Role = [""], Country = [""]}
+
+# Redirect non-www to www (or vice versa)
+[[redirects]]
+  from = "https://vane-lux.com/*"
+  to = "https://www.vane-lux.com/:splat"
+  status = 301
+  force = true
+
+# Redirect HTTP to HTTPS
+[[redirects]]
+  from = "http://www.vane-lux.com/*"
+  to = "https://www.vane-lux.com/:splat"
+  status = 301
+  force = true
+
+# Asset optimization
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Enable Brotli compression
+    Content-Encoding = "br"
+
+# Plugin configurations
+[[plugins]]
+  package = "@netlify/plugin-lighthouse"
+  
+  [plugins.inputs]
+    output_path = "lighthouse-reports"
+    
+  [[plugins.inputs.audits]]
+    path = "/"
+    preset = "desktop"
+    
+  [[plugins.inputs.audits.thresholds]]
+    performance = 0.8
+    accessibility = 0.9
+    best-practices = 0.9
+    seo = 0.9
+
+# Environment-specific settings
+[context.production]
+  command = "flutter build web --release --web-renderer auto"
+
+[context.deploy-preview]
+  command = "flutter build web --release --web-renderer auto"
+
+[context.branch-deploy]
+  command = "flutter build web --release --web-renderer auto"
+
+# Dev server settings
+[dev]
+  command = "flutter run -d web-server --web-port=8888"
+  port = 8888
+  targetPort = 8888
+  autoLaunch = false

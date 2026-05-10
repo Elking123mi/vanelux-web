@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../constants/vanelux_colors.dart';
 import '../../services/google_maps_service.dart';
 
@@ -14,26 +13,21 @@ class MobileHomeScreen extends StatefulWidget {
 class _MobileHomeScreenState extends State<MobileHomeScreen> {
   final TextEditingController _pickupController = TextEditingController();
   final TextEditingController _dropoffController = TextEditingController();
-
+  
   List<dynamic> _pickupSuggestions = [];
   List<dynamic> _dropoffSuggestions = [];
   bool _showPickupSuggestions = false;
   bool _showDropoffSuggestions = false;
-
+  
   double? _pickupLat;
   double? _pickupLng;
   String? _pickupPlaceId;
   double? _dropoffLat;
   double? _dropoffLng;
   String? _dropoffPlaceId;
-
+  
   String _selectedServiceType = 'Point to Point';
-  final List<String> _serviceTypes = [
-    'Point to Point',
-    'To Airport',
-    'From Airport',
-    'Hourly Service',
-  ];
+  final List<String> _serviceTypes = ['Point to Point', 'To Airport', 'From Airport', 'Hourly Service'];
 
   Future<void> _searchPickupPlaces(String query) async {
     if (query.isEmpty) {
@@ -78,7 +72,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
   Future<void> _selectPickupPlace(dynamic suggestion) async {
     final placeId = suggestion['place_id'];
     final description = suggestion['description'] ?? '';
-
+    
     setState(() {
       _pickupController.text = description;
       _showPickupSuggestions = false;
@@ -87,7 +81,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
 
     try {
       final details = await GoogleMapsService.getPlaceDetails(placeId);
-      if (details != null && details['geometry'] != null) {
+      if (details['geometry'] != null) {
         final location = details['geometry']['location'];
         setState(() {
           _pickupLat = location['lat'] as double;
@@ -102,7 +96,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
   Future<void> _selectDropoffPlace(dynamic suggestion) async {
     final placeId = suggestion['place_id'];
     final description = suggestion['description'] ?? '';
-
+    
     setState(() {
       _dropoffController.text = description;
       _showDropoffSuggestions = false;
@@ -111,7 +105,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
 
     try {
       final details = await GoogleMapsService.getPlaceDetails(placeId);
-      if (details != null && details['geometry'] != null) {
+      if (details['geometry'] != null) {
         final location = details['geometry']['location'];
         setState(() {
           _dropoffLat = location['lat'] as double;
@@ -192,9 +186,9 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
                     ],
                   ),
                 ),
-
+                
                 const SizedBox(height: 40),
-
+                
                 // Booking Card
                 Container(
                   padding: const EdgeInsets.all(24),
@@ -220,9 +214,9 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
                           color: VaneLuxColors.primaryBlue,
                         ),
                       ),
-
+                      
                       const SizedBox(height: 24),
-
+                      
                       // Service Type Selection
                       const Text(
                         'Service Type',
@@ -235,28 +229,19 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
                       const SizedBox(height: 12),
                       Container(
                         decoration: BoxDecoration(
-                          border: Border.all(
-                            color: VaneLuxColors.gold,
-                            width: 2,
-                          ),
+                          border: Border.all(color: VaneLuxColors.gold, width: 2),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: DropdownButtonFormField<String>(
-                          value: _selectedServiceType,
+                          initialValue: _selectedServiceType,
                           decoration: const InputDecoration(
                             border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
+                            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           ),
                           items: _serviceTypes.map((String type) {
                             return DropdownMenuItem<String>(
                               value: type,
-                              child: Text(
-                                type,
-                                style: const TextStyle(fontSize: 15),
-                              ),
+                              child: Text(type, style: const TextStyle(fontSize: 15)),
                             );
                           }).toList(),
                           onChanged: (String? newValue) {
@@ -266,9 +251,9 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
                           },
                         ),
                       ),
-
+                      
                       const SizedBox(height: 24),
-
+                      
                       // Pickup Location
                       const Text(
                         'Pickup Location',
@@ -285,37 +270,21 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
                             controller: _pickupController,
                             decoration: InputDecoration(
                               hintText: 'Enter pickup address',
-                              prefixIcon: const Icon(
-                                Icons.location_on,
-                                color: VaneLuxColors.success,
-                              ),
+                              prefixIcon: const Icon(Icons.location_on, color: VaneLuxColors.success),
                               suffixIcon: _pickupPlaceId != null
-                                  ? const Icon(
-                                      Icons.check_circle,
-                                      color: Colors.green,
-                                      size: 20,
-                                    )
+                                  ? const Icon(Icons.check_circle, color: Colors.green, size: 20)
                                   : null,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: VaneLuxColors.gold,
-                                  width: 2,
-                                ),
+                                borderSide: const BorderSide(color: VaneLuxColors.gold, width: 2),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(
-                                  color: VaneLuxColors.gold.withOpacity(0.5),
-                                  width: 1.5,
-                                ),
+                                borderSide: BorderSide(color: VaneLuxColors.gold.withOpacity(0.5), width: 1.5),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: VaneLuxColors.gold,
-                                  width: 2,
-                                ),
+                                borderSide: const BorderSide(color: VaneLuxColors.gold, width: 2),
                               ),
                             ),
                             onChanged: (value) {
@@ -327,8 +296,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
                               _searchPickupPlaces(value);
                             },
                           ),
-                          if (_showPickupSuggestions &&
-                              _pickupSuggestions.isNotEmpty)
+                          if (_showPickupSuggestions && _pickupSuggestions.isNotEmpty)
                             Container(
                               margin: const EdgeInsets.only(top: 4),
                               decoration: BoxDecoration(
@@ -345,27 +313,16 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
                               constraints: const BoxConstraints(maxHeight: 200),
                               child: ListView.separated(
                                 shrinkWrap: true,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 8,
-                                ),
+                                padding: const EdgeInsets.symmetric(vertical: 8),
                                 itemCount: _pickupSuggestions.length,
-                                separatorBuilder: (context, index) =>
-                                    const Divider(height: 1),
+                                separatorBuilder: (context, index) => const Divider(height: 1),
                                 itemBuilder: (context, index) {
                                   final suggestion = _pickupSuggestions[index];
-                                  final description =
-                                      suggestion['description'] ?? '';
+                                  final description = suggestion['description'] ?? '';
                                   return ListTile(
                                     dense: true,
-                                    leading: const Icon(
-                                      Icons.location_on,
-                                      color: VaneLuxColors.success,
-                                      size: 20,
-                                    ),
-                                    title: Text(
-                                      description,
-                                      style: const TextStyle(fontSize: 14),
-                                    ),
+                                    leading: const Icon(Icons.location_on, color: VaneLuxColors.success, size: 20),
+                                    title: Text(description, style: const TextStyle(fontSize: 14)),
                                     onTap: () => _selectPickupPlace(suggestion),
                                   );
                                 },
@@ -373,9 +330,9 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
                             ),
                         ],
                       ),
-
+                      
                       const SizedBox(height: 20),
-
+                      
                       // Dropoff Location
                       const Text(
                         'Dropoff Location',
@@ -392,37 +349,21 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
                             controller: _dropoffController,
                             decoration: InputDecoration(
                               hintText: 'Enter destination address',
-                              prefixIcon: const Icon(
-                                Icons.flag,
-                                color: VaneLuxColors.error,
-                              ),
+                              prefixIcon: const Icon(Icons.flag, color: VaneLuxColors.error),
                               suffixIcon: _dropoffPlaceId != null
-                                  ? const Icon(
-                                      Icons.check_circle,
-                                      color: Colors.green,
-                                      size: 20,
-                                    )
+                                  ? const Icon(Icons.check_circle, color: Colors.green, size: 20)
                                   : null,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: VaneLuxColors.gold,
-                                  width: 2,
-                                ),
+                                borderSide: const BorderSide(color: VaneLuxColors.gold, width: 2),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(
-                                  color: VaneLuxColors.gold.withOpacity(0.5),
-                                  width: 1.5,
-                                ),
+                                borderSide: BorderSide(color: VaneLuxColors.gold.withOpacity(0.5), width: 1.5),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: VaneLuxColors.gold,
-                                  width: 2,
-                                ),
+                                borderSide: const BorderSide(color: VaneLuxColors.gold, width: 2),
                               ),
                             ),
                             onChanged: (value) {
@@ -434,8 +375,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
                               _searchDropoffPlaces(value);
                             },
                           ),
-                          if (_showDropoffSuggestions &&
-                              _dropoffSuggestions.isNotEmpty)
+                          if (_showDropoffSuggestions && _dropoffSuggestions.isNotEmpty)
                             Container(
                               margin: const EdgeInsets.only(top: 4),
                               decoration: BoxDecoration(
@@ -452,38 +392,26 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
                               constraints: const BoxConstraints(maxHeight: 200),
                               child: ListView.separated(
                                 shrinkWrap: true,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 8,
-                                ),
+                                padding: const EdgeInsets.symmetric(vertical: 8),
                                 itemCount: _dropoffSuggestions.length,
-                                separatorBuilder: (context, index) =>
-                                    const Divider(height: 1),
+                                separatorBuilder: (context, index) => const Divider(height: 1),
                                 itemBuilder: (context, index) {
                                   final suggestion = _dropoffSuggestions[index];
-                                  final description =
-                                      suggestion['description'] ?? '';
+                                  final description = suggestion['description'] ?? '';
                                   return ListTile(
                                     dense: true,
-                                    leading: const Icon(
-                                      Icons.flag,
-                                      color: VaneLuxColors.error,
-                                      size: 20,
-                                    ),
-                                    title: Text(
-                                      description,
-                                      style: const TextStyle(fontSize: 14),
-                                    ),
-                                    onTap: () =>
-                                        _selectDropoffPlace(suggestion),
+                                    leading: const Icon(Icons.flag, color: VaneLuxColors.error, size: 20),
+                                    title: Text(description, style: const TextStyle(fontSize: 14)),
+                                    onTap: () => _selectDropoffPlace(suggestion),
                                   );
                                 },
                               ),
                             ),
                         ],
                       ),
-
+                      
                       const SizedBox(height: 32),
-
+                      
                       // Continue Button
                       SizedBox(
                         width: double.infinity,
@@ -542,16 +470,14 @@ class MobileVehicleSelectionScreen extends StatefulWidget {
   });
 
   @override
-  State<MobileVehicleSelectionScreen> createState() =>
-      _MobileVehicleSelectionScreenState();
+  State<MobileVehicleSelectionScreen> createState() => _MobileVehicleSelectionScreenState();
 }
 
-class _MobileVehicleSelectionScreenState
-    extends State<MobileVehicleSelectionScreen> {
+class _MobileVehicleSelectionScreenState extends State<MobileVehicleSelectionScreen> {
   bool _isLoadingDistance = true;
   double? _distanceMiles;
   String? _duration;
-
+  
   final List<Map<String, dynamic>> _vehicles = [
     {
       'name': 'Mercedes-Benz S-Class',
@@ -589,20 +515,18 @@ class _MobileVehicleSelectionScreenState
         '${widget.dropoffLat},${widget.dropoffLng}',
       );
 
-      if (distanceData != null) {
-        final distanceMeters = distanceData['distance_value'] as int;
-        final durationSeconds = distanceData['duration_value'] as int;
-
-        final miles = distanceMeters * 0.000621371;
-        final minutes = (durationSeconds / 60).round();
-
-        setState(() {
-          _distanceMiles = miles;
-          _duration = '$minutes mins';
-          _isLoadingDistance = false;
-        });
-      }
-    } catch (e) {
+      final distanceMeters = distanceData['distance_value'] as int;
+      final durationSeconds = distanceData['duration_value'] as int;
+      
+      final miles = distanceMeters * 0.000621371;
+      final minutes = (durationSeconds / 60).round();
+      
+      setState(() {
+        _distanceMiles = miles;
+        _duration = '$minutes mins';
+        _isLoadingDistance = false;
+      });
+        } catch (e) {
       debugPrint('Error loading route data: $e');
       setState(() => _isLoadingDistance = false);
     }
@@ -639,18 +563,13 @@ class _MobileVehicleSelectionScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Select Vehicle',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text('Select Vehicle', style: TextStyle(color: Colors.white)),
         backgroundColor: VaneLuxColors.primaryBlue,
         iconTheme: const IconThemeData(color: Colors.white),
         elevation: 0,
       ),
       body: _isLoadingDistance
-          ? const Center(
-              child: CircularProgressIndicator(color: VaneLuxColors.gold),
-            )
+          ? const Center(child: CircularProgressIndicator(color: VaneLuxColors.gold))
           : SingleChildScrollView(
               child: Column(
                 children: [
@@ -673,8 +592,7 @@ class _MobileVehicleSelectionScreenState
                             _buildInfoCard(
                               icon: Icons.straighten,
                               label: 'Distance',
-                              value:
-                                  '${_distanceMiles?.toStringAsFixed(1) ?? '0'} mi',
+                              value: '${_distanceMiles?.toStringAsFixed(1) ?? '0'} mi',
                             ),
                             _buildInfoCard(
                               icon: Icons.access_time,
@@ -692,19 +610,12 @@ class _MobileVehicleSelectionScreenState
                           ),
                           child: Row(
                             children: [
-                              const Icon(
-                                Icons.location_on,
-                                color: VaneLuxColors.success,
-                                size: 16,
-                              ),
+                              const Icon(Icons.location_on, color: VaneLuxColors.success, size: 16),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   widget.pickupAddress,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                  ),
+                                  style: const TextStyle(color: Colors.white, fontSize: 12),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -721,19 +632,12 @@ class _MobileVehicleSelectionScreenState
                           ),
                           child: Row(
                             children: [
-                              const Icon(
-                                Icons.flag,
-                                color: VaneLuxColors.error,
-                                size: 16,
-                              ),
+                              const Icon(Icons.flag, color: VaneLuxColors.error, size: 16),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   widget.dropoffAddress,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                  ),
+                                  style: const TextStyle(color: Colors.white, fontSize: 12),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -744,22 +648,20 @@ class _MobileVehicleSelectionScreenState
                       ],
                     ),
                   ),
-
+                  
                   const SizedBox(height: 20),
-
+                  
                   // Vehicle Cards
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Column(
                       children: _vehicles.map((vehicle) {
-                        final price = _calculatePrice(
-                          vehicle['baseRate'] as double,
-                        );
+                        final price = _calculatePrice(vehicle['baseRate'] as double);
                         return _buildVehicleCard(vehicle, price);
                       }).toList(),
                     ),
                   ),
-
+                  
                   const SizedBox(height: 20),
                 ],
               ),
@@ -767,11 +669,7 @@ class _MobileVehicleSelectionScreenState
     );
   }
 
-  Widget _buildInfoCard({
-    required IconData icon,
-    required String label,
-    required String value,
-  }) {
+  Widget _buildInfoCard({required IconData icon, required String label, required String value}) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       decoration: BoxDecoration(
@@ -859,33 +757,13 @@ class _MobileVehicleSelectionScreenState
                           const SizedBox(height: 8),
                           Row(
                             children: [
-                              const Icon(
-                                Icons.person,
-                                size: 16,
-                                color: Colors.grey,
-                              ),
+                              const Icon(Icons.person, size: 16, color: Colors.grey),
                               const SizedBox(width: 4),
-                              Text(
-                                vehicle['passengers'],
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
-                                ),
-                              ),
+                              Text(vehicle['passengers'], style: const TextStyle(fontSize: 12, color: Colors.grey)),
                               const SizedBox(width: 16),
-                              const Icon(
-                                Icons.luggage,
-                                size: 16,
-                                color: Colors.grey,
-                              ),
+                              const Icon(Icons.luggage, size: 16, color: Colors.grey),
                               const SizedBox(width: 4),
-                              Text(
-                                vehicle['luggage'],
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
-                                ),
-                              ),
+                              Text(vehicle['luggage'], style: const TextStyle(fontSize: 12, color: Colors.grey)),
                             ],
                           ),
                         ],
@@ -906,10 +784,7 @@ class _MobileVehicleSelectionScreenState
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
                         color: VaneLuxColors.gold,
                         borderRadius: BorderRadius.circular(20),
@@ -1042,7 +917,7 @@ class _MobileLoginScreenState extends State<MobileLoginScreen> {
                 ],
               ),
             ),
-
+            
             Padding(
               padding: const EdgeInsets.all(24),
               child: Column(
@@ -1053,40 +928,29 @@ class _MobileLoginScreenState extends State<MobileLoginScreen> {
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
                       labelText: 'Email',
-                      prefixIcon: const Icon(
-                        Icons.email,
-                        color: VaneLuxColors.gold,
-                      ),
+                      prefixIcon: const Icon(Icons.email, color: VaneLuxColors.gold),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: VaneLuxColors.gold,
-                          width: 2,
-                        ),
+                        borderSide: const BorderSide(color: VaneLuxColors.gold, width: 2),
                       ),
                     ),
                   ),
-
+                  
                   const SizedBox(height: 20),
-
+                  
                   // Password Field
                   TextField(
                     controller: _passwordController,
                     obscureText: _obscurePassword,
                     decoration: InputDecoration(
                       labelText: 'Password',
-                      prefixIcon: const Icon(
-                        Icons.lock,
-                        color: VaneLuxColors.gold,
-                      ),
+                      prefixIcon: const Icon(Icons.lock, color: VaneLuxColors.gold),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_off
-                              : Icons.visibility,
+                          _obscurePassword ? Icons.visibility_off : Icons.visibility,
                           color: VaneLuxColors.gold,
                         ),
                         onPressed: () {
@@ -1098,16 +962,13 @@ class _MobileLoginScreenState extends State<MobileLoginScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: VaneLuxColors.gold,
-                          width: 2,
-                        ),
+                        borderSide: const BorderSide(color: VaneLuxColors.gold, width: 2),
                       ),
                     ),
                   ),
-
+                  
                   const SizedBox(height: 32),
-
+                  
                   // Login Button
                   SizedBox(
                     width: double.infinity,
@@ -1132,9 +993,9 @@ class _MobileLoginScreenState extends State<MobileLoginScreen> {
                       ),
                     ),
                   ),
-
+                  
                   const SizedBox(height: 16),
-
+                  
                   // Divider
                   Row(
                     children: [
@@ -1143,18 +1004,15 @@ class _MobileLoginScreenState extends State<MobileLoginScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Text(
                           'OR',
-                          style: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: TextStyle(color: Colors.grey.shade600, fontWeight: FontWeight.bold),
                         ),
                       ),
                       Expanded(child: Divider(color: Colors.grey.shade300)),
                     ],
                   ),
-
+                  
                   const SizedBox(height: 16),
-
+                  
                   // Continue as Guest Button
                   SizedBox(
                     width: double.infinity,
@@ -1162,10 +1020,7 @@ class _MobileLoginScreenState extends State<MobileLoginScreen> {
                     child: OutlinedButton(
                       onPressed: _continueAsGuest,
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(
-                          color: VaneLuxColors.gold,
-                          width: 2,
-                        ),
+                        side: const BorderSide(color: VaneLuxColors.gold, width: 2),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
                         ),
@@ -1181,9 +1036,9 @@ class _MobileLoginScreenState extends State<MobileLoginScreen> {
                       ),
                     ),
                   ),
-
+                  
                   const SizedBox(height: 24),
-
+                  
                   // Sign Up Link
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -1246,16 +1101,13 @@ class MobileBookingDetailsScreen extends StatefulWidget {
   });
 
   @override
-  State<MobileBookingDetailsScreen> createState() =>
-      _MobileBookingDetailsScreenState();
+  State<MobileBookingDetailsScreen> createState() => _MobileBookingDetailsScreenState();
 }
 
-class _MobileBookingDetailsScreenState
-    extends State<MobileBookingDetailsScreen> {
+class _MobileBookingDetailsScreenState extends State<MobileBookingDetailsScreen> {
   final TextEditingController _flightNumberController = TextEditingController();
-  final TextEditingController _specialRequestsController =
-      TextEditingController();
-
+  final TextEditingController _specialRequestsController = TextEditingController();
+  
   bool _meetAndGreet = false;
   bool _childSafetySeat = false;
   bool _extraStop = false;
@@ -1312,10 +1164,7 @@ class _MobileBookingDetailsScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Booking Details',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text('Booking Details', style: TextStyle(color: Colors.white)),
         backgroundColor: VaneLuxColors.primaryBlue,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
@@ -1345,21 +1194,15 @@ class _MobileBookingDetailsScreenState
                   ),
                   const SizedBox(height: 12),
                   _buildSummaryRow('Vehicle', widget.vehicleName),
-                  _buildSummaryRow(
-                    'Distance',
-                    '${widget.distanceMiles.toStringAsFixed(1)} miles',
-                  ),
+                  _buildSummaryRow('Distance', '${widget.distanceMiles.toStringAsFixed(1)} miles'),
                   _buildSummaryRow('Duration', widget.duration),
-                  _buildSummaryRow(
-                    'Base Price',
-                    '\$${widget.totalPrice.toStringAsFixed(2)}',
-                  ),
+                  _buildSummaryRow('Base Price', '\$${widget.totalPrice.toStringAsFixed(2)}'),
                 ],
               ),
             ),
-
+            
             const SizedBox(height: 24),
-
+            
             // Flight Number (conditional)
             if (_isAirportService()) ...[
               const Text(
@@ -1376,25 +1219,19 @@ class _MobileBookingDetailsScreenState
                 decoration: InputDecoration(
                   labelText: 'Flight Number (Required)',
                   hintText: 'e.g., AA1234',
-                  prefixIcon: const Icon(
-                    Icons.flight,
-                    color: VaneLuxColors.gold,
-                  ),
+                  prefixIcon: const Icon(Icons.flight, color: VaneLuxColors.gold),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: VaneLuxColors.gold,
-                      width: 2,
-                    ),
+                    borderSide: const BorderSide(color: VaneLuxColors.gold, width: 2),
                   ),
                 ),
               ),
               const SizedBox(height: 24),
             ],
-
+            
             // Extra Services
             const Text(
               'Extra Services',
@@ -1426,9 +1263,9 @@ class _MobileBookingDetailsScreenState
               _extraStop,
               (value) => setState(() => _extraStop = value!),
             ),
-
+            
             const SizedBox(height: 24),
-
+            
             // Special Requests
             const Text(
               'Special Requests',
@@ -1443,23 +1280,19 @@ class _MobileBookingDetailsScreenState
               controller: _specialRequestsController,
               maxLines: 4,
               decoration: InputDecoration(
-                hintText:
-                    'Any special requests or instructions for the driver...',
+                hintText: 'Any special requests or instructions for the driver...',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(
-                    color: VaneLuxColors.gold,
-                    width: 2,
-                  ),
+                  borderSide: const BorderSide(color: VaneLuxColors.gold, width: 2),
                 ),
               ),
             ),
-
+            
             const SizedBox(height: 24),
-
+            
             // Total Price
             Container(
               padding: const EdgeInsets.all(16),
@@ -1490,9 +1323,9 @@ class _MobileBookingDetailsScreenState
                 ],
               ),
             ),
-
+            
             const SizedBox(height: 24),
-
+            
             // Continue Button
             SizedBox(
               width: double.infinity,
@@ -1620,7 +1453,7 @@ class _MobilePaymentScreenState extends State<MobilePaymentScreen> {
   final TextEditingController _expiryController = TextEditingController();
   final TextEditingController _cvvController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
-
+  
   bool _isProcessing = false;
 
   Future<void> _processPayment() async {
@@ -1649,9 +1482,7 @@ class _MobilePaymentScreenState extends State<MobilePaymentScreen> {
         context: context,
         barrierDismissible: false,
         builder: (context) => AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: const Row(
             children: [
               Icon(Icons.check_circle, color: VaneLuxColors.success, size: 32),
@@ -1676,10 +1507,7 @@ class _MobilePaymentScreenState extends State<MobilePaymentScreen> {
               },
               child: const Text(
                 'DONE',
-                style: TextStyle(
-                  color: VaneLuxColors.gold,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(color: VaneLuxColors.gold, fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -1722,10 +1550,7 @@ class _MobilePaymentScreenState extends State<MobilePaymentScreen> {
                   ),
                   const SizedBox(height: 12),
                   _buildSummaryRow('Vehicle', widget.vehicleName),
-                  _buildSummaryRow(
-                    'Distance',
-                    '${widget.distanceMiles.toStringAsFixed(1)} miles',
-                  ),
+                  _buildSummaryRow('Distance', '${widget.distanceMiles.toStringAsFixed(1)} miles'),
                   _buildSummaryRow('Duration', widget.duration),
                   const Divider(height: 24),
                   _buildSummaryRow(
@@ -1736,9 +1561,9 @@ class _MobilePaymentScreenState extends State<MobilePaymentScreen> {
                 ],
               ),
             ),
-
+            
             const SizedBox(height: 32),
-
+            
             // Payment Form
             const Text(
               'Payment Information',
@@ -1749,7 +1574,7 @@ class _MobilePaymentScreenState extends State<MobilePaymentScreen> {
               ),
             ),
             const SizedBox(height: 16),
-
+            
             // Card Number
             TextField(
               controller: _cardNumberController,
@@ -1757,25 +1582,19 @@ class _MobilePaymentScreenState extends State<MobilePaymentScreen> {
               decoration: InputDecoration(
                 labelText: 'Card Number',
                 hintText: '1234 5678 9012 3456',
-                prefixIcon: const Icon(
-                  Icons.credit_card,
-                  color: VaneLuxColors.gold,
-                ),
+                prefixIcon: const Icon(Icons.credit_card, color: VaneLuxColors.gold),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(
-                    color: VaneLuxColors.gold,
-                    width: 2,
-                  ),
+                  borderSide: const BorderSide(color: VaneLuxColors.gold, width: 2),
                 ),
               ),
             ),
-
+            
             const SizedBox(height: 16),
-
+            
             // Expiry and CVV Row
             Row(
               children: [
@@ -1786,19 +1605,13 @@ class _MobilePaymentScreenState extends State<MobilePaymentScreen> {
                     decoration: InputDecoration(
                       labelText: 'Expiry Date',
                       hintText: 'MM/YY',
-                      prefixIcon: const Icon(
-                        Icons.calendar_today,
-                        color: VaneLuxColors.gold,
-                      ),
+                      prefixIcon: const Icon(Icons.calendar_today, color: VaneLuxColors.gold),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: VaneLuxColors.gold,
-                          width: 2,
-                        ),
+                        borderSide: const BorderSide(color: VaneLuxColors.gold, width: 2),
                       ),
                     ),
                   ),
@@ -1812,28 +1625,22 @@ class _MobilePaymentScreenState extends State<MobilePaymentScreen> {
                     decoration: InputDecoration(
                       labelText: 'CVV',
                       hintText: '123',
-                      prefixIcon: const Icon(
-                        Icons.lock,
-                        color: VaneLuxColors.gold,
-                      ),
+                      prefixIcon: const Icon(Icons.lock, color: VaneLuxColors.gold),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: VaneLuxColors.gold,
-                          width: 2,
-                        ),
+                        borderSide: const BorderSide(color: VaneLuxColors.gold, width: 2),
                       ),
                     ),
                   ),
                 ),
               ],
             ),
-
+            
             const SizedBox(height: 16),
-
+            
             // Cardholder Name
             TextField(
               controller: _nameController,
@@ -1846,16 +1653,13 @@ class _MobilePaymentScreenState extends State<MobilePaymentScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(
-                    color: VaneLuxColors.gold,
-                    width: 2,
-                  ),
+                  borderSide: const BorderSide(color: VaneLuxColors.gold, width: 2),
                 ),
               ),
             ),
-
+            
             const SizedBox(height: 32),
-
+            
             // Pay Button
             SizedBox(
               width: double.infinity,
@@ -1889,9 +1693,9 @@ class _MobilePaymentScreenState extends State<MobilePaymentScreen> {
                       ),
               ),
             ),
-
+            
             const SizedBox(height: 16),
-
+            
             // Secure Payment Notice
             Row(
               mainAxisAlignment: MainAxisAlignment.center,

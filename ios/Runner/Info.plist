@@ -45,12 +45,6 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	<!-- Permitir HTTP para desarrollo local -->
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
-	</dict>
 	<key>OpenAIClientKey</key>
 	<string>$(OPENAI_API_KEY_CLIENT)</string>
 	<key>OpenAIDriverKey</key>

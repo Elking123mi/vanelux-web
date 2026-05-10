@@ -95,7 +95,7 @@ class _RatingDialogState extends State<_RatingDialog> {
         // Header
         const CircleAvatar(
           radius: 28,
-          backgroundColor: Color(0xFFD4AF3720),
+          backgroundColor: Color(0xffd4af3720),
           child: Icon(Icons.star_rate_rounded, color: _gold, size: 36),
         ),
         const SizedBox(height: 14),
